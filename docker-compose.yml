@@ -1,0 +1,75 @@
+services:
+  nats:
+    container_name: nats
+    restart: always
+    image: nats:latest
+    ports:
+      - ${NATS_PORT}:${NATS_PORT}
+      - ${NATS_INTER_PORT}:${NATS_INTER_PORT}
+    networks:
+      - microservice-network
+      - database-network
+
+  postgres:
+    container_name: postgres
+    restart: always
+    image: postgres:13.18
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - /tmp/data/postgres:/data/postgres
+    networks:
+      - microservice-network
+      - database-network
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+  api-gateway:
+    container_name: api-gateway
+    ports:
+      - ${PORT}:${PORT}
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+    image: api-gateway:latest
+    networks:
+      - microservice-network
+      - database-network
+    environment:
+      NATS_URL: ${NATS_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      - nats
+      - postgres
+
+  account:
+    container_name: account
+    build:
+      context: .
+      dockerfile: ./apps/account/Dockerfile
+    image: account:latest
+    networks:
+      - microservice-network
+      - database-network
+    environment:
+      NATS_URL: ${NATS_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      - nats
+      - postgres
+
+networks:
+  database-network: {}
+  microservice-network: {}

@@ -14,7 +14,18 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@shared/message-pattern/account": [
+        "shared/src/message-pattern/account/index.ts"
+      ],
+      "@shared/nats": ["shared/src/nats-client/index.ts"],
+      "@shared/configs": ["shared/src/configs/index.ts"],
+      "@shared/database": ["shared/src/database/index.ts"],
+
+      "@shared/dto/account": ["shared/src/nats-client/account/index.ts"],
+      "@shared/dto/guild": ["shared/src/nats-client/guild/index.ts"],
+      "@shared/dto/scripture": ["shared/src/nats-client/scripture/index.ts"],
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
