@@ -637,7 +637,7 @@ let AccountService = class AccountService {
                     .pipe((0, rxjs_1.switchMap)((isMatch) => {
                     common_1.Logger.log('Is Matched: ', isMatch);
                     if (!isMatch) {
-                        return (0, exception_1.throwException)(common_1.HttpStatus.CONFLICT, 'Password is incorrect');
+                        return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Password is incorrect');
                     }
                     const result = existingUser.toJSON();
                     delete result.password;
