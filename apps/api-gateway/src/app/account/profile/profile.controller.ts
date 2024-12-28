@@ -16,7 +16,6 @@ class UpdateExpDto {
 
 @Controller('profile')
 export class ProfileController {
-
   @Post('updateStreak')
   @ApiOperation({ summary: 'Update Streak' })
   @ApiResponse({
