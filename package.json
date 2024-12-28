@@ -19,6 +19,8 @@
     "@nestjs/sequelize": "^10.0.1",
     "@nestjs/swagger": "^8.1.0",
     "axios": "^1.6.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "nats": "^2.28.2",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.1.13",
