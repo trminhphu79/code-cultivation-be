@@ -5,8 +5,8 @@
   "scripts": {
     "rebuild-services": "nx build api-gateway && nx build account",
     "rebuild-services:none-cache": "nx build api-gateway --skip-nx-cache && nx build account --skip-nx-cache",
-    "serve": "yarn run rebuild-services && docker-compose --env-file .env up --build",
-    "serve:none-cache": "yarn run rebuild-services:none-cache && docker-compose --env-file .env up --build",
+    "serve": "yarn run rebuild-services && docker-compose --env-file .env up --build -d",
+    "serve:none-cache": "yarn run rebuild-services:none-cache && docker-compose --env-file .env up --build -d",
     "build:image": "docker-compose --env-file .env up --build"
   },
   "private": true,
@@ -14,6 +14,7 @@
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^10.0.2",
+    "@nestjs/jwt": "^10.2.0",
     "@nestjs/microservices": "^10.4.15",
     "@nestjs/platform-express": "^10.0.2",
     "@nestjs/sequelize": "^10.0.1",

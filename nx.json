@@ -42,6 +42,27 @@
     "@nx/nest:application": {
       "e2eTestRunner": "none",
       "unitTestRunner": "none"
+    },
+    "@nx/nest:library": {
+      "unitTestRunner": "none",
+      "linter": "eslint"
+    },
+    "@nx/nest:controller": {
+      "unitTestRunner": "none"
+    },
+    "@nx/nest:guard": {
+      "unitTestRunner": "none"
+    },
+    "@nx/nest:module": {
+    },
+    "@nx/nest:service": {
+      "unitTestRunner": "none"
+    },
+    "@nx/nest:pipe": {
+      "unitTestRunner": "none"
+    },
+    "@nx/nest:interceptor": {
+      "unitTestRunner": "none"
     }
   }
 }

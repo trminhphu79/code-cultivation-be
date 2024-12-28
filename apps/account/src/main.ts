@@ -7,6 +7,7 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { GlobalRpcExceptionFilter } from '@shared/exception';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -18,6 +19,7 @@ async function bootstrap() {
       },
     }
   );
+  app.useGlobalFilters(new GlobalRpcExceptionFilter());
   await app.listen();
   Logger.log('Account Microservice is Running!');
 }

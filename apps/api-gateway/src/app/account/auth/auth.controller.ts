@@ -1,30 +1,32 @@
-import { Body, Controller, Inject, Logger, Post } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Body, Controller, HttpStatus, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { NatsMicroserviceConfig } from '@shared/configs';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
-import { Observable, tap } from 'rxjs';
+import { CreateAccountDto, SignInDto } from 'shared/dtos/src/account';
+import { Public } from '@shared/guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     @Inject('NATS_SERVICE')
-    private natsClient: ClientProxy,
-    private configService: ConfigService
-  ) {
-    console.log(
-      'configService: ',
-      this.configService.get<NatsMicroserviceConfig>('microservice')
-    );
-  }
+    private natsClient: ClientProxy
+  ) {}
 
   @Post('signIn')
-  signIn(@Body() body: { email: string; password: string }): Observable<any> {
-    Logger.log('Input SignIn: ', body);
-    return this.natsClient.send(AuthMsgPattern.SignIn, body).pipe(
-      tap((response) => {
-        Logger.log('response SignIn: ', response);
-      })
-    );
+  @Public()
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Password is incorrect',
+  })
+  @ApiOperation({ summary: 'Sign in with email and password' })
+  signIn(@Body() body: SignInDto) {
+    return this.natsClient.send(AuthMsgPattern.SignIn, body);
+  }
+
+  @Post('signUp')
+  @Public()
+  @ApiOperation({ summary: 'Sign up with email and password' })
+  signUp(@Body() body: CreateAccountDto) {
+    return this.natsClient.send(AuthMsgPattern.SignUp, body);
   }
 }

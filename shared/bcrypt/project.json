@@ -1,0 +1,9 @@
+{
+  "name": "bcrypt",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "shared/bcrypt/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project bcrypt --web",
+  "targets": {}
+}

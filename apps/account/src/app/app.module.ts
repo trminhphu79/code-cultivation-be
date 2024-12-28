@@ -1,8 +1,11 @@
-import { DatabaseConfigModule } from '@shared/database';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule } from '@nestjs/config';
 import { Configurations } from '@shared/configs';
+import { DatabaseConfigModule } from '@shared/database';
+import { AccountModule } from './account/account.module';
+import { BcryptModule } from '@shared/bcrypt';
+import { JwtGlobalModule } from '@shared/jwt';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -11,8 +14,12 @@ import { Configurations } from '@shared/configs';
       isGlobal: true,
     }),
     DatabaseConfigModule,
+    AccountModule,
+    BcryptModule,
+    JwtGlobalModule,
+    AuthModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}
