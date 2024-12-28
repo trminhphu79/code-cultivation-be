@@ -16,12 +16,12 @@ class UpdateExpDto {
 
 @Controller('profile')
 export class ProfileController {
-  
+
   @Post('updateStreak')
   @ApiOperation({ summary: 'Update Streak' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Unauthorizedk',
+    description: 'Unauthorized',
   })
   updateStreak(@Body() dto: UpdateStreakDto) {
     return {
@@ -34,7 +34,7 @@ export class ProfileController {
   @ApiOperation({ summary: 'Update Exp' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
-    description: 'Unauthorizedk',
+    description: 'Unauthorized',
   })
   updateExp(@Body() dto: UpdateExpDto) {
     return {

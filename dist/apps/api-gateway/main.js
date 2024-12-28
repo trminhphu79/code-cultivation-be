@@ -555,7 +555,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Streak' }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.UNAUTHORIZED,
-        description: 'Unauthorizedk',
+        description: 'Unauthorized',
     }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
@@ -567,7 +567,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Exp' }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.UNAUTHORIZED,
-        description: 'Unauthorizedk',
+        description: 'Unauthorized',
     }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
