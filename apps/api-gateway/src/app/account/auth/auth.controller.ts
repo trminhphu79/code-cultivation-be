@@ -27,7 +27,7 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.SignIn, body);
   }
 
-  @Post('social')
+  @Post('oauth')
   @Public()
   @ApiOperation({ summary: 'Sign in with github or facebook' })
   signInOauth(@Body() body: SignInOauth) {
