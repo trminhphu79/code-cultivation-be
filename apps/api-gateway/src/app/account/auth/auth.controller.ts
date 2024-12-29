@@ -2,7 +2,11 @@ import { Body, Controller, HttpStatus, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
-import { CreateAccountDto, SignInDto } from 'shared/dtos/src/account';
+import {
+  CreateAccountDto,
+  SignInDto,
+  SignInOauth,
+} from 'shared/dtos/src/account';
 import { Public } from '@shared/guard';
 
 @Controller('auth')
@@ -21,6 +25,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in with email and password' })
   signIn(@Body() body: SignInDto) {
     return this.natsClient.send(AuthMsgPattern.SignIn, body);
+  }
+
+  @Post('social')
+  @Public()
+  @ApiOperation({ summary: 'Sign in with github or facebook' })
+  signInOauth(@Body() body: SignInOauth) {
+    return this.natsClient.send(AuthMsgPattern.SignInOauth, body);
   }
 
   @Post('signUp')

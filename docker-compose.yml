@@ -10,6 +10,20 @@ services:
       - microservice-network
       - database-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD}
+    networks:
+      - microservice-network
+
   postgres:
     container_name: postgres
     restart: always
@@ -47,9 +61,11 @@ services:
       SALT_ROUNDS: ${SALT_ROUNDS}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       - nats
       - postgres
+      - redis
 
   account:
     container_name: account
@@ -72,10 +88,15 @@ services:
       SALT_ROUNDS: ${SALT_ROUNDS}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       - nats
       - postgres
+      - redis
 
 networks:
   database-network: {}
   microservice-network: {}
+
+volumes:
+  redis-data:

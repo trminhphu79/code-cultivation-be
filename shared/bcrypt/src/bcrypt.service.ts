@@ -12,10 +12,6 @@ export class BcryptService {
    * @returns The hashed password.
    */
   hashPassword(plainPassword: string): Observable<string> {
-    Logger.log(
-      "this.configService.get('saltRounds') as number: ",
-      this.configService.get('saltRounds') as number
-    );
     return from(
       bcrypt.hash(plainPassword, this.configService.get('saltRounds') as number)
     );

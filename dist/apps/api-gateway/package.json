@@ -11,6 +11,7 @@
     "@nestjs/swagger": "8.1.0",
     "class-transformer": "0.5.1",
     "class-validator": "0.14.1",
+    "ioredis": "5.4.2",
     "nats": "2.28.2",
     "reflect-metadata": "0.1.14",
     "rxjs": "7.8.1",

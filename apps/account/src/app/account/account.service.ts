@@ -3,11 +3,17 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Account } from '@shared/models/account';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
-import { CreateAccountDto, SignInDto } from 'shared/dtos/src/account';
+import {
+  CreateAccountDto,
+  SignInDto,
+  SignInOauth,
+} from 'shared/dtos/src/account';
 import { throwException } from '@shared/exception';
-import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth/auth.service';
 import { HttpStatusCode } from 'axios';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CacheMessageAction } from '@shared/cache-manager';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AccountService {
@@ -15,7 +21,9 @@ export class AccountService {
     @InjectModel(Account)
     private readonly userModel: typeof Account,
     private readonly authService: AuthService,
-    private readonly bcryptService: BcryptService
+    private readonly eventEmitter: EventEmitter2,
+    private readonly bcryptService: BcryptService,
+    private readonly jwtService: JwtService
   ) {}
 
   createAccountDto({ email, password }: CreateAccountDto) {
@@ -37,6 +45,12 @@ export class AccountService {
                 const result = response.toJSON();
                 delete result.password;
                 return result;
+              }),
+              tap((result) => {
+                this.eventEmitter.emit(CacheMessageAction.Create, {
+                  key: 'account#' + result?.id,
+                  value: result,
+                });
               }),
               switchMap((data) =>
                 of({
@@ -90,7 +104,6 @@ export class AccountService {
                     updatedAt: string;
                   }>(result)
                 ).pipe(
-                  tap((r) => console.log('Genereated: ', r)),
                   map((token) => ({
                     message: 'Sign in successfully!',
                     data: {
@@ -105,5 +118,12 @@ export class AccountService {
         return throwException(HttpStatusCode.NotFound, 'User not found');
       })
     );
+  }
+
+  signInOauth({ token, credentialType }: SignInOauth) {
+    const tokenValue = this.jwtService.decode(token);
+    console.log('tokenValue:', tokenValue);
+    Logger.log('signInOauth with: ', credentialType);
+    return of({ data: tokenValue });
   }
 }

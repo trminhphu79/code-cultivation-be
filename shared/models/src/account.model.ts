@@ -6,6 +6,12 @@ import {
   DataType,
 } from 'sequelize-typescript';
 
+enum CredentialTypeEnum {
+  NONE = 'NONE',
+  GOOGLE = 'GOOGLE',
+  GITHUB = 'GITHUB',
+}
+
 @Table({ tableName: 'account' })
 export class Account extends Model {
   @PrimaryKey
@@ -20,6 +26,11 @@ export class Account extends Model {
 
   @Column
   password!: string;
+
+  @Column({
+    defaultValue: CredentialTypeEnum.NONE,
+  })
+  credentialType!: CredentialTypeEnum;
 
   @Column({
     type: DataType.DATE,

@@ -1,4 +1,8 @@
-import { CreateAccountDto, SignInDto } from 'shared/dtos/src/account';
+import {
+  CreateAccountDto,
+  SignInDto,
+  SignInOauth,
+} from 'shared/dtos/src/account';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
@@ -11,6 +15,11 @@ export class AccountController {
   @MessagePattern(AuthMsgPattern.SignIn)
   handleSignIn(body: SignInDto) {
     return this.accountService.signIn(body);
+  }
+
+  @MessagePattern(AuthMsgPattern.SignInOauth)
+  handleSignInOauth(body: SignInOauth) {
+    return this.accountService.signInOauth(body);
   }
 
   @MessagePattern(AuthMsgPattern.SignUp)
