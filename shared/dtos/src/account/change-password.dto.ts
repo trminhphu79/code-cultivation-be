@@ -11,11 +11,14 @@ export class ChangePasswordDto {
   @ApiProperty({
     description:
       'New password must be at least 8 characters long and contain at least one number.',
-    example: 'vodich123',
+    example: 'chicken123',
   })
   newPassword!: string;
 
   @IsNotEmpty()
-  @IsStrongPassword()
+  @ApiProperty({
+    description: 'Your current password',
+    example: 'vodich123',
+  })
   currentPassword!: string;
 }

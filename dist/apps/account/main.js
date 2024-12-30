@@ -413,12 +413,17 @@ module.exports = require("class-validator");
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DeactivateDto = void 0;
 const tslib_1 = __webpack_require__(4);
+const swagger_1 = __webpack_require__(21);
 const class_validator_1 = __webpack_require__(22);
 class DeactivateDto {
 }
 exports.DeactivateDto = DeactivateDto;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'User id need to deactivate',
+        example: '8685-bdhh34-555123-6662312',
+    }),
     tslib_1.__metadata("design:type", String)
 ], DeactivateDto.prototype, "id", void 0);
 
@@ -439,6 +444,7 @@ exports.SignInOauth = SignInOauth;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
+        example: 'codetmp77799',
         description: 'The code of the provider after authenticate.',
     }),
     tslib_1.__metadata("design:type", String)
@@ -446,6 +452,7 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
+        example: 'GITHUB',
         description: 'The credential type that user using for sign in, GOOGLE or GITHUB',
     }),
     tslib_1.__metadata("design:type", String)
@@ -600,13 +607,16 @@ tslib_1.__decorate([
     (0, password_1.IsStrongPassword)(),
     (0, swagger_1.ApiProperty)({
         description: 'New password must be at least 8 characters long and contain at least one number.',
-        example: 'vodich123',
+        example: 'chicken123',
     }),
     tslib_1.__metadata("design:type", String)
 ], ChangePasswordDto.prototype, "newPassword", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, password_1.IsStrongPassword)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Your current password',
+        example: 'vodich123',
+    }),
     tslib_1.__metadata("design:type", String)
 ], ChangePasswordDto.prototype, "currentPassword", void 0);
 
