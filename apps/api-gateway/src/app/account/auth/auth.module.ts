@@ -8,7 +8,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       {
         name: 'short',
         ttl: 1000,
-        limit: 100,
+        limit: 3,
       },
       {
         name: 'medium',

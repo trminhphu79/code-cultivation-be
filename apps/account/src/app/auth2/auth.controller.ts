@@ -10,16 +10,16 @@ export class AuthController {
 
   @MessagePattern(AuthMsgPattern.SignIn)
   handleSignIn(body: SignInDto) {
-    // return this.authService.handleSignIn(body);
+    return this.authService.handleSignIn(body);
   }
 
   @MessagePattern(AuthMsgPattern.SignInOauth)
   handleSignInOauth(body: SignInOauth) {
-    // return this.authService.handleSignInOauth(body);
+    return this.authService.handleSignInOauth(body);
   }
 
   @MessagePattern(AuthMsgPattern.SignUp)
   handleSignUp(body: CreateAccountDto) {
-    // return this.authService.handleSignUp(body);
+    return this.authService.handleSignUp(body);
   }
 }

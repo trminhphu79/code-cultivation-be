@@ -13,13 +13,16 @@ import { CreateAccountDto, SignInDto, SignInOauth } from '@shared/dtos/account';
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
+
 @Injectable()
 export class AuthService {
+
   constructor(
     @InjectModel(Account)
     private readonly accountModel: typeof Account,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly authService: AuthService,
     private readonly eventEmitter: EventEmitter2,
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService
@@ -137,7 +140,7 @@ export class AuthService {
                 delete result.password;
 
                 return from(
-                  this.generateFullTokens<{
+                  this.authService.generateFullTokens<{
                     id: string;
                     email: string;
                     createdAt: string;

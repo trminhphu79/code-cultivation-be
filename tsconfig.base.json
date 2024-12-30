@@ -16,9 +16,11 @@
     "baseUrl": ".",
     "paths": {
       "@shared/bcrypt": ["shared/bcrypt/src/index.ts"],
+      "@shared/cache-manager": ["shared/cache-manager/src/index.ts"],
       "@shared/configs": ["shared/configs/src/index.ts"],
       "@shared/database": ["shared/database/src/index.ts"],
       "@shared/dtos/account": ["shared/dtos/src/account/index.ts"],
+      "@shared/event-emitter": ["shared/event-emitter/src/index.ts"],
       "@shared/exception": ["shared/exception/src/index.ts"],
       "@shared/guard": ["shared/guard/src/index.ts"],
       "@shared/jwt": ["shared/jwt/src/index.ts"],
@@ -32,9 +34,7 @@
       ],
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
-      ],
-      "@shared/cache-manager": ["shared/cache-manager/src/index.ts"],
-      "@shared/event-emitter": ["shared/event-emitter/src/index.ts"]
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

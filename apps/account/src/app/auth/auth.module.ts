@@ -1,14 +1,12 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { DatabaseConfigFeature } from '@shared/database';
 import { HttpModule } from '@nestjs/axios';
+import { DatabaseConfigFeature } from '@shared/database';
 
-@Global()
 @Module({
   providers: [AuthService],
   controllers: [AuthController],
-  exports: [AuthService],
-  imports: [DatabaseConfigFeature, HttpModule],
+  imports: [HttpModule, DatabaseConfigFeature],
 })
 export class AuthModule {}

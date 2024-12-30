@@ -37,20 +37,18 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = tslib_1.__decorate([
     (0, common_1.Module)({
         imports: [
+            auth_module_1.AuthModule,
+            bcrypt_1.BcryptModule,
             config_1.ConfigModule.forRoot({
                 load: [configs_1.Configurations],
                 isGlobal: true,
             }),
-            auth_module_1.AuthModule,
-            bcrypt_1.BcryptModule,
             account_module_1.AccountModule,
             jwt_1.JwtGlobalModule,
             cache_manager_1.CacheManagerModule,
             database_1.DatabaseConfigModule,
             event_emitter_1.GlobalEventEmitterModule,
         ],
-        controllers: [],
-        providers: [],
     })
 ], AppModule);
 
@@ -285,6 +283,7 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const account_controller_1 = __webpack_require__(17);
 const account_service_1 = __webpack_require__(34);
+const database_1 = __webpack_require__(9);
 let AccountModule = class AccountModule {
 };
 exports.AccountModule = AccountModule;
@@ -293,6 +292,7 @@ exports.AccountModule = AccountModule = tslib_1.__decorate([
     (0, common_1.Module)({
         controllers: [account_controller_1.AccountController],
         providers: [account_service_1.AccountService],
+        imports: [database_1.DatabaseConfigFeature],
     })
 ], AccountModule);
 
@@ -1093,18 +1093,16 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const auth_service_1 = __webpack_require__(54);
 const auth_controller_1 = __webpack_require__(61);
-const database_1 = __webpack_require__(9);
 const axios_1 = __webpack_require__(59);
+const database_1 = __webpack_require__(9);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = tslib_1.__decorate([
-    (0, common_1.Global)(),
     (0, common_1.Module)({
         providers: [auth_service_1.AuthService],
         controllers: [auth_controller_1.AuthController],
-        exports: [auth_service_1.AuthService],
-        imports: [database_1.DatabaseConfigFeature, axios_1.HttpModule],
+        imports: [axios_1.HttpModule, database_1.DatabaseConfigFeature],
     })
 ], AuthModule);
 
@@ -1132,11 +1130,10 @@ const account_1 = __webpack_require__(12);
 const axios_2 = __webpack_require__(60);
 const bcrypt_service_1 = __webpack_require__(38);
 let AuthService = class AuthService {
-    constructor(userModel, jwtService, httpService, authService, eventEmitter, bcryptService, configService) {
-        this.userModel = userModel;
+    constructor(accountModel, jwtService, httpService, eventEmitter, bcryptService, configService) {
+        this.accountModel = accountModel;
         this.jwtService = jwtService;
         this.httpService = httpService;
-        this.authService = authService;
         this.eventEmitter = eventEmitter;
         this.bcryptService = bcryptService;
         this.configService = configService;
@@ -1166,11 +1163,11 @@ let AuthService = class AuthService {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(token)).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(400, `'Invalid or expired token`)));
     }
     handleSignUp({ email, password }) {
-        return (0, rxjs_1.from)(this.userModel.findOne({ where: { email } })).pipe((0, operators_1.switchMap)((existingUser) => {
+        return (0, rxjs_1.from)(this.accountModel.findOne({ where: { email } })).pipe((0, operators_1.switchMap)((existingUser) => {
             if (existingUser) {
                 return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Email already exist!');
             }
-            return (0, rxjs_1.from)(this.bcryptService.hashPassword(password)).pipe((0, operators_1.switchMap)((hashedPassword) => (0, rxjs_1.from)(this.userModel.create({
+            return (0, rxjs_1.from)(this.bcryptService.hashPassword(password)).pipe((0, operators_1.switchMap)((hashedPassword) => (0, rxjs_1.from)(this.accountModel.create({
                 email,
                 password: hashedPassword,
             })).pipe((0, operators_1.map)((response) => {
@@ -1189,7 +1186,7 @@ let AuthService = class AuthService {
         }));
     }
     handleSignIn({ email, password }) {
-        return (0, rxjs_1.from)(this.userModel.findOne({ where: { email } })).pipe((0, operators_1.catchError)((error) => {
+        return (0, rxjs_1.from)(this.accountModel.findOne({ where: { email } })).pipe((0, operators_1.catchError)((error) => {
             return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, `Database error: ${error.message}`);
         }), (0, operators_1.switchMap)((existingUser) => {
             if (existingUser) {
@@ -1202,7 +1199,7 @@ let AuthService = class AuthService {
                     }
                     const result = existingUser.toJSON();
                     delete result.password;
-                    return (0, rxjs_1.from)(this.authService.generateFullTokens(result)).pipe((0, operators_1.map)((token) => ({
+                    return (0, rxjs_1.from)(this.generateFullTokens(result)).pipe((0, operators_1.map)((token) => ({
                         message: 'Sign in successfully!',
                         data: {
                             ...result,
@@ -1232,7 +1229,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(account_1.Account)),
-    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _b : Object, AuthService, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _d : Object, typeof (_e = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _e : Object])
+    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _b : Object, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _d : Object, typeof (_e = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _e : Object])
 ], AuthService);
 
 
@@ -1332,13 +1329,13 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     handleSignIn(body) {
-        return this.authService.handleSignIn(body);
+        // return this.authService.handleSignIn(body);
     }
     handleSignInOauth(body) {
-        return this.authService.handleSignInOauth(body);
+        // return this.authService.handleSignInOauth(body);
     }
     handleSignUp(body) {
-        return this.authService.handleSignUp(body);
+        // return this.authService.handleSignUp(body);
     }
 };
 exports.AuthController = AuthController;
