@@ -6,6 +6,11 @@ export const Configurations = (): Configuration => ({
   saltRounds: parseInt(process.env['SALT_ROUNDS'] as string) || 10,
   jwtSecretKey: process.env['JWT_SECRET_KEY'],
   jwtPrivateKey: process.env['JWT_PRIVATE_KEY'],
+  github: {
+    client_id: process.env['GITHUB_CLIENT_ID'],
+    client_secret: process.env['GITHUB_CLIENT_SECRET'],
+    url: process.env['GITHUB_AUTHORIZE_URL'],
+  },
   database: {
     host: process.env['POSTGRES_HOST'],
     port: parseInt(process.env['POSTGRES_PORT'] as string) || 5432,

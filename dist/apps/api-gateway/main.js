@@ -29,14 +29,14 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_module_1 = __webpack_require__(6);
-const profile_module_1 = __webpack_require__(25);
-const nats_client_1 = __webpack_require__(27);
-const configs_1 = __webpack_require__(29);
-const config_1 = __webpack_require__(32);
-const jwt_1 = __webpack_require__(33);
-const jwt_2 = __webpack_require__(23);
+const profile_module_1 = __webpack_require__(27);
+const nats_client_1 = __webpack_require__(29);
+const configs_1 = __webpack_require__(31);
+const config_1 = __webpack_require__(34);
+const jwt_1 = __webpack_require__(35);
+const jwt_2 = __webpack_require__(25);
 const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(21);
+const guard_1 = __webpack_require__(23);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -95,7 +95,7 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(5);
@@ -104,7 +104,7 @@ const microservices_1 = __webpack_require__(8);
 const swagger_1 = __webpack_require__(3);
 const account_1 = __webpack_require__(9);
 const account_2 = __webpack_require__(14);
-const guard_1 = __webpack_require__(21);
+const guard_1 = __webpack_require__(23);
 let AuthController = class AuthController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -113,10 +113,17 @@ let AuthController = class AuthController {
         return this.natsClient.send(account_1.AuthMsgPattern.SignIn, body);
     }
     signInOauth(body) {
+        console.log('signInOauth: ', body);
         return this.natsClient.send(account_1.AuthMsgPattern.SignInOauth, body);
     }
     signUp(body) {
         return this.natsClient.send(account_1.AuthMsgPattern.SignUp, body);
+    }
+    changePassword(body) {
+        return this.natsClient.send(account_1.AuthMsgPattern.SignUp, body);
+    }
+    deactivate(body) {
+        return this.natsClient.send(account_1.AuthMsgPattern.Deactivate, body);
     }
 };
 exports.AuthController = AuthController;
@@ -151,6 +158,22 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_2.CreateAccountDto !== "undefined" && account_2.CreateAccountDto) === "function" ? _d : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signUp", null);
+tslib_1.__decorate([
+    (0, common_1.Patch)('changePassword'),
+    (0, swagger_1.ApiOperation)({ summary: 'Change password only for user login by email' }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_2.ChangePasswordDto !== "undefined" && account_2.ChangePasswordDto) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "changePassword", null);
+tslib_1.__decorate([
+    (0, common_1.Patch)('deactivate'),
+    (0, swagger_1.ApiOperation)({ summary: 'deactivate account only for user login by email' }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _f : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "deactivate", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
     (0, common_1.Controller)('auth'),
     tslib_1.__param(0, (0, common_1.Inject)('NATS_SERVICE')),
@@ -190,6 +213,8 @@ exports.AuthMsgPattern = Object.freeze({
     AccessToken: `${module_1.AccountModule.Auth}/RefreshToken`,
     RefreshToken: `${module_1.AccountModule.Auth}/AccessToken`,
     Update: `${module_1.AccountModule.Auth}/Update`,
+    ChangePassword: `${module_1.AccountModule.Profile}/ChangePassword`,
+    Deactivate: `${module_1.AccountModule.Profile}/Deactivate`,
 });
 
 
@@ -252,6 +277,8 @@ const tslib_1 = __webpack_require__(5);
 tslib_1.__exportStar(__webpack_require__(15), exports);
 tslib_1.__exportStar(__webpack_require__(17), exports);
 tslib_1.__exportStar(__webpack_require__(18), exports);
+tslib_1.__exportStar(__webpack_require__(19), exports);
+tslib_1.__exportStar(__webpack_require__(22), exports);
 
 
 /***/ }),
@@ -298,6 +325,24 @@ module.exports = require("class-validator");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeactivateDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const class_validator_1 = __webpack_require__(16);
+class DeactivateDto {
+}
+exports.DeactivateDto = DeactivateDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], DeactivateDto.prototype, "id", void 0);
+
+
+/***/ }),
+/* 18 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInOauth = void 0;
 const tslib_1 = __webpack_require__(5);
 const swagger_1 = __webpack_require__(3);
@@ -308,10 +353,10 @@ exports.SignInOauth = SignInOauth;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
-        description: 'The token of the provider after authorized.',
+        description: 'The code of the provider after authenticate.',
     }),
     tslib_1.__metadata("design:type", String)
-], SignInOauth.prototype, "token", void 0);
+], SignInOauth.prototype, "code", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
@@ -322,7 +367,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -330,8 +375,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAccountDto = void 0;
 const tslib_1 = __webpack_require__(5);
 const class_validator_1 = __webpack_require__(16);
-const password_validation_1 = __webpack_require__(19);
-const password_match_1 = __webpack_require__(20);
+const password_1 = __webpack_require__(20);
+const password_match_1 = __webpack_require__(21);
 const swagger_1 = __webpack_require__(3);
 class CreateAccountDto {
 }
@@ -347,7 +392,7 @@ tslib_1.__decorate([
 ], CreateAccountDto.prototype, "email", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, password_validation_1.IsStrongPassword)(),
+    (0, password_1.IsStrongPassword)(),
     (0, swagger_1.ApiProperty)({
         description: 'Password must be at least 8 characters long and contain at least one number.',
         example: 'vodich123',
@@ -356,7 +401,7 @@ tslib_1.__decorate([
 ], CreateAccountDto.prototype, "password", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, password_validation_1.IsStrongPassword)(),
+    (0, password_1.IsStrongPassword)(),
     (0, swagger_1.ApiProperty)({
         description: 'Confirm password must match the password.',
         example: 'vodich123',
@@ -369,7 +414,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -408,7 +453,7 @@ function IsStrongPassword(validationOptions) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -446,18 +491,53 @@ function IsPasswordMatch(property, validationOptions) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChangePasswordDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const class_validator_1 = __webpack_require__(16);
+const password_1 = __webpack_require__(20);
+const swagger_1 = __webpack_require__(3);
+class ChangePasswordDto {
+}
+exports.ChangePasswordDto = ChangePasswordDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], ChangePasswordDto.prototype, "email", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, password_1.IsStrongPassword)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'New password must be at least 8 characters long and contain at least one number.',
+        example: 'vodich123',
+    }),
+    tslib_1.__metadata("design:type", String)
+], ChangePasswordDto.prototype, "newPassword", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, password_1.IsStrongPassword)(),
+    tslib_1.__metadata("design:type", String)
+], ChangePasswordDto.prototype, "currentPassword", void 0);
+
+
+/***/ }),
+/* 23 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(22), exports);
 tslib_1.__exportStar(__webpack_require__(24), exports);
+tslib_1.__exportStar(__webpack_require__(26), exports);
 
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -468,7 +548,7 @@ exports.AuthGuard = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
-const jwt_1 = __webpack_require__(23);
+const jwt_1 = __webpack_require__(25);
 let AuthGuard = AuthGuard_1 = class AuthGuard {
     constructor(reflector, jwtService) {
         this.reflector = reflector;
@@ -512,13 +592,13 @@ exports.AuthGuard = AuthGuard = AuthGuard_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -531,7 +611,7 @@ exports.Public = Public;
 
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -539,7 +619,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const profile_controller_1 = __webpack_require__(26);
+const profile_controller_1 = __webpack_require__(28);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
@@ -551,7 +631,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -592,7 +672,7 @@ let ProfileController = class ProfileController {
 };
 exports.ProfileController = ProfileController;
 tslib_1.__decorate([
-    (0, common_1.Post)('updateStreak'),
+    (0, common_1.Patch)('updateStreak'),
     (0, swagger_1.ApiOperation)({ summary: 'Update Streak' }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.UNAUTHORIZED,
@@ -604,7 +684,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], ProfileController.prototype, "updateStreak", null);
 tslib_1.__decorate([
-    (0, common_1.Post)('updateExp'),
+    (0, common_1.Patch)('updateExp'),
     (0, swagger_1.ApiOperation)({ summary: 'Update Exp' }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.UNAUTHORIZED,
@@ -621,17 +701,17 @@ exports.ProfileController = ProfileController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(28), exports);
+tslib_1.__exportStar(__webpack_require__(30), exports);
 
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -673,18 +753,18 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 29 */
+/* 31 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(30), exports);
-tslib_1.__exportStar(__webpack_require__(31), exports);
+tslib_1.__exportStar(__webpack_require__(32), exports);
+tslib_1.__exportStar(__webpack_require__(33), exports);
 
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -692,7 +772,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -704,6 +784,11 @@ const Configurations = () => ({
     saltRounds: parseInt(process.env['SALT_ROUNDS']) || 10,
     jwtSecretKey: process.env['JWT_SECRET_KEY'],
     jwtPrivateKey: process.env['JWT_PRIVATE_KEY'],
+    github: {
+        client_id: process.env['GITHUB_CLIENT_ID'],
+        client_secret: process.env['GITHUB_CLIENT_SECRET'],
+        url: process.env['GITHUB_AUTHORIZE_URL'],
+    },
     database: {
         host: process.env['POSTGRES_HOST'],
         port: parseInt(process.env['POSTGRES_PORT']) || 5432,
@@ -722,23 +807,23 @@ exports.Configurations = Configurations;
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/config");
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(34), exports);
+tslib_1.__exportStar(__webpack_require__(36), exports);
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -746,9 +831,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtGlobalModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const jwt_1 = __webpack_require__(23);
-const config_1 = __webpack_require__(32);
-const configs_1 = __webpack_require__(29);
+const jwt_1 = __webpack_require__(25);
+const config_1 = __webpack_require__(34);
+const configs_1 = __webpack_require__(31);
 let JwtGlobalModule = class JwtGlobalModule {
 };
 exports.JwtGlobalModule = JwtGlobalModule;

@@ -15,12 +15,19 @@ export type NatsMicroserviceConfig = {
   natsInterPort: number;
 };
 
+export type GitHubConfig = {
+  client_id: string | undefined;
+  client_secret: string | undefined;
+  url: string | undefined;
+};
+
 export type Configuration = {
   port: number | undefined;
   nodeEnv: string | undefined;
-  saltRounds: number | undefined;
   database: DatabaseConfig;
+  saltRounds: number | undefined;
   microservice: NatsMicroserviceConfig;
   jwtSecretKey: string | undefined;
   jwtPrivateKey: string | undefined;
+  github: GitHubConfig;
 };

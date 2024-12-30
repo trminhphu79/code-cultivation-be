@@ -4,9 +4,9 @@ import { IsNotEmpty } from 'class-validator';
 export class SignInOauth {
   @IsNotEmpty()
   @ApiProperty({
-    description: 'The token of the provider after authorized.',
+    description: 'The code of the provider after authenticate.',
   })
-  token!: string;
+  code!: string;
 
   @IsNotEmpty()
   @ApiProperty({

@@ -64,5 +64,6 @@
     "@nx/nest:interceptor": {
       "unitTestRunner": "none"
     }
-  }
+  },
+  "neverConnectToCloud": true
 }

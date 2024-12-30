@@ -1,9 +1,18 @@
-import { Body, Controller, HttpStatus, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Inject,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
 import {
+  ChangePasswordDto,
   CreateAccountDto,
+  DeactivateDto,
   SignInDto,
   SignInOauth,
 } from 'shared/dtos/src/account';
@@ -31,6 +40,7 @@ export class AuthController {
   @Public()
   @ApiOperation({ summary: 'Sign in with github or facebook' })
   signInOauth(@Body() body: SignInOauth) {
+    console.log('signInOauth: ', body);
     return this.natsClient.send(AuthMsgPattern.SignInOauth, body);
   }
 
@@ -39,5 +49,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign up with email and password' })
   signUp(@Body() body: CreateAccountDto) {
     return this.natsClient.send(AuthMsgPattern.SignUp, body);
+  }
+
+  @Patch('changePassword')
+  @ApiOperation({ summary: 'Change password only for user login by email' })
+  changePassword(
+    @Body()
+    body: ChangePasswordDto
+  ) {
+    return this.natsClient.send(AuthMsgPattern.SignUp, body);
+  }
+
+  @Patch('deactivate')
+  @ApiOperation({ summary: 'deactivate account only for user login by email' })
+  deactivate(@Body() body: DeactivateDto) {
+    return this.natsClient.send(AuthMsgPattern.Deactivate, body);
   }
 }

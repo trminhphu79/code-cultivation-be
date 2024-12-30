@@ -10,4 +10,6 @@ export const AuthMsgPattern = Object.freeze({
   RefreshToken: `${AccountModule.Auth}/AccessToken`,
 
   Update: `${AccountModule.Auth}/Update`,
+  ChangePassword: `${AccountModule.Profile}/ChangePassword`,
+  Deactivate: `${AccountModule.Profile}/Deactivate`,
 });

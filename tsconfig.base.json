@@ -28,10 +28,10 @@
       "@shared/models/account": ["shared/models/src/account.model.ts"],
       "@shared/nats-client": ["shared/nats-client/src/index.ts"],
       "@shared/validation/password": [
-        "shared/validation/src/password-validation.ts"
+        "shared/validations/src/password-validation.ts"
       ],
       "@shared/validation/password-match": [
-        "shared/validation/src/password-match.ts"
+        "shared/validations/src/password-match.ts"
       ],
       "@shared/cache-manager": ["shared/cache-manager/src/index.ts"],
       "@shared/event-emitter": ["shared/event-emitter/src/index.ts"]

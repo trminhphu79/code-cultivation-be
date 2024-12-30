@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { IsStrongPassword } from 'shared/validations/src/password-validation';
-import { IsPasswordMatch } from 'shared/validations/src/password-match';
+import { IsStrongPassword } from '@shared/validation/password';
+import { IsPasswordMatch } from '@shared/validation/password-match';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAccountDto {

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiResponse } from '@nestjs/swagger';
 
 class UpdateStreakDto {
@@ -16,7 +16,8 @@ class UpdateExpDto {
 
 @Controller('profile')
 export class ProfileController {
-  @Post('updateStreak')
+  
+  @Patch('updateStreak')
   @ApiOperation({ summary: 'Update Streak' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -29,7 +30,7 @@ export class ProfileController {
     };
   }
 
-  @Post('updateExp')
+  @Patch('updateExp')
   @ApiOperation({ summary: 'Update Exp' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,

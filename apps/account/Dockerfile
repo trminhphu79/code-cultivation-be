@@ -1,5 +1,5 @@
 # Base image
-FROM node:22.12.0-slim
+FROM node:20.18.1
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -7,8 +7,8 @@ WORKDIR /usr/src/app
 # A wildcard is used to ensure both package.json is copied
 COPY ./dist/apps/account/package.json ./package.json
 
-# Install app dependencies
-RUN npm install pg --force
+# Install app dependencies - need instal pg(postgres db) because it doesnt including package.sjon
+RUN npm install pg
 
 # Bundle app source
 COPY ./dist/apps/account ./dist

@@ -1,29 +1,19 @@
-import {
-  CreateAccountDto,
-  SignInDto,
-  SignInOauth,
-} from 'shared/dtos/src/account';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import { ChangePasswordDto, DeactivateDto } from '@shared/dtos/account';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
 import { AccountService } from './account.service';
-
 @Controller()
 export class AccountController {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(private accountService: AccountService) {}
 
-  @MessagePattern(AuthMsgPattern.SignIn)
-  handleSignIn(body: SignInDto) {
-    return this.accountService.signIn(body);
+  @MessagePattern(AuthMsgPattern.ChangePassword)
+  handleChangePassword(body: ChangePasswordDto) {
+    return this.accountService.handleChangePassword(body);
   }
 
-  @MessagePattern(AuthMsgPattern.SignInOauth)
-  handleSignInOauth(body: SignInOauth) {
-    return this.accountService.signInOauth(body);
-  }
-
-  @MessagePattern(AuthMsgPattern.SignUp)
-  handleSignUp(body: CreateAccountDto) {
-    return this.accountService.createAccountDto(body);
+  @MessagePattern(AuthMsgPattern.Deactivate)
+  handleDeactivate(body: DeactivateDto) {
+    return this.accountService.handleDeactivate(body);
   }
 }

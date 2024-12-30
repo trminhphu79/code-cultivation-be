@@ -11,12 +11,12 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    AuthModule,
-    BcryptModule,
     ConfigModule.forRoot({
       load: [Configurations],
       isGlobal: true,
     }),
+    AuthModule,
+    BcryptModule,
     AccountModule,
     JwtGlobalModule,
     CacheManagerModule,
