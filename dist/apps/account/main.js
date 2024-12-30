@@ -953,10 +953,10 @@ let AccountService = class AccountService {
         return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
     }
     handleCreateProfile(body, accountId) {
-        return this.profileModel.create({
+        return (0, rxjs_1.from)(this.profileModel.create({
             ...body,
             accountId,
-        });
+        }));
     }
 };
 exports.AccountService = AccountService;
