@@ -24,10 +24,13 @@
       "@shared/exception": ["shared/exception/src/index.ts"],
       "@shared/guard": ["shared/guard/src/index.ts"],
       "@shared/jwt": ["shared/jwt/src/index.ts"],
+      "@shared/types": ["shared/types/src/index.ts"],
       "@shared/message-pattern/account": [
         "shared/message-pattern/src/lib/account/index.ts"
       ],
       "@shared/models/account": ["shared/models/src/account.model.ts"],
+      "@shared/models/profile": ["shared/models/src/profile.model.ts"],
+      "@shared/models/realm": ["shared/models/src/realm.model.ts"],
       "@shared/nats-client": ["shared/nats-client/src/index.ts"],
       "@shared/validation/password": [
         "shared/validations/src/password-validation.ts"

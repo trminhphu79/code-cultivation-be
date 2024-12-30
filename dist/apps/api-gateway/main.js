@@ -29,14 +29,14 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_module_1 = __webpack_require__(6);
-const profile_module_1 = __webpack_require__(28);
-const nats_client_1 = __webpack_require__(30);
-const configs_1 = __webpack_require__(32);
-const config_1 = __webpack_require__(35);
-const jwt_1 = __webpack_require__(36);
-const jwt_2 = __webpack_require__(25);
+const profile_module_1 = __webpack_require__(29);
+const nats_client_1 = __webpack_require__(31);
+const configs_1 = __webpack_require__(33);
+const config_1 = __webpack_require__(36);
+const jwt_1 = __webpack_require__(37);
+const jwt_2 = __webpack_require__(26);
 const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(23);
+const guard_1 = __webpack_require__(24);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -80,7 +80,7 @@ exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_controller_1 = __webpack_require__(7);
-const throttler_1 = __webpack_require__(27);
+const throttler_1 = __webpack_require__(28);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -124,7 +124,7 @@ const microservices_1 = __webpack_require__(8);
 const swagger_1 = __webpack_require__(3);
 const account_1 = __webpack_require__(9);
 const account_2 = __webpack_require__(14);
-const guard_1 = __webpack_require__(23);
+const guard_1 = __webpack_require__(24);
 let AuthController = class AuthController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -299,6 +299,7 @@ tslib_1.__exportStar(__webpack_require__(17), exports);
 tslib_1.__exportStar(__webpack_require__(18), exports);
 tslib_1.__exportStar(__webpack_require__(19), exports);
 tslib_1.__exportStar(__webpack_require__(22), exports);
+tslib_1.__exportStar(__webpack_require__(23), exports);
 
 
 /***/ }),
@@ -561,13 +562,36 @@ tslib_1.__decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateProfileDto = void 0;
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(24), exports);
-tslib_1.__exportStar(__webpack_require__(26), exports);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateProfileDto {
+}
+exports.CreateProfileDto = CreateProfileDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'User name',
+        example: 'Khoi Tran',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateProfileDto.prototype, "fullName", void 0);
 
 
 /***/ }),
 /* 24 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(25), exports);
+tslib_1.__exportStar(__webpack_require__(27), exports);
+
+
+/***/ }),
+/* 25 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -578,7 +602,7 @@ exports.AuthGuard = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
-const jwt_1 = __webpack_require__(25);
+const jwt_1 = __webpack_require__(26);
 let AuthGuard = AuthGuard_1 = class AuthGuard {
     constructor(reflector, jwtService) {
         this.reflector = reflector;
@@ -622,13 +646,13 @@ exports.AuthGuard = AuthGuard = AuthGuard_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -641,13 +665,13 @@ exports.Public = Public;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/throttler");
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -655,7 +679,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const profile_controller_1 = __webpack_require__(29);
+const profile_controller_1 = __webpack_require__(30);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
@@ -667,7 +691,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -737,17 +761,17 @@ exports.ProfileController = ProfileController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(31), exports);
+tslib_1.__exportStar(__webpack_require__(32), exports);
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -789,18 +813,18 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(33), exports);
 tslib_1.__exportStar(__webpack_require__(34), exports);
+tslib_1.__exportStar(__webpack_require__(35), exports);
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -808,7 +832,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -843,20 +867,10 @@ exports.Configurations = Configurations;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/config");
-
-/***/ }),
-/* 36 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(37), exports);
-
 
 /***/ }),
 /* 37 */
@@ -864,12 +878,22 @@ tslib_1.__exportStar(__webpack_require__(37), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(38), exports);
+
+
+/***/ }),
+/* 38 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtGlobalModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const jwt_1 = __webpack_require__(25);
-const config_1 = __webpack_require__(35);
-const configs_1 = __webpack_require__(32);
+const jwt_1 = __webpack_require__(26);
+const config_1 = __webpack_require__(36);
+const configs_1 = __webpack_require__(33);
 let JwtGlobalModule = class JwtGlobalModule {
 };
 exports.JwtGlobalModule = JwtGlobalModule;

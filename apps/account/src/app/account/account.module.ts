@@ -7,5 +7,6 @@ import { DatabaseConfigFeature } from '@shared/database';
   controllers: [AccountController],
   providers: [AccountService],
   imports: [DatabaseConfigFeature],
+  exports: [AccountService],
 })
 export class AccountModule {}

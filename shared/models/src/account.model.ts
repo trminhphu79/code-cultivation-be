@@ -4,7 +4,10 @@ import {
   Table,
   PrimaryKey,
   DataType,
+  HasOne,
+  AfterCreate,
 } from 'sequelize-typescript';
+import { Profile } from './profile.model';
 
 enum CredentialTypeEnum {
   NONE = 'NONE',
@@ -32,6 +35,9 @@ export class Account extends Model {
   })
   credentialType!: CredentialTypeEnum;
 
+  @HasOne(() => Profile)
+  profile!: Profile;
+
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
@@ -43,4 +49,17 @@ export class Account extends Model {
     defaultValue: DataType.NOW,
   })
   override updatedAt!: Date;
+
+  @AfterCreate
+  static async createProfile(instance: Account) {
+    await Profile.create({
+      accountId: instance.id,
+      fullName: 'Vô danh',
+      bio: '',
+      avatarUrl: '',
+      totalExp: 0,
+      streak: 0,
+      isActive: true,
+    });
+  }
 }

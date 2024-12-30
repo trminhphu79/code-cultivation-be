@@ -1,15 +1,13 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('account', {
-      credentialType: {
-        type: Sequelize.NUMBER,
-        defaultValue: 0,
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('profile', {
+      githubLink: {
+        type: Sequelize.STRING,
+        defaultValue: null,
       },
     });
   },
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('account');
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('profile');
   },
 };

@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { ChangePasswordDto, DeactivateDto } from '@shared/dtos/account';
-import { Account } from '@shared/models/account';
-import { of } from 'rxjs';
+import {
+  ChangePasswordDto,
+  DeactivateDto,
+  CreateProfileDto,
+} from '@shared/dtos/account';
+import { Profile } from '@shared/models/profile';
+import { from, of } from 'rxjs';
 @Injectable()
 export class AccountService {
   constructor(
-    @InjectModel(Account)
-    private readonly userModel: typeof Account
+    @InjectModel(Profile)
+    private readonly profileModel: typeof Profile
   ) {}
 
   handleChangePassword(body: ChangePasswordDto) {
@@ -16,5 +20,14 @@ export class AccountService {
 
   handleDeactivate(body: DeactivateDto) {
     return of({ message: 'Not impelemnted!!' });
+  }
+
+  handleCreateProfile(body: CreateProfileDto, accountId: string) {
+    return from(
+      this.profileModel.create({
+        ...body,
+        accountId,
+      })
+    );
   }
 }
