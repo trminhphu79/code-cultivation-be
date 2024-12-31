@@ -4,10 +4,10 @@ import { IsNotEmpty } from 'class-validator';
 export class SignInOauth {
   @IsNotEmpty()
   @ApiProperty({
-    example: 'codetmp77799',
-    description: 'The code of the provider after authenticate.',
+    example: 'token3912491923123',
+    description: 'The token of the provider after authenticate.',
   })
-  code!: string;
+  token!: string;
 
   @IsNotEmpty()
   @ApiProperty({

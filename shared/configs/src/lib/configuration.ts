@@ -11,6 +11,9 @@ export const Configurations = (): Configuration => ({
     client_secret: process.env['GITHUB_CLIENT_SECRET'],
     url: process.env['GITHUB_AUTHORIZE_URL'],
   },
+  google: {
+    clientId: process.env['GOOGLE_CLIENT_ID'],
+  },
   database: {
     host: process.env['POSTGRES_HOST'],
     port: parseInt(process.env['POSTGRES_PORT'] as string) || 5432,
