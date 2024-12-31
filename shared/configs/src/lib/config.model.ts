@@ -21,6 +21,10 @@ export type GitHubConfig = {
   url: string | undefined;
 };
 
+export type GoogleConfig = {
+  clientId: string | undefined;
+};
+
 export type Configuration = {
   port: number | undefined;
   nodeEnv: string | undefined;
@@ -30,4 +34,5 @@ export type Configuration = {
   jwtSecretKey: string | undefined;
   jwtPrivateKey: string | undefined;
   github: GitHubConfig;
+  google: GoogleConfig;
 };

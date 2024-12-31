@@ -7,8 +7,9 @@ import { throwException } from '@shared/exception';
 import { HttpService } from '@nestjs/axios';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/sequelize';
+import { OAuth2Client } from 'google-auth-library';
 import { CacheMessageAction } from '@shared/cache-manager';
-import { GitHubConfig } from '@shared/configs';
+import { GitHubConfig, GoogleConfig } from '@shared/configs';
 import { CreateAccountDto, SignInDto, SignInOauth } from '@shared/dtos/account';
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
@@ -17,6 +18,7 @@ import { GitHubUser } from '@shared/types';
 import { AccountService } from '../account/account.service';
 @Injectable()
 export class AuthService {
+  oauthClient!: OAuth2Client;
   constructor(
     @InjectModel(Account)
     private readonly accountModel: typeof Account,
@@ -26,21 +28,25 @@ export class AuthService {
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
     private readonly accountService: AccountService
-  ) {}
+  ) {
+    this.oauthClient = new OAuth2Client({
+      clientId: this.configService.get<GoogleConfig>('goolge')?.clientId,
+    });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   generateFullTokens<T>(payload: T & Object) {
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
-          expiresIn: '2m',
+          expiresIn: '30m',
         }),
       })),
       tap((token) => Logger.log('accessToken: ', token?.accessToken)),
       map(({ accessToken }) => ({
         accessToken,
         refreshToken: this.jwtService.sign(payload, {
-          expiresIn: '7d',
+          expiresIn: '30d',
         }),
       })),
       tap((token) => Logger.log('refreshToken: ', token.refreshToken)),
@@ -166,14 +172,37 @@ export class AuthService {
     );
   }
 
-  handleSignInOauth({ code }: { code: string }) {
+  handleSignInOauth({ token, credentialType }: SignInOauth) {
+    switch (credentialType) {
+      case 'GITHUB':
+        return this.handleSignInOAuthGithub({ token, credentialType });
+      default:
+        return this.handleSignInOAuthFacebook({ token, credentialType });
+    }
+  }
+
+  private handleSignInOAuthFacebook({ token }: SignInOauth) {
+    console.log('handleSignInOAuthFacebook: ', token);
+    return from(
+      this.oauthClient.verifyIdToken({
+        idToken: token,
+        audience: this.configService.get<GoogleConfig>('google').clientId,
+      })
+    ).pipe(
+      tap((response) => {
+        console.log('Verify google sign in response: ', response);
+      })
+    );
+  }
+
+  private handleSignInOAuthGithub({ token }: SignInOauth) {
     const { client_id, client_secret, url } =
       this.configService.get<GitHubConfig>('github');
 
     const payload = {
       client_id,
       client_secret,
-      code,
+      code: token,
       accept: 'json',
     };
 
