@@ -76,13 +76,4 @@ export class AuthController {
   deactivate(@Body() body: DeactivateDto) {
     return this.natsClient.send(AuthMsgPattern.Deactivate, body);
   }
-
-  @Get('getCache')
-  @ApiOperation({
-    summary:
-      'Get Cache data, Example: ACCOUNT#{{CREDENTIAL_TYPE}}#{{account_id}}',
-  })
-  getCacheData(@Param('key') key: string) {
-    return this.natsClient.send(AuthMsgPattern.GetCache, { key });
-  }
 }
