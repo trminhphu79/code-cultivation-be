@@ -19,6 +19,8 @@ import {
   SignInDto,
   SignInOauth,
   AuthenticateDto,
+  VerifyEmailOtp,
+  ResendVerifyEmail,
 } from 'shared/dtos/src/account';
 import { Public } from '@shared/guard';
 
@@ -60,6 +62,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign up with email and password' })
   signUp(@Body() body: CreateAccountDto) {
     return this.natsClient.send(AuthMsgPattern.SignUp, body);
+  }
+
+  @Post('verify')
+  @Public()
+  @ApiOperation({ summary: 'Verify email after sign up by email' })
+  verifyEmail(@Body() body: VerifyEmailOtp) {
+    return this.natsClient.send(AuthMsgPattern.VerifyEmail, body);
+  }
+
+  @Post('sendOtp')
+  @Public()
+  @ApiOperation({ summary: 'Send otp to email for verify email' })
+  sendOtpVerify(@Body() body: ResendVerifyEmail) {
+    return this.natsClient.send(AuthMsgPattern.SendOtpVerifyEmail, body);
   }
 
   @Patch('changePassword')

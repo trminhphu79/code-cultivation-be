@@ -15,4 +15,6 @@ export const AuthMsgPattern = Object.freeze({
   Deactivate: `${AccountModule.Profile}/Deactivate`,
 
   GetCache: `${AccountModule.Auth}/GetCache`,
+  VerifyEmail: `${AccountModule.Auth}/VerifyEmail`,
+  SendOtpVerifyEmail: `${AccountModule.Auth}/SendOtpVerifyEmail`,
 });

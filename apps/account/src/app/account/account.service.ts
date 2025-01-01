@@ -4,6 +4,8 @@ import {
   ChangePasswordDto,
   DeactivateDto,
   CreateProfileDto,
+  VerifyEmailOtp,
+  ResendVerifyEmail,
 } from '@shared/dtos/account';
 import { Profile } from '@shared/models/profile';
 import { from, of } from 'rxjs';
@@ -19,6 +21,14 @@ export class AccountService {
   }
 
   handleDeactivate(body: DeactivateDto) {
+    return of({ message: 'Not impelemnted!!' });
+  }
+
+  handleVerifyEmail(body: VerifyEmailOtp) {
+    return of({ message: 'Not impelemnted!!' });
+  }
+
+  handleSendVerifyEmail(body: ResendVerifyEmail) {
     return of({ message: 'Not impelemnted!!' });
   }
 
