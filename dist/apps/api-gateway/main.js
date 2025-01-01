@@ -379,11 +379,11 @@ exports.SignInOauth = SignInOauth;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
-        example: 'codetmp77799',
-        description: 'The code of the provider after authenticate.',
+        example: 'token3912491923123',
+        description: 'The token of the provider after authenticate.',
     }),
     tslib_1.__metadata("design:type", String)
-], SignInOauth.prototype, "code", void 0);
+], SignInOauth.prototype, "token", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
@@ -848,6 +848,9 @@ const Configurations = () => ({
         client_id: process.env['GITHUB_CLIENT_ID'],
         client_secret: process.env['GITHUB_CLIENT_SECRET'],
         url: process.env['GITHUB_AUTHORIZE_URL'],
+    },
+    google: {
+        clientId: process.env['GOOGLE_CLIENT_ID'],
     },
     database: {
         host: process.env['POSTGRES_HOST'],

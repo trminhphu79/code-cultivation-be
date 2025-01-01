@@ -102,6 +102,9 @@ const Configurations = () => ({
         client_secret: process.env['GITHUB_CLIENT_SECRET'],
         url: process.env['GITHUB_AUTHORIZE_URL'],
     },
+    google: {
+        clientId: process.env['GOOGLE_CLIENT_ID'],
+    },
     database: {
         host: process.env['POSTGRES_HOST'],
         port: parseInt(process.env['POSTGRES_PORT']) || 5432,
@@ -650,11 +653,11 @@ exports.SignInOauth = SignInOauth;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
-        example: 'codetmp77799',
-        description: 'The code of the provider after authenticate.',
+        example: 'token3912491923123',
+        description: 'The token of the provider after authenticate.',
     }),
     tslib_1.__metadata("design:type", String)
-], SignInOauth.prototype, "code", void 0);
+], SignInOauth.prototype, "token", void 0);
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
@@ -1327,7 +1330,7 @@ exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const auth_service_1 = __webpack_require__(57);
-const auth_controller_1 = __webpack_require__(64);
+const auth_controller_1 = __webpack_require__(65);
 const axios_1 = __webpack_require__(62);
 const database_1 = __webpack_require__(9);
 let AuthModule = class AuthModule {
@@ -1360,9 +1363,10 @@ const exception_1 = __webpack_require__(59);
 const axios_1 = __webpack_require__(62);
 const event_emitter_1 = __webpack_require__(48);
 const sequelize_1 = __webpack_require__(17);
+const google_auth_library_1 = __webpack_require__(63);
 const cache_manager_1 = __webpack_require__(50);
 const account_1 = __webpack_require__(12);
-const axios_2 = __webpack_require__(63);
+const axios_2 = __webpack_require__(64);
 const bcrypt_service_1 = __webpack_require__(41);
 const account_service_1 = __webpack_require__(37);
 let AuthService = class AuthService {
@@ -1374,17 +1378,20 @@ let AuthService = class AuthService {
         this.bcryptService = bcryptService;
         this.configService = configService;
         this.accountService = accountService;
+        this.oauthClient = new google_auth_library_1.OAuth2Client({
+            clientId: this.configService.get('goolge')?.clientId,
+        });
     }
     // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
     generateFullTokens(payload) {
         return (0, rxjs_1.of)(payload).pipe((0, operators_1.map)((payload) => ({
             accessToken: this.jwtService.sign(payload, {
-                expiresIn: '2m',
+                expiresIn: '30m',
             }),
         })), (0, operators_1.tap)((token) => common_1.Logger.log('accessToken: ', token?.accessToken)), (0, operators_1.map)(({ accessToken }) => ({
             accessToken,
             refreshToken: this.jwtService.sign(payload, {
-                expiresIn: '7d',
+                expiresIn: '30d',
             }),
         })), (0, operators_1.tap)((token) => common_1.Logger.log('refreshToken: ', token.refreshToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
@@ -1445,15 +1452,32 @@ let AuthService = class AuthService {
                     })));
                 }));
             }
-            return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'User not found');
+            return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy tài khoản!');
         }));
     }
-    handleSignInOauth({ code }) {
+    handleSignInOauth({ token, credentialType }) {
+        switch (credentialType) {
+            case 'GITHUB':
+                return this.handleSignInOAuthGithub({ token, credentialType });
+            default:
+                return this.handleSignInOAuthGoogle({ token, credentialType });
+        }
+    }
+    handleSignInOAuthGoogle({ token }) {
+        console.log('handleSignInOAuthGoogle: ', token);
+        return (0, rxjs_1.from)(this.oauthClient.verifyIdToken({
+            idToken: token,
+            audience: this.configService.get('google').clientId,
+        })).pipe((0, operators_1.tap)((response) => {
+            console.log('Verify google sign in response: ', response);
+        }));
+    }
+    handleSignInOAuthGithub({ token }) {
         const { client_id, client_secret, url } = this.configService.get('github');
         const payload = {
             client_id,
             client_secret,
-            code,
+            code: token,
             accept: 'json',
         };
         return this.httpService.post(url, payload).pipe((0, operators_1.filter)((response) => !!response?.data), (0, operators_1.map)((response) => {
@@ -1639,10 +1663,16 @@ module.exports = require("@nestjs/axios");
 /* 63 */
 /***/ ((module) => {
 
-module.exports = require("axios");
+module.exports = require("google-auth-library");
 
 /***/ }),
 /* 64 */
+/***/ ((module) => {
+
+module.exports = require("axios");
+
+/***/ }),
+/* 65 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 

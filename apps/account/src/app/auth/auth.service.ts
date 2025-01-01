@@ -69,6 +69,7 @@ export class AuthService {
       )
     );
   }
+
   verifyToken(token: string) {
     return from(this.jwtService.verifyAsync(token)).pipe(
       catchError(() => throwException(400, `'Invalid or expired token`))
@@ -167,7 +168,10 @@ export class AuthService {
               })
             );
         }
-        return throwException(HttpStatusCode.NotFound, 'User not found');
+        return throwException(
+          HttpStatusCode.NotFound,
+          'Không tìm thấy tài khoản!'
+        );
       })
     );
   }
@@ -177,12 +181,12 @@ export class AuthService {
       case 'GITHUB':
         return this.handleSignInOAuthGithub({ token, credentialType });
       default:
-        return this.handleSignInOAuthFacebook({ token, credentialType });
+        return this.handleSignInOAuthGoogle({ token, credentialType });
     }
   }
 
-  private handleSignInOAuthFacebook({ token }: SignInOauth) {
-    console.log('handleSignInOAuthFacebook: ', token);
+  private handleSignInOAuthGoogle({ token }: SignInOauth) {
+    console.log('handleSignInOAuthGoogle: ', token);
     return from(
       this.oauthClient.verifyIdToken({
         idToken: token,

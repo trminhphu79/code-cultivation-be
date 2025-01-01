@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "rebuild-services": "nx build api-gateway && nx build account",
-    "rebuild-services:none-cache": "nx build api-gateway --skip-nx-cache && nx build account --skip-nx-cache",
-    "serve": "yarn run rebuild-services && docker-compose --env-file .env up --build -d",
-    "serve:none-cache": "yarn run rebuild-services:none-cache && docker-compose --env-file .env up --build -d",
+    "build-service": "nx build api-gateway && nx build account",
+    "build-service:none-cache": "nx build api-gateway --skip-nx-cache && nx build account --skip-nx-cache",
+    "start": "yarn run build-service && docker-compose --env-file .env up --build -d",
+    "serve:none-cache": "yarn run build-service:none-cache && docker-compose --env-file .env up --build -d",
     "build:image": "docker-compose --env-file .env up --build"
   },
   "private": true,
@@ -27,6 +27,7 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "google-auth-library": "^9.15.0",
     "ioredis": "^5.4.2",
     "nats": "^2.28.2",
     "pg": "^8.13.1",

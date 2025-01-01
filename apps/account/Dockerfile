@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY ./dist/apps/account/package.json ./package.json
 
 # Install app dependencies - need instal pg(postgres db) because it doesnt including package.sjon
-RUN npm install pg
+RUN npm install pg google-auth-library
 
 # Bundle app source
 COPY ./dist/apps/account ./dist
