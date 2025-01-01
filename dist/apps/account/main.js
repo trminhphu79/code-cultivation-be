@@ -26,11 +26,11 @@ const config_1 = __webpack_require__(5);
 const configs_1 = __webpack_require__(6);
 const database_1 = __webpack_require__(9);
 const account_module_1 = __webpack_require__(18);
-const bcrypt_1 = __webpack_require__(39);
-const jwt_1 = __webpack_require__(43);
-const event_emitter_1 = __webpack_require__(46);
-const cache_manager_1 = __webpack_require__(50);
-const auth_module_1 = __webpack_require__(56);
+const bcrypt_1 = __webpack_require__(40);
+const jwt_1 = __webpack_require__(44);
+const event_emitter_1 = __webpack_require__(47);
+const cache_manager_1 = __webpack_require__(51);
+const auth_module_1 = __webpack_require__(57);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -200,15 +200,7 @@ var CredentialTypeEnum;
 })(CredentialTypeEnum || (CredentialTypeEnum = {}));
 let Account = class Account extends sequelize_typescript_1.Model {
     static async createProfile(instance) {
-        await profile_model_1.Profile.create({
-            accountId: instance.id,
-            fullName: 'Vô danh',
-            bio: '',
-            avatarUrl: '',
-            totalExp: 0,
-            streak: 0,
-            isActive: true,
-        });
+        return { ...profile_model_1.DefaultProfileValue, accountId: instance.id };
     }
 };
 exports.Account = Account;
@@ -276,11 +268,20 @@ module.exports = require("sequelize-typescript");
 
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Profile = void 0;
+exports.Profile = exports.DefaultProfileValue = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(13);
 const account_model_1 = __webpack_require__(12);
 const realm_model_1 = __webpack_require__(15);
+exports.DefaultProfileValue = {
+    fullName: 'Vô danh',
+    nickName: 'unknown',
+    bio: '',
+    avatarUrl: '',
+    totalExp: 0,
+    streak: 0,
+    isActive: true,
+};
 let Profile = class Profile extends sequelize_typescript_1.Model {
 };
 exports.Profile = Profile;
@@ -323,6 +324,13 @@ tslib_1.__decorate([
     }),
     tslib_1.__metadata("design:type", String)
 ], Profile.prototype, "fullName", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "nickName", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.STRING,
@@ -489,7 +497,7 @@ exports.AccountModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const account_controller_1 = __webpack_require__(19);
-const account_service_1 = __webpack_require__(37);
+const account_service_1 = __webpack_require__(38);
 const database_1 = __webpack_require__(9);
 let AccountModule = class AccountModule {
 };
@@ -517,8 +525,8 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const microservices_1 = __webpack_require__(20);
 const account_1 = __webpack_require__(21);
-const account_2 = __webpack_require__(32);
-const account_service_1 = __webpack_require__(37);
+const account_2 = __webpack_require__(33);
+const account_service_1 = __webpack_require__(38);
 let AccountController = class AccountController {
     constructor(accountService) {
         this.accountService = accountService;
@@ -566,8 +574,9 @@ tslib_1.__exportStar(__webpack_require__(22), exports);
 tslib_1.__exportStar(__webpack_require__(25), exports);
 tslib_1.__exportStar(__webpack_require__(26), exports);
 tslib_1.__exportStar(__webpack_require__(27), exports);
-tslib_1.__exportStar(__webpack_require__(30), exports);
+tslib_1.__exportStar(__webpack_require__(28), exports);
 tslib_1.__exportStar(__webpack_require__(31), exports);
+tslib_1.__exportStar(__webpack_require__(32), exports);
 
 
 /***/ }),
@@ -643,6 +652,29 @@ tslib_1.__decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticateDto = void 0;
+const tslib_1 = __webpack_require__(4);
+const swagger_1 = __webpack_require__(23);
+const class_validator_1 = __webpack_require__(24);
+class AuthenticateDto {
+}
+exports.AuthenticateDto = AuthenticateDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Token use for authenticate user',
+        example: '8685-bdhh34-555123-6662312',
+    }),
+    tslib_1.__metadata("design:type", String)
+], AuthenticateDto.prototype, "token", void 0);
+
+
+/***/ }),
+/* 27 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInOauth = void 0;
 const tslib_1 = __webpack_require__(4);
 const swagger_1 = __webpack_require__(23);
@@ -669,7 +701,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -677,8 +709,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAccountDto = void 0;
 const tslib_1 = __webpack_require__(4);
 const class_validator_1 = __webpack_require__(24);
-const password_1 = __webpack_require__(28);
-const password_match_1 = __webpack_require__(29);
+const password_1 = __webpack_require__(29);
+const password_match_1 = __webpack_require__(30);
 const swagger_1 = __webpack_require__(23);
 class CreateAccountDto {
 }
@@ -716,7 +748,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -755,7 +787,7 @@ function IsStrongPassword(validationOptions) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -793,7 +825,7 @@ function IsPasswordMatch(property, validationOptions) {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -801,7 +833,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ChangePasswordDto = void 0;
 const tslib_1 = __webpack_require__(4);
 const class_validator_1 = __webpack_require__(24);
-const password_1 = __webpack_require__(28);
+const password_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(23);
 class ChangePasswordDto {
 }
@@ -831,7 +863,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -854,28 +886,29 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 32 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(33), exports);
-tslib_1.__exportStar(__webpack_require__(36), exports);
-
-
-/***/ }),
 /* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(34), exports);
+tslib_1.__exportStar(__webpack_require__(37), exports);
+
+
+/***/ }),
+/* 34 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthMsgPattern = void 0;
-const module_1 = __webpack_require__(34);
+const module_1 = __webpack_require__(35);
 exports.AuthMsgPattern = Object.freeze({
     SignUp: `${module_1.AccountModule.Auth}/SignUp`,
     SignIn: `${module_1.AccountModule.Auth}/SignIn`,
     SignInOauth: `${module_1.AccountModule.Auth}/SignInOauth`,
+    Authenticate: `${module_1.AccountModule.Auth}/Authenticate`,
     AccessToken: `${module_1.AccountModule.Auth}/RefreshToken`,
     RefreshToken: `${module_1.AccountModule.Auth}/AccessToken`,
     Update: `${module_1.AccountModule.Auth}/Update`,
@@ -885,13 +918,13 @@ exports.AuthMsgPattern = Object.freeze({
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountModule = void 0;
-const __1 = __webpack_require__(35);
+const __1 = __webpack_require__(36);
 exports.AccountModule = Object.freeze({
     Auth: `${__1.MicroServiceName.Account}/Auth`,
     Profile: `${__1.MicroServiceName.Account}/Profile`,
@@ -899,7 +932,7 @@ exports.AccountModule = Object.freeze({
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -913,13 +946,13 @@ exports.MicroServiceName = Object.freeze({
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileMsgPattern = void 0;
-const module_1 = __webpack_require__(34);
+const module_1 = __webpack_require__(35);
 exports.ProfileMsgPattern = Object.freeze({
     UpdateExp: `${module_1.AccountModule.Profile}/UpdateExp`,
     UpdateStreak: `${module_1.AccountModule.Profile}/UpdateStreak`,
@@ -934,7 +967,7 @@ exports.ProfileMsgPattern = Object.freeze({
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -944,7 +977,7 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const sequelize_1 = __webpack_require__(17);
 const profile_1 = __webpack_require__(14);
-const rxjs_1 = __webpack_require__(38);
+const rxjs_1 = __webpack_require__(39);
 let AccountService = class AccountService {
     constructor(profileModel) {
         this.profileModel = profileModel;
@@ -971,20 +1004,10 @@ exports.AccountService = AccountService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
-
-/***/ }),
-/* 39 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(40), exports);
-
 
 /***/ }),
 /* 40 */
@@ -992,10 +1015,20 @@ tslib_1.__exportStar(__webpack_require__(40), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(41), exports);
+
+
+/***/ }),
+/* 41 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BcryptModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const bcrypt_service_1 = __webpack_require__(41);
+const bcrypt_service_1 = __webpack_require__(42);
 const config_1 = __webpack_require__(5);
 const configs_1 = __webpack_require__(6);
 let BcryptModule = class BcryptModule {
@@ -1017,7 +1050,7 @@ exports.BcryptModule = BcryptModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1027,8 +1060,8 @@ exports.BcryptService = void 0;
 const tslib_1 = __webpack_require__(4);
 const config_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const bcrypt = tslib_1.__importStar(__webpack_require__(42));
-const rxjs_1 = __webpack_require__(38);
+const bcrypt = tslib_1.__importStar(__webpack_require__(43));
+const rxjs_1 = __webpack_require__(39);
 let BcryptService = class BcryptService {
     constructor(configService) {
         this.configService = configService;
@@ -1059,20 +1092,10 @@ exports.BcryptService = BcryptService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ ((module) => {
 
 module.exports = require("bcrypt");
-
-/***/ }),
-/* 43 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(44), exports);
-
 
 /***/ }),
 /* 44 */
@@ -1080,10 +1103,20 @@ tslib_1.__exportStar(__webpack_require__(44), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(45), exports);
+
+
+/***/ }),
+/* 45 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtGlobalModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const jwt_1 = __webpack_require__(45);
+const jwt_1 = __webpack_require__(46);
 const config_1 = __webpack_require__(5);
 const configs_1 = __webpack_require__(6);
 let JwtGlobalModule = class JwtGlobalModule {
@@ -1116,21 +1149,10 @@ exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
-
-/***/ }),
-/* 46 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(47), exports);
-tslib_1.__exportStar(__webpack_require__(49), exports);
-
 
 /***/ }),
 /* 47 */
@@ -1138,11 +1160,22 @@ tslib_1.__exportStar(__webpack_require__(49), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(48), exports);
+tslib_1.__exportStar(__webpack_require__(50), exports);
+
+
+/***/ }),
+/* 48 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GlobalEventEmitterModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(48);
-const event_emitter_service_1 = __webpack_require__(49);
+const event_emitter_1 = __webpack_require__(49);
+const event_emitter_service_1 = __webpack_require__(50);
 let GlobalEventEmitterModule = class GlobalEventEmitterModule {
 };
 exports.GlobalEventEmitterModule = GlobalEventEmitterModule;
@@ -1156,13 +1189,13 @@ exports.GlobalEventEmitterModule = GlobalEventEmitterModule = tslib_1.__decorate
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1172,7 +1205,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EventEmitterService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(48);
+const event_emitter_1 = __webpack_require__(49);
 let EventEmitterService = EventEmitterService_1 = class EventEmitterService {
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
@@ -1195,18 +1228,18 @@ exports.EventEmitterService = EventEmitterService = EventEmitterService_1 = tsli
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(51), exports);
-tslib_1.__exportStar(__webpack_require__(53), exports);
+tslib_1.__exportStar(__webpack_require__(52), exports);
+tslib_1.__exportStar(__webpack_require__(54), exports);
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1214,8 +1247,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const cache_listener_service_1 = __webpack_require__(52);
-const ioredis_1 = __webpack_require__(54);
+const cache_listener_service_1 = __webpack_require__(53);
+const ioredis_1 = __webpack_require__(55);
 let CacheManagerModule = class CacheManagerModule {
 };
 exports.CacheManagerModule = CacheManagerModule;
@@ -1234,7 +1267,7 @@ exports.CacheManagerModule = CacheManagerModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1244,19 +1277,21 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheListener = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(48);
-const cache_message_1 = __webpack_require__(53);
-const ioredis_1 = __webpack_require__(54);
-const ioredis_2 = tslib_1.__importDefault(__webpack_require__(55));
+const event_emitter_1 = __webpack_require__(49);
+const cache_message_1 = __webpack_require__(54);
+const ioredis_1 = __webpack_require__(55);
+const ioredis_2 = tslib_1.__importDefault(__webpack_require__(56));
 let CacheListener = CacheListener_1 = class CacheListener {
     constructor(redis) {
         this.redis = redis;
         this.logger = new common_1.Logger(CacheListener_1.name);
     }
     async handleCreateEvent(data) {
-        await this.redis.set(data.key, data.value);
+        await this.redis.set(data.key, typeof data.value == 'object' ? JSON.stringify(data.value) : data.value);
         await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
         this.logger.log(`Handled create cache for key: ${data.key}`);
+        const redisData = await this.redis.get(data.key);
+        console.dir(JSON.parse(redisData));
     }
     async handleUpdateEvent(data) {
         await this.redis.set(data.key, data.value);
@@ -1294,7 +1329,7 @@ exports.CacheListener = CacheListener = CacheListener_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1309,19 +1344,19 @@ var CacheMessageAction;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs-modules/ioredis");
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ ((module) => {
 
 module.exports = require("ioredis");
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1329,9 +1364,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const auth_service_1 = __webpack_require__(57);
-const auth_controller_1 = __webpack_require__(65);
-const axios_1 = __webpack_require__(62);
+const auth_service_1 = __webpack_require__(58);
+const auth_controller_1 = __webpack_require__(66);
+const axios_1 = __webpack_require__(63);
 const database_1 = __webpack_require__(9);
 let AuthModule = class AuthModule {
 };
@@ -1346,32 +1381,36 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const config_1 = __webpack_require__(5);
-const jwt_1 = __webpack_require__(45);
-const rxjs_1 = __webpack_require__(38);
-const operators_1 = __webpack_require__(58);
-const exception_1 = __webpack_require__(59);
-const axios_1 = __webpack_require__(62);
-const event_emitter_1 = __webpack_require__(48);
+const jwt_1 = __webpack_require__(46);
+const rxjs_1 = __webpack_require__(39);
+const operators_1 = __webpack_require__(59);
+const exception_1 = __webpack_require__(60);
+const axios_1 = __webpack_require__(63);
+const event_emitter_1 = __webpack_require__(49);
 const sequelize_1 = __webpack_require__(17);
-const google_auth_library_1 = __webpack_require__(63);
-const cache_manager_1 = __webpack_require__(50);
+const google_auth_library_1 = __webpack_require__(64);
+const cache_manager_1 = __webpack_require__(51);
 const account_1 = __webpack_require__(12);
-const axios_2 = __webpack_require__(64);
-const bcrypt_service_1 = __webpack_require__(41);
-const account_service_1 = __webpack_require__(37);
+const axios_2 = __webpack_require__(65);
+const bcrypt_service_1 = __webpack_require__(42);
+const ioredis_1 = tslib_1.__importDefault(__webpack_require__(56));
+const ioredis_2 = __webpack_require__(55);
+const account_service_1 = __webpack_require__(38);
+const profile_1 = __webpack_require__(14);
 let AuthService = class AuthService {
-    constructor(accountModel, jwtService, httpService, eventEmitter, bcryptService, configService, accountService) {
+    constructor(accountModel, cache, jwtService, httpService, eventEmitter, bcryptService, configService, accountService) {
         this.accountModel = accountModel;
+        this.cache = cache;
         this.jwtService = jwtService;
         this.httpService = httpService;
         this.eventEmitter = eventEmitter;
@@ -1386,7 +1425,7 @@ let AuthService = class AuthService {
     generateFullTokens(payload) {
         return (0, rxjs_1.of)(payload).pipe((0, operators_1.map)((payload) => ({
             accessToken: this.jwtService.sign(payload, {
-                expiresIn: '30m',
+                expiresIn: '2m',
             }),
         })), (0, operators_1.tap)((token) => common_1.Logger.log('accessToken: ', token?.accessToken)), (0, operators_1.map)(({ accessToken }) => ({
             accessToken,
@@ -1404,7 +1443,7 @@ let AuthService = class AuthService {
         })), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
     verifyToken(token) {
-        return (0, rxjs_1.from)(this.jwtService.verifyAsync(token)).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(400, `'Invalid or expired token`)));
+        return (0, rxjs_1.from)(this.jwtService.verifyAsync(token)).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(401, `Token không hợp lệ hoặc đã hết hạn!`)));
     }
     handleSignUp({ email, password }) {
         return this.existingAccount(email).pipe((0, operators_1.switchMap)((existingUser) => {
@@ -1414,15 +1453,16 @@ let AuthService = class AuthService {
             return (0, rxjs_1.from)(this.bcryptService.hashPassword(password)).pipe((0, operators_1.switchMap)((hashedPassword) => (0, rxjs_1.from)(this.accountModel.create({
                 email,
                 password: hashedPassword,
-            })).pipe((0, operators_1.map)((response) => {
+            })).pipe((0, operators_1.tap)((result) => {
+                const jsonData = result.toJSON();
+                this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
+                    key: 'account#' + email,
+                    value: { ...jsonData, profile: profile_1.DefaultProfileValue },
+                });
+            }), (0, operators_1.map)((response) => {
                 const result = response.toJSON();
                 delete result.password;
                 return result;
-            }), (0, operators_1.tap)((result) => {
-                this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
-                    key: 'account#' + result?.id,
-                    value: result,
-                });
             }), (0, operators_1.switchMap)((data) => (0, rxjs_1.of)({
                 message: 'Tạo tài khoản thành công',
                 data,
@@ -1430,29 +1470,49 @@ let AuthService = class AuthService {
         }));
     }
     handleSignIn({ email, password }) {
-        return (0, rxjs_1.from)(this.accountModel.findOne({ where: { email } })).pipe((0, operators_1.catchError)((error) => {
-            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, `Database error: ${error.message}`);
-        }), (0, operators_1.switchMap)((existingUser) => {
-            if (existingUser) {
+        return (0, rxjs_1.from)(this.cache.get(`account#${email}`)).pipe((0, operators_1.map)((stringData) => JSON.parse(stringData)), (0, operators_1.switchMap)((cacheData) => {
+            // Logger.log('SignIn Get From Cache: ', `${!!cacheData}`);
+            console.log('cacheData: ', cacheData.email);
+            console.log('cacheData: ', cacheData.password);
+            if (cacheData) {
+                return (0, rxjs_1.of)(cacheData);
+            }
+            return (0, rxjs_1.from)(this.accountModel.findOne({
+                where: { email },
+                include: { association: 'profile', required: false },
+            })).pipe((0, operators_1.map)((res) => res.toJSON()), (0, operators_1.catchError)((error) => {
+                return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, `Database error: ${error.message}`);
+            }));
+        }), (0, operators_1.switchMap)((userData) => {
+            if (userData) {
                 return this.bcryptService
-                    .comparePassword(password, existingUser.password)
+                    .comparePassword(password, userData.password)
                     .pipe((0, operators_1.switchMap)((isMatch) => {
                     common_1.Logger.log('Is Matched: ', isMatch);
                     if (!isMatch) {
                         return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Mật khẩu không chính xác!');
                     }
-                    const result = existingUser.toJSON();
-                    delete result.password;
-                    return (0, rxjs_1.from)(this.generateFullTokens(result)).pipe((0, operators_1.map)((tokens) => ({
+                    delete userData.password;
+                    return (0, rxjs_1.from)(this.generateFullTokens(userData)).pipe((0, operators_1.map)((tokens) => ({
                         message: 'Đăng nhập thành công!',
                         data: {
-                            ...result,
+                            ...userData,
                             tokens,
                         },
                     })));
                 }));
             }
             return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy tài khoản!');
+        }));
+    }
+    handleSignInWithToken({ token }) {
+        return this.verifyToken(token).pipe((0, operators_1.switchMap)(() => {
+            const source = this.jwtService.decode(token);
+            console.log('decode value: source', source);
+            if (!source?.email) {
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng!');
+            }
+            return this.existingAccount(source.email);
         }));
     }
     handleSignInOauth({ token, credentialType }) {
@@ -1533,7 +1593,6 @@ let AuthService = class AuthService {
         let accountData;
         return (0, rxjs_1.from)(this.accountModel.create({ email, credentialType })).pipe((0, operators_1.map)((account) => {
             accountData = account.toJSON();
-            delete accountData.password;
             return accountData;
         }), (0, operators_1.switchMap)((account) => this.createProfile({
             accountId: account.id,
@@ -1543,13 +1602,15 @@ let AuthService = class AuthService {
             githubLink,
         }).pipe((0, operators_1.tap)((profile) => {
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
-                key: 'account#' + account.id,
+                key: 'account#' + email,
                 value: { ...accountData, email, profile },
             });
         }), (0, operators_1.switchMap)((profile) => this.generateFullTokens({
             ...accountData,
             fullName: profile.fullName,
-        }).pipe((0, operators_1.map)((tokens) => ({
+        }).pipe((0, operators_1.tap)(() => {
+            delete accountData.password;
+        }), (0, operators_1.map)((tokens) => ({
             message: 'Đăng nhập thành công!',
             data: { ...accountData, tokens, profile },
         })))))));
@@ -1584,29 +1645,30 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(account_1.Account)),
-    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _b : Object, typeof (_c = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _c : Object, typeof (_d = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _d : Object, typeof (_e = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _e : Object, typeof (_f = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _f : Object])
+    tslib_1.__param(1, (0, ioredis_2.InjectRedis)()),
+    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof ioredis_1.default !== "undefined" && ioredis_1.default) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _c : Object, typeof (_d = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _d : Object, typeof (_e = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _e : Object, typeof (_f = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _f : Object, typeof (_g = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _g : Object])
 ], AuthService);
 
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ ((module) => {
 
 module.exports = require("rxjs/operators");
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(60), exports);
 tslib_1.__exportStar(__webpack_require__(61), exports);
+tslib_1.__exportStar(__webpack_require__(62), exports);
 
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1615,7 +1677,7 @@ exports.GlobalRpcExceptionFilter = exports.CustomRpcException = void 0;
 const tslib_1 = __webpack_require__(4);
 const microservices_1 = __webpack_require__(20);
 const common_1 = __webpack_require__(1);
-const rxjs_1 = __webpack_require__(38);
+const rxjs_1 = __webpack_require__(39);
 class CustomRpcException extends microservices_1.RpcException {
     constructor(statusCode, message) {
         super({ statusCode, message });
@@ -1639,14 +1701,14 @@ exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter = tslib_1.__decorate
 
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.throwException = void 0;
-const rxjs_1 = __webpack_require__(38);
-const rcp_exception_1 = __webpack_require__(60);
+const rxjs_1 = __webpack_require__(39);
+const rcp_exception_1 = __webpack_require__(61);
 const throwException = (code, message) => (0, rxjs_1.throwError)(() => {
     return new rcp_exception_1.CustomRpcException(code, message);
 });
@@ -1654,40 +1716,43 @@ exports.throwException = throwException;
 
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/axios");
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ ((module) => {
 
 module.exports = require("google-auth-library");
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ ((module) => {
 
 module.exports = require("axios");
 
 /***/ }),
-/* 65 */
+/* 66 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const microservices_1 = __webpack_require__(20);
 const account_1 = __webpack_require__(21);
-const account_2 = __webpack_require__(32);
-const auth_service_1 = __webpack_require__(57);
+const account_2 = __webpack_require__(33);
+const auth_service_1 = __webpack_require__(58);
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
+    }
+    handleSignInWithToken(body) {
+        return this.authService.handleSignInWithToken(body);
     }
     handleSignIn(body) {
         return this.authService.handleSignIn(body);
@@ -1701,21 +1766,27 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 tslib_1.__decorate([
+    (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.Authenticate),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof account_1.AuthenticateDto !== "undefined" && account_1.AuthenticateDto) === "function" ? _b : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "handleSignInWithToken", null);
+tslib_1.__decorate([
     (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.SignIn),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof account_1.SignInDto !== "undefined" && account_1.SignInDto) === "function" ? _b : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof account_1.SignInDto !== "undefined" && account_1.SignInDto) === "function" ? _c : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "handleSignIn", null);
 tslib_1.__decorate([
     (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.SignInOauth),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof account_1.SignInOauth !== "undefined" && account_1.SignInOauth) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_1.SignInOauth !== "undefined" && account_1.SignInOauth) === "function" ? _d : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "handleSignInOauth", null);
 tslib_1.__decorate([
     (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.SignUp),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_1.CreateAccountDto !== "undefined" && account_1.CreateAccountDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_1.CreateAccountDto !== "undefined" && account_1.CreateAccountDto) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "handleSignUp", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
@@ -1766,7 +1837,7 @@ const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
 const app_module_1 = __webpack_require__(3);
 const microservices_1 = __webpack_require__(20);
-const exception_1 = __webpack_require__(59);
+const exception_1 = __webpack_require__(60);
 async function bootstrap() {
     const app = await core_1.NestFactory.createMicroservice(app_module_1.AppModule, {
         transport: microservices_1.Transport.NATS,

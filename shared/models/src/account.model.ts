@@ -7,7 +7,7 @@ import {
   HasOne,
   AfterCreate,
 } from 'sequelize-typescript';
-import { Profile } from './profile.model';
+import { DefaultProfileValue, Profile } from './profile.model';
 
 enum CredentialTypeEnum {
   NONE = 'NONE',
@@ -52,14 +52,6 @@ export class Account extends Model {
 
   @AfterCreate
   static async createProfile(instance: Account) {
-    await Profile.create({
-      accountId: instance.id,
-      fullName: 'Vô danh',
-      bio: '',
-      avatarUrl: '',
-      totalExp: 0,
-      streak: 0,
-      isActive: true,
-    });
+    return { ...DefaultProfileValue, accountId: instance.id };
   }
 }

@@ -10,18 +10,28 @@ import { InjectModel } from '@nestjs/sequelize';
 import { OAuth2Client } from 'google-auth-library';
 import { CacheMessageAction } from '@shared/cache-manager';
 import { GitHubConfig, GoogleConfig } from '@shared/configs';
-import { CreateAccountDto, SignInDto, SignInOauth } from '@shared/dtos/account';
+import {
+  CreateAccountDto,
+  SignInDto,
+  SignInOauth,
+  AuthenticateDto,
+} from '@shared/dtos/account';
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import { GitHubUser } from '@shared/types';
+import Redis from 'ioredis';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import { AccountService } from '../account/account.service';
+import { DefaultProfileValue } from '@shared/models/profile';
+
 @Injectable()
 export class AuthService {
   oauthClient!: OAuth2Client;
   constructor(
     @InjectModel(Account)
     private readonly accountModel: typeof Account,
+    @InjectRedis() private readonly cache: Redis,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
     private readonly eventEmitter: EventEmitter2,
@@ -39,7 +49,7 @@ export class AuthService {
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
-          expiresIn: '30m',
+          expiresIn: '2m',
         }),
       })),
       tap((token) => Logger.log('accessToken: ', token?.accessToken)),
@@ -72,7 +82,9 @@ export class AuthService {
 
   verifyToken(token: string) {
     return from(this.jwtService.verifyAsync(token)).pipe(
-      catchError(() => throwException(400, `'Invalid or expired token`))
+      catchError(() =>
+        throwException(401, `Token không hợp lệ hoặc đã hết hạn!`)
+      )
     );
   }
 
@@ -94,16 +106,17 @@ export class AuthService {
                 password: hashedPassword,
               })
             ).pipe(
+              tap((result) => {
+                const jsonData = result.toJSON();
+                this.eventEmitter.emit(CacheMessageAction.Create, {
+                  key: 'account#' + email,
+                  value: { ...jsonData, profile: DefaultProfileValue },
+                });
+              }),
               map((response) => {
                 const result = response.toJSON();
                 delete result.password;
                 return result;
-              }),
-              tap((result) => {
-                this.eventEmitter.emit(CacheMessageAction.Create, {
-                  key: 'account#' + result?.id,
-                  value: result,
-                });
               }),
               switchMap((data) =>
                 of({
@@ -125,17 +138,34 @@ export class AuthService {
   }
 
   handleSignIn({ email, password }: SignInDto) {
-    return from(this.accountModel.findOne({ where: { email } })).pipe(
-      catchError((error) => {
-        return throwException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          `Database error: ${error.message}`
+    return from(this.cache.get(`account#${email}`)).pipe(
+      map((stringData) => JSON.parse(stringData)),
+      switchMap((cacheData: any) => {
+        // Logger.log('SignIn Get From Cache: ', `${!!cacheData}`);
+        console.log('cacheData: ', cacheData.email);
+        console.log('cacheData: ', cacheData.password);
+        if (cacheData) {
+          return of(cacheData);
+        }
+        return from(
+          this.accountModel.findOne({
+            where: { email },
+            include: { association: 'profile', required: false },
+          })
+        ).pipe(
+          map((res) => res.toJSON()),
+          catchError((error) => {
+            return throwException(
+              HttpStatus.INTERNAL_SERVER_ERROR,
+              `Database error: ${error.message}`
+            );
+          })
         );
       }),
-      switchMap((existingUser) => {
-        if (existingUser) {
+      switchMap((userData) => {
+        if (userData) {
           return this.bcryptService
-            .comparePassword(password, existingUser.password)
+            .comparePassword(password, userData.password)
             .pipe(
               switchMap((isMatch) => {
                 Logger.log('Is Matched: ', isMatch);
@@ -146,8 +176,7 @@ export class AuthService {
                   );
                 }
 
-                const result = existingUser.toJSON();
-                delete result.password;
+                delete userData.password;
 
                 return from(
                   this.generateFullTokens<{
@@ -155,12 +184,12 @@ export class AuthService {
                     email: string;
                     createdAt: string;
                     updatedAt: string;
-                  }>(result)
+                  }>(userData)
                 ).pipe(
                   map((tokens) => ({
                     message: 'Đăng nhập thành công!',
                     data: {
-                      ...result,
+                      ...userData,
                       tokens,
                     },
                   }))
@@ -172,6 +201,22 @@ export class AuthService {
           HttpStatusCode.NotFound,
           'Không tìm thấy tài khoản!'
         );
+      })
+    );
+  }
+
+  handleSignInWithToken({ token }: AuthenticateDto) {
+    return this.verifyToken(token).pipe(
+      switchMap(() => {
+        const source = this.jwtService.decode(token) as { email: string };
+        console.log('decode value: source', source);
+        if (!source?.email) {
+          return throwException(
+            HttpStatusCode.NotFound,
+            'Không tìm thấy người dùng!'
+          );
+        }
+        return this.existingAccount(source.email);
       })
     );
   }
@@ -308,7 +353,6 @@ export class AuthService {
     return from(this.accountModel.create({ email, credentialType })).pipe(
       map((account) => {
         accountData = account.toJSON();
-        delete accountData.password;
         return accountData;
       }),
       switchMap((account) =>
@@ -321,7 +365,7 @@ export class AuthService {
         }).pipe(
           tap((profile) => {
             this.eventEmitter.emit(CacheMessageAction.Create, {
-              key: 'account#' + account.id,
+              key: 'account#' + email,
               value: { ...accountData, email, profile },
             });
           }),
@@ -330,6 +374,9 @@ export class AuthService {
               ...accountData,
               fullName: profile.fullName,
             }).pipe(
+              tap(() => {
+                delete accountData.password;
+              }),
               map((tokens) => ({
                 message: 'Đăng nhập thành công!',
                 data: { ...accountData, tokens, profile },

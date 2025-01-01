@@ -10,6 +10,15 @@ import {
 import { Account } from './account.model';
 import { Realm } from './realm.model';
 
+export const DefaultProfileValue = {
+  fullName: 'Vô danh',
+  nickName: 'unknown',
+  bio: '',
+  avatarUrl: '',
+  totalExp: 0,
+  streak: 0,
+  isActive: true,
+}
 @Table({ tableName: 'profile' })
 export class Profile extends Model {
   @PrimaryKey
@@ -44,6 +53,12 @@ export class Profile extends Model {
     allowNull: false,
   })
   fullName!: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  nickName!: string;
 
   @Column({
     type: DataType.STRING,

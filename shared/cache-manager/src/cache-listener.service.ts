@@ -12,9 +12,14 @@ export class CacheListener {
 
   @OnEvent(CacheMessageAction.Create)
   async handleCreateEvent(data: { key: string; value: any; ttl: number }) {
-    await this.redis.set(data.key, data.value);
+    await this.redis.set(
+      data.key,
+      typeof data.value == 'object' ? JSON.stringify(data.value) : data.value
+    );
     await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
     this.logger.log(`Handled create cache for key: ${data.key}`);
+    const redisData = await this.redis.get(data.key);
+    console.dir(JSON.parse(redisData as string));
   }
 
   @OnEvent(CacheMessageAction.Update)

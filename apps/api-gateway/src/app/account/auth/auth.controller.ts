@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Header,
   HttpStatus,
   Inject,
   Patch,
@@ -15,6 +16,7 @@ import {
   DeactivateDto,
   SignInDto,
   SignInOauth,
+  AuthenticateDto,
 } from 'shared/dtos/src/account';
 import { Public } from '@shared/guard';
 
@@ -34,6 +36,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in with email and password' })
   signIn(@Body() body: SignInDto) {
     return this.natsClient.send(AuthMsgPattern.SignIn, body);
+  }
+
+  @Post('authenticate')
+  @Public()
+  @ApiOperation({ summary: 'Sign in with access token' })
+  authenticate(@Body() body: AuthenticateDto) {
+    return this.natsClient.send(AuthMsgPattern.Authenticate, body);
   }
 
   @Post('oauth')

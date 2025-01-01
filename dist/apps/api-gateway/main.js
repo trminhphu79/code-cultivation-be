@@ -29,14 +29,14 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_module_1 = __webpack_require__(6);
-const profile_module_1 = __webpack_require__(29);
-const nats_client_1 = __webpack_require__(31);
-const configs_1 = __webpack_require__(33);
-const config_1 = __webpack_require__(36);
-const jwt_1 = __webpack_require__(37);
-const jwt_2 = __webpack_require__(26);
+const profile_module_1 = __webpack_require__(30);
+const nats_client_1 = __webpack_require__(32);
+const configs_1 = __webpack_require__(34);
+const config_1 = __webpack_require__(37);
+const jwt_1 = __webpack_require__(38);
+const jwt_2 = __webpack_require__(27);
 const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(24);
+const guard_1 = __webpack_require__(25);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -80,7 +80,7 @@ exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_controller_1 = __webpack_require__(7);
-const throttler_1 = __webpack_require__(28);
+const throttler_1 = __webpack_require__(29);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -115,7 +115,7 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(5);
@@ -124,13 +124,16 @@ const microservices_1 = __webpack_require__(8);
 const swagger_1 = __webpack_require__(3);
 const account_1 = __webpack_require__(9);
 const account_2 = __webpack_require__(14);
-const guard_1 = __webpack_require__(24);
+const guard_1 = __webpack_require__(25);
 let AuthController = class AuthController {
     constructor(natsClient) {
         this.natsClient = natsClient;
     }
     signIn(body) {
         return this.natsClient.send(account_1.AuthMsgPattern.SignIn, body);
+    }
+    authenticate(body) {
+        return this.natsClient.send(account_1.AuthMsgPattern.Authenticate, body);
     }
     signInOauth(body) {
         console.log('signInOauth: ', body);
@@ -161,12 +164,21 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signIn", null);
 tslib_1.__decorate([
+    (0, common_1.Post)('authenticate'),
+    (0, guard_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Sign in with access token' }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof account_2.AuthenticateDto !== "undefined" && account_2.AuthenticateDto) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "authenticate", null);
+tslib_1.__decorate([
     (0, common_1.Post)('oauth'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Sign in with github or facebook' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof account_2.SignInOauth !== "undefined" && account_2.SignInOauth) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_2.SignInOauth !== "undefined" && account_2.SignInOauth) === "function" ? _d : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signInOauth", null);
 tslib_1.__decorate([
@@ -175,7 +187,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Sign up with email and password' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_2.CreateAccountDto !== "undefined" && account_2.CreateAccountDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_2.CreateAccountDto !== "undefined" && account_2.CreateAccountDto) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signUp", null);
 tslib_1.__decorate([
@@ -183,7 +195,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change password only for user login by email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_2.ChangePasswordDto !== "undefined" && account_2.ChangePasswordDto) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_2.ChangePasswordDto !== "undefined" && account_2.ChangePasswordDto) === "function" ? _f : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "changePassword", null);
 tslib_1.__decorate([
@@ -191,7 +203,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'deactivate account only for user login by email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _f : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _g : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "deactivate", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
@@ -230,6 +242,7 @@ exports.AuthMsgPattern = Object.freeze({
     SignUp: `${module_1.AccountModule.Auth}/SignUp`,
     SignIn: `${module_1.AccountModule.Auth}/SignIn`,
     SignInOauth: `${module_1.AccountModule.Auth}/SignInOauth`,
+    Authenticate: `${module_1.AccountModule.Auth}/Authenticate`,
     AccessToken: `${module_1.AccountModule.Auth}/RefreshToken`,
     RefreshToken: `${module_1.AccountModule.Auth}/AccessToken`,
     Update: `${module_1.AccountModule.Auth}/Update`,
@@ -298,8 +311,9 @@ tslib_1.__exportStar(__webpack_require__(15), exports);
 tslib_1.__exportStar(__webpack_require__(17), exports);
 tslib_1.__exportStar(__webpack_require__(18), exports);
 tslib_1.__exportStar(__webpack_require__(19), exports);
-tslib_1.__exportStar(__webpack_require__(22), exports);
+tslib_1.__exportStar(__webpack_require__(20), exports);
 tslib_1.__exportStar(__webpack_require__(23), exports);
+tslib_1.__exportStar(__webpack_require__(24), exports);
 
 
 /***/ }),
@@ -369,6 +383,29 @@ tslib_1.__decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthenticateDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class AuthenticateDto {
+}
+exports.AuthenticateDto = AuthenticateDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Token use for authenticate user',
+        example: '8685-bdhh34-555123-6662312',
+    }),
+    tslib_1.__metadata("design:type", String)
+], AuthenticateDto.prototype, "token", void 0);
+
+
+/***/ }),
+/* 19 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInOauth = void 0;
 const tslib_1 = __webpack_require__(5);
 const swagger_1 = __webpack_require__(3);
@@ -395,7 +432,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -403,8 +440,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAccountDto = void 0;
 const tslib_1 = __webpack_require__(5);
 const class_validator_1 = __webpack_require__(16);
-const password_1 = __webpack_require__(20);
-const password_match_1 = __webpack_require__(21);
+const password_1 = __webpack_require__(21);
+const password_match_1 = __webpack_require__(22);
 const swagger_1 = __webpack_require__(3);
 class CreateAccountDto {
 }
@@ -442,7 +479,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -481,7 +518,7 @@ function IsStrongPassword(validationOptions) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -519,7 +556,7 @@ function IsPasswordMatch(property, validationOptions) {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -527,7 +564,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ChangePasswordDto = void 0;
 const tslib_1 = __webpack_require__(5);
 const class_validator_1 = __webpack_require__(16);
-const password_1 = __webpack_require__(20);
+const password_1 = __webpack_require__(21);
 const swagger_1 = __webpack_require__(3);
 class ChangePasswordDto {
 }
@@ -557,7 +594,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -580,18 +617,18 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(25), exports);
-tslib_1.__exportStar(__webpack_require__(27), exports);
+tslib_1.__exportStar(__webpack_require__(26), exports);
+tslib_1.__exportStar(__webpack_require__(28), exports);
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -602,7 +639,7 @@ exports.AuthGuard = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
-const jwt_1 = __webpack_require__(26);
+const jwt_1 = __webpack_require__(27);
 let AuthGuard = AuthGuard_1 = class AuthGuard {
     constructor(reflector, jwtService) {
         this.reflector = reflector;
@@ -646,13 +683,13 @@ exports.AuthGuard = AuthGuard = AuthGuard_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -665,13 +702,13 @@ exports.Public = Public;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/throttler");
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -679,7 +716,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const profile_controller_1 = __webpack_require__(30);
+const profile_controller_1 = __webpack_require__(31);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
@@ -691,7 +728,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -761,17 +798,17 @@ exports.ProfileController = ProfileController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(32), exports);
+tslib_1.__exportStar(__webpack_require__(33), exports);
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -813,18 +850,18 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(34), exports);
 tslib_1.__exportStar(__webpack_require__(35), exports);
+tslib_1.__exportStar(__webpack_require__(36), exports);
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -832,7 +869,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -870,20 +907,10 @@ exports.Configurations = Configurations;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/config");
-
-/***/ }),
-/* 37 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(38), exports);
-
 
 /***/ }),
 /* 38 */
@@ -891,12 +918,22 @@ tslib_1.__exportStar(__webpack_require__(38), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(39), exports);
+
+
+/***/ }),
+/* 39 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtGlobalModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const jwt_1 = __webpack_require__(26);
-const config_1 = __webpack_require__(36);
-const configs_1 = __webpack_require__(33);
+const jwt_1 = __webpack_require__(27);
+const config_1 = __webpack_require__(37);
+const configs_1 = __webpack_require__(34);
 let JwtGlobalModule = class JwtGlobalModule {
 };
 exports.JwtGlobalModule = JwtGlobalModule;

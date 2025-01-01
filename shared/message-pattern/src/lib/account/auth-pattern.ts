@@ -5,6 +5,7 @@ export const AuthMsgPattern = Object.freeze({
 
   SignIn: `${AccountModule.Auth}/SignIn`,
   SignInOauth: `${AccountModule.Auth}/SignInOauth`,
+  Authenticate: `${AccountModule.Auth}/Authenticate`,
 
   AccessToken: `${AccountModule.Auth}/RefreshToken`,
   RefreshToken: `${AccountModule.Auth}/AccessToken`,
