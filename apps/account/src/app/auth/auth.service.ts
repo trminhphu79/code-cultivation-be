@@ -8,7 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/sequelize';
 import { OAuth2Client } from 'google-auth-library';
-import { CacheMessageAction } from '@shared/cache-manager';
+import { CacheMessageAction, CacheManagerService } from '@shared/cache-manager';
 import { GitHubConfig, GoogleConfig } from '@shared/configs';
 import {
   CreateAccountDto,
@@ -19,28 +19,31 @@ import {
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
-import { GitHubUser } from '@shared/types';
-import Redis from 'ioredis';
-import { InjectRedis } from '@nestjs-modules/ioredis';
+import { CredentialTypeEnum, GitHubUser } from '@shared/types';
 import { AccountService } from '../account/account.service';
 import { DefaultProfileValue } from '@shared/models/profile';
 
 @Injectable()
 export class AuthService {
   oauthClient!: OAuth2Client;
+  githubConfig!: GitHubConfig;
+  googleConfig!: GoogleConfig;
+
   constructor(
     @InjectModel(Account)
     private readonly accountModel: typeof Account,
-    @InjectRedis() private readonly cache: Redis,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly cacheService: CacheManagerService,
     private readonly eventEmitter: EventEmitter2,
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
     private readonly accountService: AccountService
   ) {
+    this.githubConfig = this.configService.get<GitHubConfig>('github');
+    this.googleConfig = this.configService.get<GoogleConfig>('google');
     this.oauthClient = new OAuth2Client({
-      clientId: this.configService.get<GoogleConfig>('goolge')?.clientId,
+      clientId: this.googleConfig?.clientId,
     });
   }
 
@@ -80,7 +83,7 @@ export class AuthService {
     );
   }
 
-  verifyToken(token: string) {
+  private verifyToken(token: string) {
     return from(this.jwtService.verifyAsync(token)).pipe(
       catchError(() =>
         throwException(401, `Token không hợp lệ hoặc đã hết hạn!`)
@@ -89,7 +92,7 @@ export class AuthService {
   }
 
   handleSignUp({ email, password }: CreateAccountDto) {
-    return this.existingAccount(email).pipe(
+    return this.getExistingAccount(email).pipe(
       switchMap((existingUser) => {
         if (existingUser) {
           return throwException(
@@ -106,17 +109,17 @@ export class AuthService {
                 password: hashedPassword,
               })
             ).pipe(
+              map((response) => response.toJSON()),
               tap((result) => {
-                const jsonData = result.toJSON();
+                const key = this.getCacheKey(email);
                 this.eventEmitter.emit(CacheMessageAction.Create, {
-                  key: 'account#' + email,
-                  value: { ...jsonData, profile: DefaultProfileValue },
+                  key,
+                  value: { ...result, profile: DefaultProfileValue },
                 });
               }),
               map((response) => {
-                const result = response.toJSON();
-                delete result.password;
-                return result;
+                delete response.password;
+                return response;
               }),
               switchMap((data) =>
                 of({
@@ -138,46 +141,20 @@ export class AuthService {
   }
 
   handleSignIn({ email, password }: SignInDto) {
-    return from(this.cache.get(`account#${email}`)).pipe(
-      map((stringData) => JSON.parse(stringData)),
-      switchMap((cacheData: any) => {
-        // Logger.log('SignIn Get From Cache: ', `${!!cacheData}`);
-        console.log('cacheData: ', cacheData.email);
-        console.log('cacheData: ', cacheData.password);
-        if (cacheData) {
-          return of(cacheData);
-        }
-        return from(
-          this.accountModel.findOne({
-            where: { email },
-            include: { association: 'profile', required: false },
-          })
-        ).pipe(
-          map((res) => res.toJSON()),
-          catchError((error) => {
-            return throwException(
-              HttpStatus.INTERNAL_SERVER_ERROR,
-              `Database error: ${error.message}`
-            );
-          })
-        );
-      }),
+    return this.getExistingAccount(email).pipe(
       switchMap((userData) => {
         if (userData) {
           return this.bcryptService
             .comparePassword(password, userData.password)
             .pipe(
               switchMap((isMatch) => {
-                Logger.log('Is Matched: ', isMatch);
                 if (!isMatch) {
                   return throwException(
                     HttpStatus.BAD_REQUEST,
                     'Mật khẩu không chính xác!'
                   );
                 }
-
                 delete userData.password;
-
                 return from(
                   this.generateFullTokens<{
                     id: string;
@@ -197,9 +174,10 @@ export class AuthService {
               })
             );
         }
+
         return throwException(
           HttpStatusCode.NotFound,
-          'Không tìm thấy tài khoản!'
+          'Không tìm thấy người dùng!'
         );
       })
     );
@@ -216,26 +194,26 @@ export class AuthService {
             'Không tìm thấy người dùng!'
           );
         }
-        return this.existingAccount(source.email);
+        return this.getExistingAccount(source.email, CredentialTypeEnum.NONE);
       })
     );
   }
 
-  handleSignInOauth({ token, credentialType }: SignInOauth) {
+  handleOAuth({ token, credentialType }: SignInOauth) {
     switch (credentialType) {
-      case 'GITHUB':
-        return this.handleSignInOAuthGithub({ token, credentialType });
+      case CredentialTypeEnum.GITHUB:
+        return this.handleOAuthGithub({ token, credentialType });
       default:
-        return this.handleSignInOAuthGoogle({ token, credentialType });
+        return this.handleOAuthGoogle({ token, credentialType });
     }
   }
 
-  private handleSignInOAuthGoogle({ token }: SignInOauth) {
-    console.log('handleSignInOAuthGoogle: ', token);
+  private handleOAuthGoogle({ token }: SignInOauth) {
+    console.log('handleOAuthGoogle: ', token);
     return from(
       this.oauthClient.verifyIdToken({
         idToken: token,
-        audience: this.configService.get<GoogleConfig>('google').clientId,
+        audience: this.googleConfig.clientId,
       })
     ).pipe(
       tap((response) => {
@@ -244,9 +222,8 @@ export class AuthService {
     );
   }
 
-  private handleSignInOAuthGithub({ token }: SignInOauth) {
-    const { client_id, client_secret, url } =
-      this.configService.get<GitHubConfig>('github');
+  private handleOAuthGithub({ token }: SignInOauth) {
+    const { client_id, client_secret, url } = this.githubConfig;
 
     const payload = {
       client_id,
@@ -273,7 +250,9 @@ export class AuthService {
         Logger.log('Received Token:', token);
         return this.getGithubUserInfo(token);
       }),
-      switchMap((userInfo) => this.handleSocialAccount(userInfo.data)),
+      switchMap((userInfo) =>
+        this.handleGetOrCreateGithubAccount(userInfo.data)
+      ),
       catchError((error) => {
         Logger.error('Error during OAuth sign-in:', error);
         return throwException(
@@ -286,7 +265,7 @@ export class AuthService {
 
   private getGithubUserInfo(token: string) {
     return this.httpService
-      .get<GitHubUser>('https://api.github.com/user', {
+      .get<GitHubUser>(this.githubConfig.userInfoUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -302,21 +281,20 @@ export class AuthService {
       );
   }
 
-  private handleSocialAccount(userInfo: GitHubUser) {
+  private handleGetOrCreateGithubAccount(userInfo: GitHubUser) {
     const { email, name, avatar_url, bio, login, html_url } = userInfo;
     Logger.log('GitHubUser: ', userInfo);
 
     const _email = email || login + '@github.com';
 
-    return this.existingAccount(_email).pipe(
+    return this.getExistingAccount(_email, CredentialTypeEnum.GITHUB).pipe(
       switchMap((existingAccount) => {
         if (existingAccount) {
-          const accountData = existingAccount.toJSON();
-          delete accountData.password;
-          return this.generateFullTokens(accountData).pipe(
+          delete existingAccount.password;
+          return this.generateFullTokens(existingAccount).pipe(
             map((tokens) => ({
               message: 'Đăng nhập thành công!',
-              data: { ...accountData, tokens },
+              data: { ...existingAccount, tokens },
             }))
           );
         }
@@ -325,7 +303,7 @@ export class AuthService {
           email: _email,
           name,
           avatarUrl: avatar_url,
-          credentialType: 'GITHUB',
+          credentialType: CredentialTypeEnum.GITHUB,
           bio,
           githubLink: html_url,
         });
@@ -349,7 +327,6 @@ export class AuthService {
     githubLink: string;
   }) {
     let accountData: any;
-
     return from(this.accountModel.create({ email, credentialType })).pipe(
       map((account) => {
         accountData = account.toJSON();
@@ -364,8 +341,9 @@ export class AuthService {
           githubLink,
         }).pipe(
           tap((profile) => {
+            const key = this.getCacheKey(email, CredentialTypeEnum.GITHUB);
             this.eventEmitter.emit(CacheMessageAction.Create, {
-              key: 'account#' + email,
+              key,
               value: { ...accountData, email, profile },
             });
           }),
@@ -422,25 +400,41 @@ export class AuthService {
     );
   }
 
-  private existingAccount(email: string) {
-    return from(
-      this.accountModel.findOne({
-        where: { email },
-        include: [
-          {
-            association: 'profile',
-            required: false, // Set to true if the profile must exist
-          },
-        ],
-      })
-    ).pipe(
-      catchError((error) => {
-        Logger.error('Error fetching social account:', error);
-        return throwException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'Không tìm thấy thông tin người dùng!'
-        );
+  /**
+   *
+   * @param email
+   * @param credentialType
+   * @returns Return the current cached user if it exists; otherwise, fetch it from the database.
+   */
+  private getExistingAccount(
+    email: string,
+    credentialType: CredentialTypeEnum = CredentialTypeEnum.NONE
+  ) {
+    const cacheKey = this.getCacheKey(email, credentialType);
+    return this.cacheService.get(cacheKey).pipe(
+      switchMap((cacheData) => {
+        if (cacheData) {
+          return of(cacheData);
+        }
+        return from(
+          this.accountModel.findOne({
+            where: { email, credentialType },
+            include: [
+              {
+                association: 'profile',
+                required: false, // Set to true if the profile must exist
+              },
+            ],
+          })
+        ).pipe(map((response) => response?.toJSON?.() || null));
       })
     );
+  }
+
+  private getCacheKey(
+    email: string,
+    credentialType: CredentialTypeEnum = CredentialTypeEnum.NONE
+  ) {
+    return `ACCOUNT#${email}#${credentialType}`;
   }
 }

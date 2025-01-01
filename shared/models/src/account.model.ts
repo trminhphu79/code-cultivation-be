@@ -8,13 +8,7 @@ import {
   AfterCreate,
 } from 'sequelize-typescript';
 import { DefaultProfileValue, Profile } from './profile.model';
-
-enum CredentialTypeEnum {
-  NONE = 'NONE',
-  GOOGLE = 'GOOGLE',
-  GITHUB = 'GITHUB',
-}
-
+import { CredentialTypeEnum } from '@shared/types';
 @Table({ tableName: 'account' })
 export class Account extends Model {
   @PrimaryKey
@@ -32,6 +26,7 @@ export class Account extends Model {
 
   @Column({
     defaultValue: CredentialTypeEnum.NONE,
+    type: DataType.STRING
   })
   credentialType!: CredentialTypeEnum;
 

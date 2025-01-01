@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Header,
   HttpStatus,
   Inject,
+  Param,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -73,5 +75,14 @@ export class AuthController {
   @ApiOperation({ summary: 'deactivate account only for user login by email' })
   deactivate(@Body() body: DeactivateDto) {
     return this.natsClient.send(AuthMsgPattern.Deactivate, body);
+  }
+
+  @Get('getCache')
+  @ApiOperation({
+    summary:
+      'Get Cache data, Example: ACCOUNT#{{CREDENTIAL_TYPE}}#{{account_id}}',
+  })
+  getCacheData(@Param('key') key: string) {
+    return this.natsClient.send(AuthMsgPattern.GetCache, { key });
   }
 }

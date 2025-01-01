@@ -24,8 +24,8 @@ export class AuthController {
   }
 
   @MessagePattern(AuthMsgPattern.SignInOauth)
-  handleSignInOauth(body: SignInOauth) {
-    return this.authService.handleSignInOauth(body);
+  handleOAuth(body: SignInOauth) {
+    return this.authService.handleOAuth(body);
   }
 
   @MessagePattern(AuthMsgPattern.SignUp)

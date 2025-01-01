@@ -10,6 +10,7 @@ export const Configurations = (): Configuration => ({
     client_id: process.env['GITHUB_CLIENT_ID'],
     client_secret: process.env['GITHUB_CLIENT_SECRET'],
     url: process.env['GITHUB_AUTHORIZE_URL'],
+    userInfoUrl: process.env['GITHUB_USER_INFO_URL'],
   },
   google: {
     clientId: process.env['GOOGLE_CLIENT_ID'],

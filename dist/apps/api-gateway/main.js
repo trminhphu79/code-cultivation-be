@@ -37,6 +37,7 @@ const jwt_1 = __webpack_require__(38);
 const jwt_2 = __webpack_require__(27);
 const core_1 = __webpack_require__(2);
 const guard_1 = __webpack_require__(25);
+const cache_health_module_1 = __webpack_require__(40);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -47,10 +48,12 @@ exports.AppModule = AppModule = tslib_1.__decorate([
             profile_module_1.ProfileModule,
             jwt_1.JwtGlobalModule,
             nats_client_1.NatsClientModule,
+            cache_health_module_1.CacheHealthModule,
             config_1.ConfigModule.forRoot({
                 load: [configs_1.Configurations],
                 isGlobal: true,
             }),
+            cache_health_module_1.CacheHealthModule,
         ],
         controllers: [],
         providers: [
@@ -148,6 +151,9 @@ let AuthController = class AuthController {
     deactivate(body) {
         return this.natsClient.send(account_1.AuthMsgPattern.Deactivate, body);
     }
+    getCacheData(key) {
+        return this.natsClient.send(account_1.AuthMsgPattern.GetCache, { key });
+    }
 };
 exports.AuthController = AuthController;
 tslib_1.__decorate([
@@ -206,6 +212,16 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _g : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "deactivate", null);
+tslib_1.__decorate([
+    (0, common_1.Get)('getCache'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get Cache data, Example: ACCOUNT#{{CREDENTIAL_TYPE}}#{{account_id}}',
+    }),
+    tslib_1.__param(0, (0, common_1.Param)('key')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "getCacheData", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
     (0, common_1.Controller)('auth'),
     tslib_1.__param(0, (0, common_1.Inject)('NATS_SERVICE')),
@@ -248,6 +264,7 @@ exports.AuthMsgPattern = Object.freeze({
     Update: `${module_1.AccountModule.Auth}/Update`,
     ChangePassword: `${module_1.AccountModule.Profile}/ChangePassword`,
     Deactivate: `${module_1.AccountModule.Profile}/Deactivate`,
+    GetCache: `${module_1.AccountModule.Auth}/GetCache`,
 });
 
 
@@ -885,6 +902,7 @@ const Configurations = () => ({
         client_id: process.env['GITHUB_CLIENT_ID'],
         client_secret: process.env['GITHUB_CLIENT_SECRET'],
         url: process.env['GITHUB_AUTHORIZE_URL'],
+        userInfoUrl: process.env['GITHUB_USER_INFO_URL'],
     },
     google: {
         clientId: process.env['GOOGLE_CLIENT_ID'],
@@ -961,6 +979,269 @@ exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
         exports: [jwt_1.JwtModule],
     })
 ], JwtGlobalModule);
+
+
+/***/ }),
+/* 40 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheHealthModule = void 0;
+const tslib_1 = __webpack_require__(5);
+const cache_manager_1 = __webpack_require__(41);
+const common_1 = __webpack_require__(1);
+const cache_health_controller_1 = __webpack_require__(50);
+let CacheHealthModule = class CacheHealthModule {
+};
+exports.CacheHealthModule = CacheHealthModule;
+exports.CacheHealthModule = CacheHealthModule = tslib_1.__decorate([
+    (0, common_1.Module)({
+        imports: [cache_manager_1.CacheManagerModule],
+        controllers: [cache_health_controller_1.CacheHealthController],
+    })
+], CacheHealthModule);
+
+
+/***/ }),
+/* 41 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(42), exports);
+tslib_1.__exportStar(__webpack_require__(45), exports);
+tslib_1.__exportStar(__webpack_require__(48), exports);
+
+
+/***/ }),
+/* 42 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheManagerModule = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const cache_listener_service_1 = __webpack_require__(43);
+const ioredis_1 = __webpack_require__(46);
+const cache_manager_service_1 = __webpack_require__(48);
+let CacheManagerModule = class CacheManagerModule {
+};
+exports.CacheManagerModule = CacheManagerModule;
+exports.CacheManagerModule = CacheManagerModule = tslib_1.__decorate([
+    (0, common_1.Global)(),
+    (0, common_1.Module)({
+        imports: [
+            ioredis_1.RedisModule.forRoot({
+                url: process.env['REDIS_URL'],
+                type: 'single',
+            }),
+        ],
+        providers: [cache_listener_service_1.CacheListener, cache_manager_service_1.CacheManagerService],
+        exports: [cache_manager_service_1.CacheManagerService],
+    })
+], CacheManagerModule);
+
+
+/***/ }),
+/* 43 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var CacheListener_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheListener = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const event_emitter_1 = __webpack_require__(44);
+const cache_message_1 = __webpack_require__(45);
+const ioredis_1 = __webpack_require__(46);
+const ioredis_2 = tslib_1.__importDefault(__webpack_require__(47));
+let CacheListener = CacheListener_1 = class CacheListener {
+    constructor(redis) {
+        this.redis = redis;
+        this.logger = new common_1.Logger(CacheListener_1.name);
+    }
+    async handleCreateEvent(data) {
+        await this.redis.set(data.key, typeof data.value == 'object' ? JSON.stringify(data.value) : data.value);
+        await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
+        this.logger.log(`Handled create cache for key: ${data.key}`);
+        const redisData = await this.redis.get(data.key);
+        console.dir(JSON.parse(redisData));
+    }
+    async handleUpdateEvent(data) {
+        await this.redis.set(data.key, data.value);
+        this.logger.log(`Handled update cache for key: ${data.key}`);
+    }
+    async handleDeleteEvent(key) {
+        await this.redis.del(key);
+        this.logger.log(`Handled delete cache for key: ${key}`);
+    }
+    async handlePartialUpdate(input) {
+        const stringData = await this.redis.get(input.key);
+        if (!stringData)
+            return;
+        const currentData = JSON.parse(stringData);
+        if (typeof currentData == 'object') {
+            await this.redis.set(input.key, {
+                ...currentData,
+                ...input.newValue,
+            });
+        }
+        else {
+            await this.redis.set(input.key, input.newValue);
+        }
+        this.logger.log(`Handled update cache for key: ${input.key}`);
+    }
+};
+exports.CacheListener = CacheListener;
+tslib_1.__decorate([
+    (0, event_emitter_1.OnEvent)(cache_message_1.CacheMessageAction.Create),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], CacheListener.prototype, "handleCreateEvent", null);
+tslib_1.__decorate([
+    (0, event_emitter_1.OnEvent)(cache_message_1.CacheMessageAction.Update),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], CacheListener.prototype, "handleUpdateEvent", null);
+tslib_1.__decorate([
+    (0, event_emitter_1.OnEvent)(cache_message_1.CacheMessageAction.Delete),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", Promise)
+], CacheListener.prototype, "handleDeleteEvent", null);
+tslib_1.__decorate([
+    (0, event_emitter_1.OnEvent)(cache_message_1.CacheMessageAction.PartialUpdate),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", Promise)
+], CacheListener.prototype, "handlePartialUpdate", null);
+exports.CacheListener = CacheListener = CacheListener_1 = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__param(0, (0, ioredis_1.InjectRedis)()),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof ioredis_2.default !== "undefined" && ioredis_2.default) === "function" ? _a : Object])
+], CacheListener);
+
+
+/***/ }),
+/* 44 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/event-emitter");
+
+/***/ }),
+/* 45 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheMessageAction = void 0;
+var CacheMessageAction;
+(function (CacheMessageAction) {
+    CacheMessageAction["Create"] = "Create";
+    CacheMessageAction["Update"] = "Update";
+    CacheMessageAction["PartialUpdate"] = "PartialUpdate";
+    CacheMessageAction["Delete"] = "Delete";
+})(CacheMessageAction || (exports.CacheMessageAction = CacheMessageAction = {}));
+
+
+/***/ }),
+/* 46 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs-modules/ioredis");
+
+/***/ }),
+/* 47 */
+/***/ ((module) => {
+
+module.exports = require("ioredis");
+
+/***/ }),
+/* 48 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var CacheManagerService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheManagerService = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const ioredis_1 = tslib_1.__importDefault(__webpack_require__(47));
+const ioredis_2 = __webpack_require__(46);
+const rxjs_1 = __webpack_require__(49);
+let CacheManagerService = CacheManagerService_1 = class CacheManagerService {
+    constructor(cache) {
+        this.cache = cache;
+        this.logger = new common_1.Logger(CacheManagerService_1.name);
+    }
+    get(key) {
+        return (0, rxjs_1.from)(this.cache.get(key)).pipe((0, rxjs_1.map)((value) => {
+            if (!value) {
+                return null;
+            }
+            return JSON.parse(value);
+        }), (0, rxjs_1.tap)((response) => {
+            if (response) {
+                this.logger.log(`Get from cache success: ${key}`);
+            }
+        }));
+    }
+};
+exports.CacheManagerService = CacheManagerService;
+exports.CacheManagerService = CacheManagerService = CacheManagerService_1 = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__param(0, (0, ioredis_2.InjectRedis)()),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof ioredis_1.default !== "undefined" && ioredis_1.default) === "function" ? _a : Object])
+], CacheManagerService);
+
+
+/***/ }),
+/* 49 */
+/***/ ((module) => {
+
+module.exports = require("rxjs");
+
+/***/ }),
+/* 50 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CacheHealthController = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const cache_manager_1 = __webpack_require__(41);
+const guard_1 = __webpack_require__(25);
+let CacheHealthController = class CacheHealthController {
+    constructor(cache) {
+        this.cache = cache;
+    }
+    getCache(key) {
+        return this.cache.get(key);
+    }
+};
+exports.CacheHealthController = CacheHealthController;
+tslib_1.__decorate([
+    (0, common_1.Get)('check'),
+    (0, guard_1.Public)(),
+    tslib_1.__param(0, (0, common_1.Param)('key')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], CacheHealthController.prototype, "getCache", null);
+exports.CacheHealthController = CacheHealthController = tslib_1.__decorate([
+    (0, common_1.Controller)('cache-health'),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof cache_manager_1.CacheManagerService !== "undefined" && cache_manager_1.CacheManagerService) === "function" ? _a : Object])
+], CacheHealthController);
 
 
 /***/ })

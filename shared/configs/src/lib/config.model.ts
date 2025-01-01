@@ -19,6 +19,7 @@ export type GitHubConfig = {
   client_id: string | undefined;
   client_secret: string | undefined;
   url: string | undefined;
+  userInfoUrl: string | undefined;
 };
 
 export type GoogleConfig = {

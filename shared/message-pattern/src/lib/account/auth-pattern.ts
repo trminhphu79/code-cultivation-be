@@ -13,4 +13,6 @@ export const AuthMsgPattern = Object.freeze({
   Update: `${AccountModule.Auth}/Update`,
   ChangePassword: `${AccountModule.Profile}/ChangePassword`,
   Deactivate: `${AccountModule.Profile}/Deactivate`,
+
+  GetCache: `${AccountModule.Auth}/GetCache`,
 });

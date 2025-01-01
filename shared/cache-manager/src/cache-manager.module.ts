@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { CacheListener } from './cache-listener.service';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { CacheManagerService } from './cache-manager.service';
 
 @Global()
 @Module({
@@ -10,6 +11,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
       type: 'single',
     }),
   ],
-  providers: [CacheListener],
+  providers: [CacheListener, CacheManagerService],
+  exports: [CacheManagerService],
 })
 export class CacheManagerModule {}
