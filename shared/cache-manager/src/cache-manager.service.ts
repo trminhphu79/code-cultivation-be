@@ -15,7 +15,7 @@ export class CacheManagerService {
         if (!value) {
           return null;
         }
-        return JSON.parse(value as string) as T;
+        return JSON.parse(value as string) || null
       }),
       tap((response) => {
         if (response) {

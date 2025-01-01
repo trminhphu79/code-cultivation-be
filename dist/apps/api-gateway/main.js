@@ -1137,11 +1137,9 @@ let CacheListener = CacheListener_1 = class CacheListener {
         this.logger = new common_1.Logger(CacheListener_1.name);
     }
     async handleCreateEvent(data) {
-        await this.redis.set(data.key, typeof JSON.stringify(data.value));
+        await this.redis.set(data.key, JSON.stringify(data.value));
         await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
         this.logger.log(`Handled create cache for key: ${data.key}`);
-        const redisData = await this.redis.get(data.key);
-        console.dir(JSON.parse(redisData));
     }
     async handleUpdateEvent(data) {
         await this.redis.set(data.key, data.value);
@@ -1259,7 +1257,7 @@ let CacheManagerService = CacheManagerService_1 = class CacheManagerService {
             if (!value) {
                 return null;
             }
-            return JSON.parse(value);
+            return JSON.parse(value) || null;
         }), (0, rxjs_1.tap)((response) => {
             if (response) {
                 this.logger.log(`Get from cache success: ${key}`);
