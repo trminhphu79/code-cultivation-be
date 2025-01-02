@@ -18,14 +18,12 @@ import { catchError, from, map, of, tap } from 'rxjs';
 
 @Injectable()
 export class AccountService {
-  private readonly logger = new Logger(AccountService.name);
   constructor(
     @InjectModel(Profile)
+    private readonly profileModel: typeof Profile,
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly profileModel: typeof Profile,
-    private readonly mailerService: EmailService,
-    private readonly configService: ConfigService
+    private readonly mailerService: EmailService
   ) {}
 
   handleChangePassword(body: ChangePasswordDto) {
@@ -52,12 +50,12 @@ export class AccountService {
 
       const verificationLink = `http://localhost:4200/auth/verify-email?token=${token}`;
 
-      this.logger.log('Generated verification token: ', token);
+      Logger.log('Generated verification token: ', token);
       return this.mailerService
         .sendOtpVerifyEmail(body.email, verificationLink)
         .pipe(
           tap(() => {
-            this.logger.log(`Verification email sent to ${body.email}`);
+            Logger.log(`Verification email sent to ${body.email}`);
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key: `VERIFY_EMAIL#${body.email}`,
               value: token,
@@ -68,10 +66,7 @@ export class AccountService {
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
           })),
           catchError((error) => {
-            this.logger.error(
-              'Error sending verification email: ',
-              error.message
-            );
+            Logger.error('Error sending verification email: ', error.message);
             return throwException(
               HttpStatus.INTERNAL_SERVER_ERROR,
               'Không thể gửi email xác thực. Vui lòng thử lại sau!'
@@ -79,7 +74,7 @@ export class AccountService {
           })
         );
     } catch (error) {
-      this.logger.error('Unexpected error: ', error.message);
+      Logger.error('Unexpected error: ', error.message);
       return throwException(
         HttpStatus.INTERNAL_SERVER_ERROR,
         'Đã xảy ra lỗi. Vui lòng thử lại sau!'

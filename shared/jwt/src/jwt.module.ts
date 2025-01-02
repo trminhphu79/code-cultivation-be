@@ -23,6 +23,23 @@ import { Configurations } from '@shared/configs';
       }),
     }),
   ],
-  exports: [JwtModule],
+  exports: [
+    JwtModule.registerAsync({
+      imports: [
+        ConfigModule.forRoot({
+          load: [Configurations],
+          isGlobal: true,
+        }),
+      ],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('jwtSecretKey'),
+        privateKey: configService.get<string>('jwtPrivateKey'),
+        signOptions: {
+          algorithm: 'HS256',
+        },
+      }),
+    }),
+  ],
 })
 export class JwtGlobalModule {}

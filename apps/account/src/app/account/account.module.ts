@@ -3,8 +3,6 @@ import { AccountController } from './account.controller';
 import { AccountService } from './account.service';
 import { DatabaseConfigFeature } from '@shared/database';
 import { MailerModule } from '@shared/mailer';
-import { ConfigModule } from '@nestjs/config';
-import { Configurations } from '@shared/configs';
 
 @Global()
 @Module({

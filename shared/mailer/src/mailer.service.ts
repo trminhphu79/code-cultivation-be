@@ -74,7 +74,6 @@ export class EmailService {
 
   constructor(configService: ConfigService) {
     const mailer = configService.get<MailerConfig>('mailer');
-    console.log("mailer configurations: ", mailer)
     this.mailer = createTransport({
       service: 'gmail',
       host: mailer?.host,

@@ -1055,7 +1055,24 @@ exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
                 }),
             }),
         ],
-        exports: [jwt_1.JwtModule],
+        exports: [
+            jwt_1.JwtModule.registerAsync({
+                imports: [
+                    config_1.ConfigModule.forRoot({
+                        load: [configs_1.Configurations],
+                        isGlobal: true,
+                    }),
+                ],
+                inject: [config_1.ConfigService],
+                useFactory: async (configService) => ({
+                    secret: configService.get('jwtSecretKey'),
+                    privateKey: configService.get('jwtPrivateKey'),
+                    signOptions: {
+                        algorithm: 'HS256',
+                    },
+                }),
+            }),
+        ],
     })
 ], JwtGlobalModule);
 

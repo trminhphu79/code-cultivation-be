@@ -1090,13 +1090,11 @@ exports.ProfileMsgPattern = Object.freeze({
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var AccountService_1;
-var _a, _b, _c, _d;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const config_1 = __webpack_require__(5);
 const event_emitter_1 = __webpack_require__(44);
 const jwt_1 = __webpack_require__(45);
 const sequelize_1 = __webpack_require__(20);
@@ -1105,14 +1103,12 @@ const exception_1 = __webpack_require__(54);
 const mailer_1 = __webpack_require__(57);
 const profile_1 = __webpack_require__(14);
 const rxjs_1 = __webpack_require__(53);
-let AccountService = AccountService_1 = class AccountService {
-    constructor(jwtService, eventEmitter, profileModel, mailerService, configService) {
+let AccountService = class AccountService {
+    constructor(profileModel, jwtService, eventEmitter, mailerService) {
+        this.profileModel = profileModel;
         this.jwtService = jwtService;
         this.eventEmitter = eventEmitter;
-        this.profileModel = profileModel;
         this.mailerService = mailerService;
-        this.configService = configService;
-        this.logger = new common_1.Logger(AccountService_1.name);
     }
     handleChangePassword(body) {
         return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
@@ -1130,11 +1126,11 @@ let AccountService = AccountService_1 = class AccountService {
                 expiresIn: '2m', // Set token expiration
             });
             const verificationLink = `http://localhost:4200/auth/verify-email?token=${token}`;
-            this.logger.log('Generated verification token: ', token);
+            common_1.Logger.log('Generated verification token: ', token);
             return this.mailerService
                 .sendOtpVerifyEmail(body.email, verificationLink)
                 .pipe((0, rxjs_1.tap)(() => {
-                this.logger.log(`Verification email sent to ${body.email}`);
+                common_1.Logger.log(`Verification email sent to ${body.email}`);
                 this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                     key: `VERIFY_EMAIL#${body.email}`,
                     value: token,
@@ -1143,12 +1139,12 @@ let AccountService = AccountService_1 = class AccountService {
                 data: null,
                 message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
             })), (0, rxjs_1.catchError)((error) => {
-                this.logger.error('Error sending verification email: ', error.message);
+                common_1.Logger.error('Error sending verification email: ', error.message);
                 return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Không thể gửi email xác thực. Vui lòng thử lại sau!');
             }));
         }
         catch (error) {
-            this.logger.error('Unexpected error: ', error.message);
+            common_1.Logger.error('Unexpected error: ', error.message);
             return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Đã xảy ra lỗi. Vui lòng thử lại sau!');
         }
     }
@@ -1160,10 +1156,10 @@ let AccountService = AccountService_1 = class AccountService {
     }
 };
 exports.AccountService = AccountService;
-exports.AccountService = AccountService = AccountService_1 = tslib_1.__decorate([
+exports.AccountService = AccountService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(profile_1.Profile)),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object, Object, typeof (_c = typeof mailer_1.EmailService !== "undefined" && mailer_1.EmailService) === "function" ? _c : Object, typeof (_d = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _d : Object])
+    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object, typeof (_c = typeof mailer_1.EmailService !== "undefined" && mailer_1.EmailService) === "function" ? _c : Object])
 ], AccountService);
 
 
@@ -1554,7 +1550,6 @@ exports.EMAIL_TEMPLATE = {
 let EmailService = class EmailService {
     constructor(configService) {
         const mailer = configService.get('mailer');
-        console.log("mailer configurations: ", mailer);
         this.mailer = (0, nodemailer_1.createTransport)({
             service: 'gmail',
             host: mailer?.host,
@@ -1748,7 +1743,24 @@ exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
                 }),
             }),
         ],
-        exports: [jwt_1.JwtModule],
+        exports: [
+            jwt_1.JwtModule.registerAsync({
+                imports: [
+                    config_1.ConfigModule.forRoot({
+                        load: [configs_1.Configurations],
+                        isGlobal: true,
+                    }),
+                ],
+                inject: [config_1.ConfigService],
+                useFactory: async (configService) => ({
+                    secret: configService.get('jwtSecretKey'),
+                    privateKey: configService.get('jwtPrivateKey'),
+                    signOptions: {
+                        algorithm: 'HS256',
+                    },
+                }),
+            }),
+        ],
     })
 ], JwtGlobalModule);
 
