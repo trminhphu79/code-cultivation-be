@@ -37,7 +37,8 @@
       ],
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
-      ]
+      ],
+      "@shared/mailer": ["shared/mailer/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

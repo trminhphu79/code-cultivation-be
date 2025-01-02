@@ -969,6 +969,7 @@ const Configurations = () => ({
     saltRounds: parseInt(process.env['SALT_ROUNDS']) || 10,
     jwtSecretKey: process.env['JWT_SECRET_KEY'],
     jwtPrivateKey: process.env['JWT_PRIVATE_KEY'],
+    verifyRedirect: process.env['VERIFY_EMAIL_REDIRECT'],
     github: {
         client_id: process.env['GITHUB_CLIENT_ID'],
         client_secret: process.env['GITHUB_CLIENT_SECRET'],
@@ -977,6 +978,13 @@ const Configurations = () => ({
     },
     google: {
         clientId: process.env['GOOGLE_CLIENT_ID'],
+    },
+    mailer: {
+        host: process.env['MAIL_HOST'],
+        port: parseInt(process.env['MAIL_PORT']) || 10,
+        pass: process.env['MAIL_USER'],
+        user: process.env['MAIL_PASS'],
+        from: process.env['MAIL_FROM'],
     },
     database: {
         host: process.env['POSTGRES_HOST'],

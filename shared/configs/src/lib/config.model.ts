@@ -26,6 +26,14 @@ export type GoogleConfig = {
   clientId: string | undefined;
 };
 
+export type MailerConfig = {
+  host: string | undefined;
+  port: number | undefined;
+  user: string | undefined;
+  pass: string | undefined;
+  from: string | undefined;
+};
+
 export type Configuration = {
   port: number | undefined;
   nodeEnv: string | undefined;
@@ -34,6 +42,8 @@ export type Configuration = {
   microservice: NatsMicroserviceConfig;
   jwtSecretKey: string | undefined;
   jwtPrivateKey: string | undefined;
+  verifyRedirect: string | undefined;
   github: GitHubConfig;
   google: GoogleConfig;
+  mailer: MailerConfig;
 };
