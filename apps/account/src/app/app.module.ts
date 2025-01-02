@@ -13,11 +13,11 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     AuthModule,
     BcryptModule,
+    AccountModule,
     ConfigModule.forRoot({
       load: [Configurations],
       isGlobal: true,
     }),
-    AccountModule,
     JwtGlobalModule,
     CacheManagerModule,
     DatabaseConfigModule,

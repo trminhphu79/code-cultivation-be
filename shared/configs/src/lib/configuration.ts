@@ -19,8 +19,8 @@ export const Configurations = (): Configuration => ({
   mailer: {
     host: process.env['MAIL_HOST'],
     port: parseInt(process.env['MAIL_PORT'] as string) || 10,
-    pass: process.env['MAIL_USER'],
-    user: process.env['MAIL_PASS'],
+    pass: process.env['MAIL_PASS'],
+    user: process.env['MAIL_USER'],
     from: process.env['MAIL_FROM'],
   },
   database: {
