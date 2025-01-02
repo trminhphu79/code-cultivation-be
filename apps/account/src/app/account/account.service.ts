@@ -51,7 +51,7 @@ export class AccountService {
       const verificationLink = `http://localhost:4200/auth/verify-email?token=${token}`;
 
       Logger.log('Generated verification token: ', token);
-      return this.mailerService
+      this.mailerService
         .sendOtpVerifyEmail(body.email, verificationLink)
         .pipe(
           tap(() => {
@@ -60,19 +60,15 @@ export class AccountService {
               key: `VERIFY_EMAIL#${body.email}`,
               value: token,
             });
-          }),
-          map(() => ({
-            data: null,
-            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-          })),
-          catchError((error) => {
-            Logger.error('Error sending verification email: ', error.message);
-            return throwException(
-              HttpStatus.INTERNAL_SERVER_ERROR,
-              'Không thể gửi email xác thực. Vui lòng thử lại sau!'
-            );
           })
-        );
+        )
+        .subscribe();
+      return of(200).pipe(
+        map(() => ({
+          data: null,
+          message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+        }))
+      );
     } catch (error) {
       Logger.error('Unexpected error: ', error.message);
       return throwException(

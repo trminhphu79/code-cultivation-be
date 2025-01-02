@@ -1127,7 +1127,7 @@ let AccountService = class AccountService {
             });
             const verificationLink = `http://localhost:4200/auth/verify-email?token=${token}`;
             common_1.Logger.log('Generated verification token: ', token);
-            return this.mailerService
+            this.mailerService
                 .sendOtpVerifyEmail(body.email, verificationLink)
                 .pipe((0, rxjs_1.tap)(() => {
                 common_1.Logger.log(`Verification email sent to ${body.email}`);
@@ -1135,13 +1135,12 @@ let AccountService = class AccountService {
                     key: `VERIFY_EMAIL#${body.email}`,
                     value: token,
                 });
-            }), (0, rxjs_1.map)(() => ({
+            }))
+                .subscribe();
+            return (0, rxjs_1.of)(200).pipe((0, rxjs_1.map)(() => ({
                 data: null,
                 message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-            })), (0, rxjs_1.catchError)((error) => {
-                common_1.Logger.error('Error sending verification email: ', error.message);
-                return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Không thể gửi email xác thực. Vui lòng thử lại sau!');
-            }));
+            })));
         }
         catch (error) {
             common_1.Logger.error('Unexpected error: ', error.message);
