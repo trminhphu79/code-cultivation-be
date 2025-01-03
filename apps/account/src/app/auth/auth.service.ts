@@ -23,14 +23,15 @@ import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import {
   AccountVerifyStatusEnum,
+  CreateAccountAndProfile,
   CredentialTypeEnum,
   GitHubUser,
 } from '@shared/types';
 import { AccountService } from '../account/account.service';
-import { DefaultProfileValue } from '@shared/models/profile';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   oauthClient!: OAuth2Client;
   githubConfig!: GitHubConfig;
   googleConfig!: GoogleConfig;
@@ -61,14 +62,14 @@ export class AuthService {
           expiresIn: '2m',
         }),
       })),
-      tap((token) => Logger.log('accessToken: ', token?.accessToken)),
+      tap((token) => this.logger.log('accessToken: ', token?.accessToken)),
       map(({ accessToken }) => ({
         accessToken,
         refreshToken: this.jwtService.sign(payload, {
           expiresIn: '30d',
         }),
       })),
-      tap((token) => Logger.log('refreshToken: ', token.refreshToken)),
+      tap((token) => this.logger.log('refreshToken: ', token.refreshToken)),
       catchError((error) =>
         throwException(500, `Lỗi tạo token ${error.message}`)
       )
@@ -218,7 +219,12 @@ export class AuthService {
   handleSignInWithToken({ token }: AuthenticateDto) {
     return this.verifyToken(token).pipe(
       switchMap(() => {
-        const source = this.jwtService.decode(token) as { email: string };
+        const source = this.jwtService.decode(token) as {
+          email: string;
+          credentialType: CredentialTypeEnum;
+        };
+
+        console.log('source: ', source);
         if (!source?.email) {
           return throwException(
             HttpStatusCode.NotFound,
@@ -227,8 +233,22 @@ export class AuthService {
         }
         return this.accountService.getExistingAccount(
           source.email,
-          CredentialTypeEnum.NONE
+          source.credentialType
         );
+      }),
+      switchMap((response) => {
+        if (!response) {
+          return throwException(
+            HttpStatusCode.NotFound,
+            'Không tìm thấy người dùng.'
+          );
+        }
+
+        delete response.password;
+        return of({
+          data: response,
+          message: 'Đăng nhập thành công.',
+        });
       })
     );
   }
@@ -243,21 +263,24 @@ export class AuthService {
   }
 
   private handleOAuthGoogle({ token }: SignInOauth) {
-    console.log('handleOAuthGoogle: ', token);
+    this.logger.log('handleOAuthGoogle: ', token);
     return from(
       this.oauthClient.verifyIdToken({
         idToken: token,
         audience: this.googleConfig.clientId,
       })
     ).pipe(
-      tap((response) => {
-        console.log('Verify google sign in response: ', response);
-      }),
+      catchError(() =>
+        throwException(
+          HttpStatusCode.BadRequest,
+          'Có lỗi xảy ra trong quá trình xác thực người dùng từ gmail.'
+        )
+      ),
+      map((googlResponse) => googlResponse.getPayload()),
       switchMap((response) => {
-        // response.??
-        return of(1);
+        console.log('Oauth google resposne: ', response);
         return this.accountService
-          .getExistingAccount('', CredentialTypeEnum.GITHUB)
+          .getExistingAccount(response.email, CredentialTypeEnum.GOOLGE)
           .pipe(
             switchMap((existingAccount) => {
               if (existingAccount) {
@@ -269,15 +292,18 @@ export class AuthService {
                   }))
                 );
               }
-
-              return this.createNewAccountAndProfile({
-                email: '',
-                name: '',
-                avatarUrl: 'avatar_url',
-                credentialType: CredentialTypeEnum.GITHUB,
+              const payload = {
+                email: response.email,
+                name:
+                  response?.name ||
+                  response?.family_name + ' ' + response?.given_name,
+                avatarUrl: response?.picture,
+                credentialType: CredentialTypeEnum.GOOLGE,
                 bio: '',
-                githubLink: 'html_url',
-              });
+                githubLink: '',
+                nickName: response?.email?.split('@')?.[0] || '',
+              };
+              return this.createNewAccountAndProfile(payload);
             })
           );
       })
@@ -309,14 +335,14 @@ export class AuthService {
         return tokenMatch;
       }),
       switchMap((token: string) => {
-        Logger.log('Received Token:', token);
+        this.logger.log('Received Token:', token);
         return this.getGithubUserInfo(token);
       }),
       switchMap((userInfo) =>
         this.handleGetOrCreateGithubAccount(userInfo.data)
       ),
       catchError((error) => {
-        Logger.error('Error during OAuth sign-in:', error);
+        this.logger.error('Error during OAuth sign-in:', error);
         return throwException(
           HttpStatus.INTERNAL_SERVER_ERROR,
           'Có lỗi xảy ra trong quá trình xác thực người dùng từ github.'
@@ -334,7 +360,7 @@ export class AuthService {
       })
       .pipe(
         catchError((error) => {
-          Logger.error('Error fetching GitHub user info:', error);
+          this.logger.error('Error fetching GitHub user info:', error);
           return throwException(
             HttpStatus.BAD_REQUEST,
             'Lấy thông tin người dùng từ github thất bại'
@@ -345,7 +371,7 @@ export class AuthService {
 
   private handleGetOrCreateGithubAccount(userInfo: GitHubUser) {
     const { email, name, avatar_url, bio, login, html_url } = userInfo;
-    Logger.log('GitHubUser: ', userInfo);
+    this.logger.log('GitHubUser: ', userInfo);
 
     const _email = email || login + '@github.com';
 
@@ -363,14 +389,16 @@ export class AuthService {
             );
           }
 
-          return this.createNewAccountAndProfile({
+          const payload = {
             email: _email,
             name,
             avatarUrl: avatar_url,
             credentialType: CredentialTypeEnum.GITHUB,
             bio,
             githubLink: html_url,
-          });
+            nickName: _email?.split('@')?.[0] || '',
+          };
+          return this.createNewAccountAndProfile(payload);
         })
       );
   }
@@ -382,15 +410,10 @@ export class AuthService {
     avatarUrl,
     credentialType,
     githubLink,
-  }: {
-    email: string;
-    name: string;
-    avatarUrl: string;
-    credentialType: string;
-    bio: string;
-    githubLink: string;
-  }) {
+    nickName,
+  }: CreateAccountAndProfile) {
     let accountData: any;
+    this.logger.log('CREATE new account and profile');
     return from(
       this.accountModel.create({ email, credentialType, isVerify: true })
     ).pipe(
@@ -405,9 +428,10 @@ export class AuthService {
           avatarUrl,
           bio,
           githubLink,
+          nickName,
         }).pipe(
           tap((profile) => {
-            const key = this.getCacheKey(email, CredentialTypeEnum.GITHUB);
+            const key = this.getCacheKey(email, credentialType);
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: { ...accountData, email, profile },
@@ -438,12 +462,14 @@ export class AuthService {
     avatarUrl,
     bio,
     githubLink,
+    nickName,
   }: {
     accountId: string;
     fullName: string;
     avatarUrl: string;
     bio: string;
     githubLink: string;
+    nickName: string;
   }) {
     return from(
       this.accountService.handleCreateProfile(
@@ -452,12 +478,13 @@ export class AuthService {
           avatarUrl,
           bio,
           githubLink,
+          nickName,
         },
         accountId
       )
     ).pipe(
       catchError((error) => {
-        Logger.error('Error creating profile:', error);
+        this.logger.error('Error creating profile:', error);
         return throwException(
           HttpStatus.INTERNAL_SERVER_ERROR,
           'Tạo thông tin người dùng thất bại.'

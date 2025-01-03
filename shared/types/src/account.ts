@@ -7,3 +7,13 @@ export enum CredentialTypeEnum {
 export enum AccountVerifyStatusEnum {
   UNVERIFY = 'UNVERIFY',
 }
+
+export type CreateAccountAndProfile = {
+  email: string;
+  name: string;
+  bio: string;
+  avatarUrl: string;
+  credentialType: CredentialTypeEnum;
+  githubLink: string;
+  nickName: string;
+};

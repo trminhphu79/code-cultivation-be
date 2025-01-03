@@ -9,7 +9,6 @@ import {
   DeactivateDto,
   CreateProfileDto,
   VerifyEmailOtp,
-  ResendVerifyEmail,
   CreateAccountDto,
 } from '@shared/dtos/account';
 import { throwException } from '@shared/exception';
@@ -23,6 +22,8 @@ import { HttpStatusCode } from 'axios';
 
 @Injectable()
 export class AccountService {
+  private readonly logger = new Logger(AccountService.name);
+
   constructor(
     @InjectModel(Profile)
     private readonly profileModel: typeof Profile,
@@ -54,11 +55,10 @@ export class AccountService {
       catchError(() => {
         return throwException(
           HttpStatusCode.BadRequest,
-          'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
+          'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
         );
       }),
       switchMap((source) => {
-        console.log('verifyAsync: ', source);
         const key = `${AccountVerifyStatusEnum.UNVERIFY}#${source.email}`;
         return this.cacheService.get(key).pipe(
           switchMap(
@@ -66,7 +66,7 @@ export class AccountService {
               if (!response) {
                 return throwException(
                   HttpStatusCode.BadRequest,
-                  'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
+                  'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
                 );
               }
 
@@ -96,7 +96,7 @@ export class AccountService {
   }
 
   handleCreateAccount({ password, email }: CreateAccountDto) {
-    Logger.log('handleCreateAccount...', email);
+    this.logger.log('handleCreateAccount...', email);
     return this.bcryptService.hashPassword(password).pipe(
       switchMap((hashPassword) =>
         from(
@@ -112,7 +112,6 @@ export class AccountService {
               key,
               value: { ...result, profile: DefaultProfileValue },
             });
-            console.log('Created: ', result);
             this.handleSendTokenVerifyEmail(result?.email);
           })
         )
@@ -126,12 +125,12 @@ export class AccountService {
   handleSendTokenVerifyEmail(email: string) {
     const token = this.generateTokenVerify(email);
     const verificationLink = this.getVerifyLink(token);
-    Logger.log(`handleSendTokenVerifyEmail ${token}`);
+    this.logger.log(`handleSendTokenVerifyEmail ${token}`);
     this.mailerService
       .sendOtpVerifyEmail(email, verificationLink)
       .pipe(
         tap(() => {
-          Logger.log(`Verification email sent to ${email}`);
+          this.logger.log(`Verification email sent to ${email}`);
           this.eventEmitter.emit(CacheMessageAction.Create, {
             key: `${AccountVerifyStatusEnum.UNVERIFY}#${email}`,
             value: {
@@ -140,7 +139,7 @@ export class AccountService {
             },
             ttl: 180, // 3 phut
           });
-        }),
+        })
       )
       .subscribe();
   }

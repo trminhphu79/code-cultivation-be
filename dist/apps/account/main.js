@@ -1074,6 +1074,7 @@ exports.ProfileMsgPattern = Object.freeze({
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var AccountService_1;
 var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountService = void 0;
@@ -1092,7 +1093,7 @@ const types_1 = __webpack_require__(16);
 const rxjs_1 = __webpack_require__(53);
 const bcrypt_service_1 = __webpack_require__(61);
 const axios_1 = __webpack_require__(63);
-let AccountService = class AccountService {
+let AccountService = AccountService_1 = class AccountService {
     constructor(profileModel, accountModel, jwtService, eventEmitter, mailerService, bcryptService, configService, cacheService) {
         this.profileModel = profileModel;
         this.accountModel = accountModel;
@@ -1102,6 +1103,7 @@ let AccountService = class AccountService {
         this.bcryptService = bcryptService;
         this.configService = configService;
         this.cacheService = cacheService;
+        this.logger = new common_1.Logger(AccountService_1.name);
     }
     handleChangePassword(body) {
         return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
@@ -1111,13 +1113,12 @@ let AccountService = class AccountService {
     }
     handleVerifyEmail(payload) {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(payload.token)).pipe((0, rxjs_1.catchError)(() => {
-            return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
+            return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
         }), (0, rxjs_1.switchMap)((source) => {
-            console.log('verifyAsync: ', source);
             const key = `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${source.email}`;
             return this.cacheService.get(key).pipe((0, rxjs_1.switchMap)((response) => {
                 if (!response) {
-                    return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
+                    return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
                 }
                 if (payload?.token !== response?.token) {
                     return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Có lỗi xảy ra trong quá trình xác thực, xin vui lòng thử lại.');
@@ -1132,7 +1133,7 @@ let AccountService = class AccountService {
         })));
     }
     handleCreateAccount({ password, email }) {
-        common_1.Logger.log('handleCreateAccount...', email);
+        this.logger.log('handleCreateAccount...', email);
         return this.bcryptService.hashPassword(password).pipe((0, rxjs_1.switchMap)((hashPassword) => (0, rxjs_1.from)(this.accountModel.create({
             email,
             password: hashPassword,
@@ -1142,7 +1143,6 @@ let AccountService = class AccountService {
                 key,
                 value: { ...result, profile: profile_1.DefaultProfileValue },
             });
-            console.log('Created: ', result);
             this.handleSendTokenVerifyEmail(result?.email);
         }))), (0, rxjs_1.map)(() => ({
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
@@ -1151,11 +1151,11 @@ let AccountService = class AccountService {
     handleSendTokenVerifyEmail(email) {
         const token = this.generateTokenVerify(email);
         const verificationLink = this.getVerifyLink(token);
-        common_1.Logger.log(`handleSendTokenVerifyEmail ${token}`);
+        this.logger.log(`handleSendTokenVerifyEmail ${token}`);
         this.mailerService
             .sendOtpVerifyEmail(email, verificationLink)
             .pipe((0, rxjs_1.tap)(() => {
-            common_1.Logger.log(`Verification email sent to ${email}`);
+            this.logger.log(`Verification email sent to ${email}`);
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key: `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${email}`,
                 value: {
@@ -1214,7 +1214,7 @@ let AccountService = class AccountService {
     }
 };
 exports.AccountService = AccountService;
-exports.AccountService = AccountService = tslib_1.__decorate([
+exports.AccountService = AccountService = AccountService_1 = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(profile_1.Profile)),
     tslib_1.__param(1, (0, sequelize_1.InjectModel)(account_1.Account)),
@@ -1886,6 +1886,7 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var AuthService_1;
 var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthService = void 0;
@@ -1906,7 +1907,7 @@ const axios_2 = __webpack_require__(63);
 const bcrypt_service_1 = __webpack_require__(61);
 const types_1 = __webpack_require__(16);
 const account_service_1 = __webpack_require__(43);
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     constructor(accountModel, jwtService, httpService, cacheService, eventEmitter, bcryptService, configService, accountService) {
         this.accountModel = accountModel;
         this.jwtService = jwtService;
@@ -1916,6 +1917,7 @@ let AuthService = class AuthService {
         this.bcryptService = bcryptService;
         this.configService = configService;
         this.accountService = accountService;
+        this.logger = new common_1.Logger(AuthService_1.name);
         this.githubConfig = this.configService.get('github');
         this.googleConfig = this.configService.get('google');
         this.oauthClient = new google_auth_library_1.OAuth2Client({
@@ -1928,12 +1930,12 @@ let AuthService = class AuthService {
             accessToken: this.jwtService.sign(payload, {
                 expiresIn: '2m',
             }),
-        })), (0, operators_1.tap)((token) => common_1.Logger.log('accessToken: ', token?.accessToken)), (0, operators_1.map)(({ accessToken }) => ({
+        })), (0, operators_1.tap)((token) => this.logger.log('accessToken: ', token?.accessToken)), (0, operators_1.map)(({ accessToken }) => ({
             accessToken,
             refreshToken: this.jwtService.sign(payload, {
                 expiresIn: '30d',
             }),
-        })), (0, operators_1.tap)((token) => common_1.Logger.log('refreshToken: ', token.refreshToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
+        })), (0, operators_1.tap)((token) => this.logger.log('refreshToken: ', token.refreshToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
     // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
     generateAccessTokens(payload) {
@@ -2013,10 +2015,20 @@ let AuthService = class AuthService {
     handleSignInWithToken({ token }) {
         return this.verifyToken(token).pipe((0, operators_1.switchMap)(() => {
             const source = this.jwtService.decode(token);
+            console.log('source: ', source);
             if (!source?.email) {
                 return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng.');
             }
-            return this.accountService.getExistingAccount(source.email, types_1.CredentialTypeEnum.NONE);
+            return this.accountService.getExistingAccount(source.email, source.credentialType);
+        }), (0, operators_1.switchMap)((response) => {
+            if (!response) {
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng.');
+            }
+            delete response.password;
+            return (0, rxjs_1.of)({
+                data: response,
+                message: 'Đăng nhập thành công.',
+            });
         }));
     }
     handleOAuth({ token, credentialType }) {
@@ -2028,17 +2040,14 @@ let AuthService = class AuthService {
         }
     }
     handleOAuthGoogle({ token }) {
-        console.log('handleOAuthGoogle: ', token);
+        this.logger.log('handleOAuthGoogle: ', token);
         return (0, rxjs_1.from)(this.oauthClient.verifyIdToken({
             idToken: token,
             audience: this.googleConfig.clientId,
-        })).pipe((0, operators_1.tap)((response) => {
-            console.log('Verify google sign in response: ', response);
-        }), (0, operators_1.switchMap)((response) => {
-            // response.??
-            return (0, rxjs_1.of)(1);
+        })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(axios_2.HttpStatusCode.BadRequest, 'Có lỗi xảy ra trong quá trình xác thực người dùng từ gmail.')), (0, operators_1.map)((googlResponse) => googlResponse.getPayload()), (0, operators_1.switchMap)((response) => {
+            console.log('Oauth google resposne: ', response);
             return this.accountService
-                .getExistingAccount('', types_1.CredentialTypeEnum.GITHUB)
+                .getExistingAccount(response.email, types_1.CredentialTypeEnum.GOOLGE)
                 .pipe((0, operators_1.switchMap)((existingAccount) => {
                 if (existingAccount) {
                     delete existingAccount.password;
@@ -2047,14 +2056,17 @@ let AuthService = class AuthService {
                         data: { ...existingAccount, tokens },
                     })));
                 }
-                return this.createNewAccountAndProfile({
-                    email: '',
-                    name: '',
-                    avatarUrl: 'avatar_url',
-                    credentialType: types_1.CredentialTypeEnum.GITHUB,
+                const payload = {
+                    email: response.email,
+                    name: response?.name ||
+                        response?.family_name + ' ' + response?.given_name,
+                    avatarUrl: response?.picture,
+                    credentialType: types_1.CredentialTypeEnum.GOOLGE,
                     bio: '',
-                    githubLink: 'html_url',
-                });
+                    githubLink: '',
+                    nickName: response?.email?.split('@')?.[0] || '',
+                };
+                return this.createNewAccountAndProfile(payload);
             }));
         }));
     }
@@ -2073,10 +2085,10 @@ let AuthService = class AuthService {
             }
             return tokenMatch;
         }), (0, operators_1.switchMap)((token) => {
-            common_1.Logger.log('Received Token:', token);
+            this.logger.log('Received Token:', token);
             return this.getGithubUserInfo(token);
         }), (0, operators_1.switchMap)((userInfo) => this.handleGetOrCreateGithubAccount(userInfo.data)), (0, operators_1.catchError)((error) => {
-            common_1.Logger.error('Error during OAuth sign-in:', error);
+            this.logger.error('Error during OAuth sign-in:', error);
             return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Có lỗi xảy ra trong quá trình xác thực người dùng từ github.');
         }));
     }
@@ -2088,13 +2100,13 @@ let AuthService = class AuthService {
             },
         })
             .pipe((0, operators_1.catchError)((error) => {
-            common_1.Logger.error('Error fetching GitHub user info:', error);
+            this.logger.error('Error fetching GitHub user info:', error);
             return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Lấy thông tin người dùng từ github thất bại');
         }));
     }
     handleGetOrCreateGithubAccount(userInfo) {
         const { email, name, avatar_url, bio, login, html_url } = userInfo;
-        common_1.Logger.log('GitHubUser: ', userInfo);
+        this.logger.log('GitHubUser: ', userInfo);
         const _email = email || login + '@github.com';
         return this.accountService
             .getExistingAccount(_email, types_1.CredentialTypeEnum.GITHUB)
@@ -2106,18 +2118,21 @@ let AuthService = class AuthService {
                     data: { ...existingAccount, tokens },
                 })));
             }
-            return this.createNewAccountAndProfile({
+            const payload = {
                 email: _email,
                 name,
                 avatarUrl: avatar_url,
                 credentialType: types_1.CredentialTypeEnum.GITHUB,
                 bio,
                 githubLink: html_url,
-            });
+                nickName: _email?.split('@')?.[0] || '',
+            };
+            return this.createNewAccountAndProfile(payload);
         }));
     }
-    createNewAccountAndProfile({ email, name, bio, avatarUrl, credentialType, githubLink, }) {
+    createNewAccountAndProfile({ email, name, bio, avatarUrl, credentialType, githubLink, nickName, }) {
         let accountData;
+        this.logger.log('CREATE new account and profile');
         return (0, rxjs_1.from)(this.accountModel.create({ email, credentialType, isVerify: true })).pipe((0, operators_1.map)((account) => {
             accountData = account.toJSON();
             return accountData;
@@ -2127,8 +2142,9 @@ let AuthService = class AuthService {
             avatarUrl,
             bio,
             githubLink,
+            nickName,
         }).pipe((0, operators_1.tap)((profile) => {
-            const key = this.getCacheKey(email, types_1.CredentialTypeEnum.GITHUB);
+            const key = this.getCacheKey(email, credentialType);
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key,
                 value: { ...accountData, email, profile },
@@ -2143,14 +2159,15 @@ let AuthService = class AuthService {
             data: { ...accountData, tokens, profile },
         })))))));
     }
-    createProfile({ accountId, fullName, avatarUrl, bio, githubLink, }) {
+    createProfile({ accountId, fullName, avatarUrl, bio, githubLink, nickName, }) {
         return (0, rxjs_1.from)(this.accountService.handleCreateProfile({
             fullName,
             avatarUrl,
             bio,
             githubLink,
+            nickName,
         }, accountId)).pipe((0, operators_1.catchError)((error) => {
-            common_1.Logger.error('Error creating profile:', error);
+            this.logger.error('Error creating profile:', error);
             return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Tạo thông tin người dùng thất bại.');
         }));
     }
@@ -2159,7 +2176,7 @@ let AuthService = class AuthService {
     }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = tslib_1.__decorate([
+exports.AuthService = AuthService = AuthService_1 = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(account_1.Account)),
     tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof axios_1.HttpService !== "undefined" && axios_1.HttpService) === "function" ? _b : Object, typeof (_c = typeof cache_manager_1.CacheManagerService !== "undefined" && cache_manager_1.CacheManagerService) === "function" ? _c : Object, typeof (_d = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _d : Object, typeof (_e = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _e : Object, typeof (_f = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _f : Object, typeof (_g = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _g : Object])

@@ -58,6 +58,12 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.SignInOauth, body);
   }
 
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
   @Post('signUp')
   @Public()
   @ApiOperation({ summary: 'Sign up with email and password' })
@@ -72,15 +78,15 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.VerifyEmail, body);
   }
 
-  //TODO enhancement for tracking user id or ip 
+  //TODO enhancement for tracking user id or ip
   //https://innosufiyan.hashnode.dev/custom-throttler-guard-in-nestjs-with-redis
 
   @Throttle({
     default: {
-      limit: 5,
+      limit: 100,
       ttl: 10000,
     },
-  }) 
+  })
   @Post('sendOtp')
   @Public()
   @ApiOperation({ summary: 'Send otp to email for verify email' })

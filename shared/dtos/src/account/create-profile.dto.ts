@@ -14,4 +14,6 @@ export class CreateProfileDto {
   avatarUrl!: string;
 
   githubLink!: string;
+
+  nickName!: string;
 }
