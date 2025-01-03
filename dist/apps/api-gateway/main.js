@@ -84,6 +84,7 @@ const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_controller_1 = __webpack_require__(7);
 const throttler_1 = __webpack_require__(31);
+const core_1 = __webpack_require__(2);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -93,21 +94,16 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
         imports: [
             throttler_1.ThrottlerModule.forRoot([
                 {
-                    name: 'short',
                     ttl: 1000,
-                    limit: 3,
-                },
-                {
-                    name: 'medium',
-                    ttl: 10000,
-                    limit: 500,
-                },
-                {
-                    name: 'long',
-                    ttl: 60000,
-                    limit: 10000,
+                    limit: 100,
                 },
             ]),
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
         ],
     })
 ], AuthModule);
@@ -128,6 +124,7 @@ const swagger_1 = __webpack_require__(3);
 const account_1 = __webpack_require__(9);
 const account_2 = __webpack_require__(14);
 const guard_1 = __webpack_require__(27);
+const throttler_1 = __webpack_require__(31);
 let AuthController = class AuthController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -209,6 +206,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "verifyEmail", null);
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 5,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('sendOtp'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Send otp to email for verify email' }),

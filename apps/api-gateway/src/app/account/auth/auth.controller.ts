@@ -23,6 +23,7 @@ import {
   ResendVerifyEmail,
 } from 'shared/dtos/src/account';
 import { Public } from '@shared/guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -71,6 +72,15 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.VerifyEmail, body);
   }
 
+  //TODO enhancement for tracking user id or ip 
+  //https://innosufiyan.hashnode.dev/custom-throttler-guard-in-nestjs-with-redis
+
+  @Throttle({
+    default: {
+      limit: 5,
+      ttl: 10000,
+    },
+  }) 
   @Post('sendOtp')
   @Public()
   @ApiOperation({ summary: 'Send otp to email for verify email' })

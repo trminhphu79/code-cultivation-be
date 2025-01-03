@@ -21,7 +21,11 @@ import {
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
-import { CredentialTypeEnum, GitHubUser } from '@shared/types';
+import {
+  AccountVerifyStatusEnum,
+  CredentialTypeEnum,
+  GitHubUser,
+} from '@shared/types';
 import { AccountService } from '../account/account.service';
 import { DefaultProfileValue } from '@shared/models/profile';
 
@@ -108,10 +112,24 @@ export class AuthService {
         }
 
         if (existingUser && !existingUser.isVerify) {
-          this.accountService.handleSendTokenVerifyEmail(body.email);
-          return of({
-            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-          });
+          const key = `${AccountVerifyStatusEnum.UNVERIFY}#${body.email}`;
+          return this.cacheService.get(key).pipe(
+            switchMap((cacheData) => {
+              if (cacheData) {
+                return throwException(
+                  HttpStatusCode.BadRequest,
+                  'Vui lòng thử lại sau ít phút.'
+                );
+              }
+
+              return of({
+                message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+              });
+            }),
+            tap(() => {
+              this.accountService.handleSendTokenVerifyEmail(body.email);
+            })
+          );
         }
 
         return throwException(
