@@ -26,11 +26,11 @@ const config_1 = __webpack_require__(5);
 const configs_1 = __webpack_require__(6);
 const database_1 = __webpack_require__(9);
 const account_module_1 = __webpack_require__(21);
-const bcrypt_1 = __webpack_require__(61);
-const jwt_1 = __webpack_require__(65);
-const event_emitter_1 = __webpack_require__(67);
+const bcrypt_1 = __webpack_require__(64);
+const jwt_1 = __webpack_require__(66);
+const event_emitter_1 = __webpack_require__(68);
 const cache_manager_1 = __webpack_require__(46);
-const auth_module_1 = __webpack_require__(70);
+const auth_module_1 = __webpack_require__(71);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -226,8 +226,15 @@ tslib_1.__decorate([
 ], Account.prototype, "password", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.BOOLEAN,
+        defaultValue: false,
+    }),
+    tslib_1.__metadata("design:type", Boolean)
+], Account.prototype, "isVerify", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
         defaultValue: types_1.CredentialTypeEnum.NONE,
-        type: sequelize_typescript_1.DataType.STRING
+        type: sequelize_typescript_1.DataType.STRING,
     }),
     tslib_1.__metadata("design:type", typeof (_a = typeof types_1.CredentialTypeEnum !== "undefined" && types_1.CredentialTypeEnum) === "function" ? _a : Object)
 ], Account.prototype, "credentialType", void 0);
@@ -487,13 +494,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CredentialTypeEnum = void 0;
+exports.AccountVerifyStatusEnum = exports.CredentialTypeEnum = void 0;
 var CredentialTypeEnum;
 (function (CredentialTypeEnum) {
     CredentialTypeEnum["NONE"] = "NONE";
     CredentialTypeEnum["GITHUB"] = "GITHUB";
     CredentialTypeEnum["GOOLGE"] = "GOOGLE";
 })(CredentialTypeEnum || (exports.CredentialTypeEnum = CredentialTypeEnum = {}));
+var AccountVerifyStatusEnum;
+(function (AccountVerifyStatusEnum) {
+    AccountVerifyStatusEnum["UNVERIFY"] = "UNVERIFY";
+})(AccountVerifyStatusEnum || (exports.AccountVerifyStatusEnum = AccountVerifyStatusEnum = {}));
 
 
 /***/ }),
@@ -558,7 +569,7 @@ exports.AccountModule = AccountModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountController = void 0;
 const tslib_1 = __webpack_require__(4);
@@ -577,12 +588,6 @@ let AccountController = class AccountController {
     handleDeactivate(body) {
         return this.accountService.handleDeactivate(body);
     }
-    handleVerifyEmail(body) {
-        return this.accountService.handleVerifyEmail(body);
-    }
-    handleSendVerifyEmail(body) {
-        return this.accountService.handleSendVerifyEmail(body);
-    }
 };
 exports.AccountController = AccountController;
 tslib_1.__decorate([
@@ -597,18 +602,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof account_1.DeactivateDto !== "undefined" && account_1.DeactivateDto) === "function" ? _c : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AccountController.prototype, "handleDeactivate", null);
-tslib_1.__decorate([
-    (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.VerifyEmail),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_1.VerifyEmailOtp !== "undefined" && account_1.VerifyEmailOtp) === "function" ? _d : Object]),
-    tslib_1.__metadata("design:returntype", void 0)
-], AccountController.prototype, "handleVerifyEmail", null);
-tslib_1.__decorate([
-    (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.SendOtpVerifyEmail),
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_1.ResendVerifyEmail !== "undefined" && account_1.ResendVerifyEmail) === "function" ? _e : Object]),
-    tslib_1.__metadata("design:returntype", void 0)
-], AccountController.prototype, "handleSendVerifyEmail", null);
 exports.AccountController = AccountController = tslib_1.__decorate([
     (0, common_1.Controller)(),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof account_service_1.AccountService !== "undefined" && account_service_1.AccountService) === "function" ? _a : Object])
@@ -699,20 +692,11 @@ exports.VerifyEmailOtp = VerifyEmailOtp;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
-        description: 'Otp use for verify email',
+        description: 'Token use for verify email',
         example: '123456',
     }),
     tslib_1.__metadata("design:type", String)
-], VerifyEmailOtp.prototype, "otp", void 0);
-tslib_1.__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    (0, swagger_1.ApiProperty)({
-        description: 'Email use for verify email',
-        example: 'tangkinhcode@example.com',
-    }),
-    tslib_1.__metadata("design:type", String)
-], VerifyEmailOtp.prototype, "email", void 0);
+], VerifyEmailOtp.prototype, "token", void 0);
 
 
 /***/ }),
@@ -1090,7 +1074,7 @@ exports.ProfileMsgPattern = Object.freeze({
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AccountService = void 0;
 const tslib_1 = __webpack_require__(4);
@@ -1098,17 +1082,26 @@ const common_1 = __webpack_require__(1);
 const event_emitter_1 = __webpack_require__(44);
 const jwt_1 = __webpack_require__(45);
 const sequelize_1 = __webpack_require__(20);
+const config_1 = __webpack_require__(5);
 const cache_manager_1 = __webpack_require__(46);
 const exception_1 = __webpack_require__(54);
 const mailer_1 = __webpack_require__(57);
+const account_1 = __webpack_require__(12);
 const profile_1 = __webpack_require__(14);
+const types_1 = __webpack_require__(16);
 const rxjs_1 = __webpack_require__(53);
+const bcrypt_service_1 = __webpack_require__(61);
+const axios_1 = __webpack_require__(63);
 let AccountService = class AccountService {
-    constructor(profileModel, jwtService, eventEmitter, mailerService) {
+    constructor(profileModel, accountModel, jwtService, eventEmitter, mailerService, bcryptService, configService, cacheService) {
         this.profileModel = profileModel;
+        this.accountModel = accountModel;
         this.jwtService = jwtService;
         this.eventEmitter = eventEmitter;
         this.mailerService = mailerService;
+        this.bcryptService = bcryptService;
+        this.configService = configService;
+        this.cacheService = cacheService;
     }
     handleChangePassword(body) {
         return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
@@ -1116,36 +1109,63 @@ let AccountService = class AccountService {
     handleDeactivate(body) {
         return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
     }
-    handleVerifyEmail(body) {
-        return (0, rxjs_1.of)({ message: 'Not impelemnted!!' });
+    handleVerifyEmail(payload) {
+        return (0, rxjs_1.from)(this.jwtService.verifyAsync(payload.token)).pipe((0, rxjs_1.catchError)(() => {
+            return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
+        }), (0, rxjs_1.switchMap)((source) => {
+            console.log('verifyAsync: ', source);
+            const key = `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${source.email}`;
+            return this.cacheService.get(key).pipe((0, rxjs_1.switchMap)((response) => {
+                if (!response) {
+                    return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Đường dẫn xác thực tài khoản đã hết hạn, xin vui lòng thử lại.');
+                }
+                if (payload?.token !== response?.token) {
+                    return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Có lỗi xảy ra trong quá trình xác thực, xin vui lòng thử lại.');
+                }
+                return this.accountModel.update({ isVerify: true }, { where: { email: response.email } });
+            }), (0, rxjs_1.tap)(() => {
+                this.removeVerifyTokenCache(source.email);
+            }));
+        }), (0, rxjs_1.map)(() => ({
+            data: true,
+            message: 'Tài khoản đã được xác thực thành công.',
+        })));
     }
-    handleSendVerifyEmail(body) {
-        try {
-            // Generate a JWT token for email verification
-            const token = this.jwtService.sign({ email: body.email, time: new Date().getTime() }, {
-                expiresIn: '2m', // Set token expiration
+    handleCreateAccount({ password, email }) {
+        common_1.Logger.log('handleCreateAccount...', email);
+        return this.bcryptService.hashPassword(password).pipe((0, rxjs_1.switchMap)((hashPassword) => (0, rxjs_1.from)(this.accountModel.create({
+            email,
+            password: hashPassword,
+        })).pipe((0, rxjs_1.map)((response) => response.toJSON()), (0, rxjs_1.tap)((result) => {
+            const key = this.getCacheKey(email);
+            this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
+                key,
+                value: { ...result, profile: profile_1.DefaultProfileValue },
             });
-            const verificationLink = `http://localhost:4200/auth/verify-email?token=${token}`;
-            common_1.Logger.log('Generated verification token: ', token);
-            this.mailerService
-                .sendOtpVerifyEmail(body.email, verificationLink)
-                .pipe((0, rxjs_1.tap)(() => {
-                common_1.Logger.log(`Verification email sent to ${body.email}`);
-                this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
-                    key: `VERIFY_EMAIL#${body.email}`,
-                    value: token,
-                });
-            }))
-                .subscribe();
-            return (0, rxjs_1.of)(200).pipe((0, rxjs_1.map)(() => ({
-                data: null,
-                message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-            })));
-        }
-        catch (error) {
-            common_1.Logger.error('Unexpected error: ', error.message);
-            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Đã xảy ra lỗi. Vui lòng thử lại sau!');
-        }
+            console.log('Created: ', result);
+            this.handleSendTokenVerifyEmail(result?.email);
+        }))), (0, rxjs_1.map)(() => ({
+            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+        })));
+    }
+    handleSendTokenVerifyEmail(email) {
+        const token = this.generateTokenVerify(email);
+        const verificationLink = this.getVerifyLink(token);
+        common_1.Logger.log(`handleSendTokenVerifyEmail ${token}`);
+        this.mailerService
+            .sendOtpVerifyEmail(email, verificationLink)
+            .pipe((0, rxjs_1.tap)(() => {
+            common_1.Logger.log(`Verification email sent to ${email}`);
+            this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
+                key: `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${email}`,
+                value: {
+                    token,
+                    email,
+                },
+                ttl: 180, // 3 phut
+            });
+        }))
+            .subscribe();
     }
     handleCreateProfile(body, accountId) {
         return (0, rxjs_1.from)(this.profileModel.create({
@@ -1153,12 +1173,52 @@ let AccountService = class AccountService {
             accountId,
         }));
     }
+    getCacheKey(email, credentialType = types_1.CredentialTypeEnum.NONE) {
+        return `ACCOUNT#${email}#${credentialType}`;
+    }
+    generateTokenVerify(email) {
+        const code = new Date().getTime();
+        const token = this.jwtService.sign({ email, code }, { expiresIn: '3m' });
+        return token;
+    }
+    getVerifyLink(token) {
+        const verificationLink = `${this.configService.get('verifyRedirect')}?token=${token}`;
+        return verificationLink;
+    }
+    removeVerifyTokenCache(email) {
+        const removeKey = `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${email}`;
+        this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Delete, removeKey);
+    }
+    /**
+     *
+     * @param email
+     * @param credentialType
+     * @returns Return the current cached user if it exists; otherwise, fetch it from the database.
+     */
+    getExistingAccount(email, credentialType = types_1.CredentialTypeEnum.NONE) {
+        const cacheKey = this.getCacheKey(email, credentialType);
+        return this.cacheService.get(cacheKey).pipe((0, rxjs_1.switchMap)((cacheData) => {
+            if (cacheData) {
+                return (0, rxjs_1.of)(cacheData);
+            }
+            return (0, rxjs_1.from)(this.accountModel.findOne({
+                where: { email, credentialType },
+                include: [
+                    {
+                        association: 'profile',
+                        required: false, // Set to true if the profile must exist
+                    },
+                ],
+            })).pipe((0, rxjs_1.map)((response) => response?.toJSON?.() || null));
+        }));
+    }
 };
 exports.AccountService = AccountService;
 exports.AccountService = AccountService = tslib_1.__decorate([
     (0, common_1.Injectable)(),
     tslib_1.__param(0, (0, sequelize_1.InjectModel)(profile_1.Profile)),
-    tslib_1.__metadata("design:paramtypes", [Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object, typeof (_c = typeof mailer_1.EmailService !== "undefined" && mailer_1.EmailService) === "function" ? _c : Object])
+    tslib_1.__param(1, (0, sequelize_1.InjectModel)(account_1.Account)),
+    tslib_1.__metadata("design:paramtypes", [Object, Object, typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _b : Object, typeof (_c = typeof mailer_1.EmailService !== "undefined" && mailer_1.EmailService) === "function" ? _c : Object, typeof (_d = typeof bcrypt_service_1.BcryptService !== "undefined" && bcrypt_service_1.BcryptService) === "function" ? _d : Object, typeof (_e = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _e : Object, typeof (_f = typeof cache_manager_1.CacheManagerService !== "undefined" && cache_manager_1.CacheManagerService) === "function" ? _f : Object])
 ], AccountService);
 
 
@@ -1478,54 +1538,10 @@ exports.MailerModule = MailerModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-// import { Injectable } from '@nestjs/common';
-// import { ConfigService } from '@nestjs/config';
-// import { MailerConfig } from '@shared/configs';
-// import * as nodemailer from 'nodemailer';
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmailService = exports.EMAIL_TEMPLATE = exports.RESEND_FORGOT_PASSWORD_TEMPLATE = exports.VERIFY_SIGN_UP = void 0;
 const tslib_1 = __webpack_require__(4);
-// @Injectable()
-// export class MailerService {
-//   private transporter: nodemailer.Transporter;
-//   constructor(private readonly configService: ConfigService) {
-//     // Initialize Nodemailer transporter
-//     const mailer = configService.get<MailerConfig>('mailer');
-//     this.transporter = nodemailer.createTransport({
-//       host: mailer?.host || 'smtp.example.com',
-//       port: mailer?.port || 587,
-//       secure: false, // true for port 465, false for other ports
-//       auth: {
-//         user: mailer?.user || 'your_email@example.com',
-//         pass: mailer?.pass || 'your_password',
-//       },
-//     });
-//     console.log('transporter instance: ', this.transporter);
-//   }
-//   async sendMail(
-//     to: string,
-//     subject: string,
-//     text: string,
-//     html?: string
-//   ): Promise<any> {
-//     const mailOptions = {
-//       from: '"No-Reply" <no-reply@tangkinhcode.com>',
-//       to,
-//       subject,
-//       text,
-//       html,
-//     };
-//     try {
-//       const info = await this.transporter.sendMail(mailOptions);
-//       console.log('Email sent: ', info.response);
-//       return info;
-//     } catch (error) {
-//       console.error('Error sending email: ', error);
-//       throw error;
-//     }
-//   }
-// }
 const common_1 = __webpack_require__(1);
 const rxjs_1 = __webpack_require__(53);
 const nodemailer_1 = __webpack_require__(60);
@@ -1566,16 +1582,19 @@ let EmailService = class EmailService {
      * @param otp
      * @returns observable
      */
-    sendOtpVerifyEmail(to, token) {
-        return (0, rxjs_1.from)(this.mailer.sendMail({
-            to,
+    sendOtpVerifyEmail(email, token) {
+        common_1.Logger.log('sendOtpVerifyEmail: ', email);
+        const payload = {
+            to: email,
             from: {
                 name: exports.EMAIL_TEMPLATE.VERIFY_SIGN_UP.NAME,
                 address: 'No reply noreply@tangkinhcode.com',
             },
             subject: exports.EMAIL_TEMPLATE.VERIFY_SIGN_UP.SUBJECT_VRF,
             html: exports.EMAIL_TEMPLATE.VERIFY_SIGN_UP.HTML.replace('${token}', token),
-        }));
+        };
+        console.log('payload: ', payload);
+        return (0, rxjs_1.from)(this.mailer.sendMail(payload));
     }
     /**
      *
@@ -1613,53 +1632,13 @@ module.exports = require("nodemailer");
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(62), exports);
-
-
-/***/ }),
-/* 62 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BcryptModule = void 0;
-const tslib_1 = __webpack_require__(4);
-const common_1 = __webpack_require__(1);
-const bcrypt_service_1 = __webpack_require__(63);
-const config_1 = __webpack_require__(5);
-const configs_1 = __webpack_require__(6);
-let BcryptModule = class BcryptModule {
-};
-exports.BcryptModule = BcryptModule;
-exports.BcryptModule = BcryptModule = tslib_1.__decorate([
-    (0, common_1.Global)(),
-    (0, common_1.Module)({
-        imports: [
-            config_1.ConfigModule.forRoot({
-                load: [configs_1.Configurations],
-                isGlobal: true,
-            }),
-        ],
-        providers: [bcrypt_service_1.BcryptService],
-        exports: [bcrypt_service_1.BcryptService],
-    })
-], BcryptModule);
-
-
-/***/ }),
-/* 63 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BcryptService = void 0;
 const tslib_1 = __webpack_require__(4);
 const config_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const bcrypt = tslib_1.__importStar(__webpack_require__(64));
+const bcrypt = tslib_1.__importStar(__webpack_require__(62));
 const rxjs_1 = __webpack_require__(53);
 let BcryptService = class BcryptService {
     constructor(configService) {
@@ -1691,10 +1670,26 @@ exports.BcryptService = BcryptService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 64 */
+/* 62 */
 /***/ ((module) => {
 
 module.exports = require("bcrypt");
+
+/***/ }),
+/* 63 */
+/***/ ((module) => {
+
+module.exports = require("axios");
+
+/***/ }),
+/* 64 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(65), exports);
+
 
 /***/ }),
 /* 65 */
@@ -1702,12 +1697,42 @@ module.exports = require("bcrypt");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BcryptModule = void 0;
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(66), exports);
+const common_1 = __webpack_require__(1);
+const bcrypt_service_1 = __webpack_require__(61);
+const config_1 = __webpack_require__(5);
+const configs_1 = __webpack_require__(6);
+let BcryptModule = class BcryptModule {
+};
+exports.BcryptModule = BcryptModule;
+exports.BcryptModule = BcryptModule = tslib_1.__decorate([
+    (0, common_1.Global)(),
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                load: [configs_1.Configurations],
+                isGlobal: true,
+            }),
+        ],
+        providers: [bcrypt_service_1.BcryptService],
+        exports: [bcrypt_service_1.BcryptService],
+    })
+], BcryptModule);
 
 
 /***/ }),
 /* 66 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(67), exports);
+
+
+/***/ }),
+/* 67 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1765,18 +1790,18 @@ exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 67 */
+/* 68 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(68), exports);
 tslib_1.__exportStar(__webpack_require__(69), exports);
+tslib_1.__exportStar(__webpack_require__(70), exports);
 
 
 /***/ }),
-/* 68 */
+/* 69 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1785,7 +1810,7 @@ exports.GlobalEventEmitterModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const event_emitter_1 = __webpack_require__(44);
-const event_emitter_service_1 = __webpack_require__(69);
+const event_emitter_service_1 = __webpack_require__(70);
 let GlobalEventEmitterModule = class GlobalEventEmitterModule {
 };
 exports.GlobalEventEmitterModule = GlobalEventEmitterModule;
@@ -1799,7 +1824,7 @@ exports.GlobalEventEmitterModule = GlobalEventEmitterModule = tslib_1.__decorate
 
 
 /***/ }),
-/* 69 */
+/* 70 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1832,7 +1857,7 @@ exports.EventEmitterService = EventEmitterService = EventEmitterService_1 = tsli
 
 
 /***/ }),
-/* 70 */
+/* 71 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1840,9 +1865,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const auth_service_1 = __webpack_require__(71);
+const auth_service_1 = __webpack_require__(72);
 const auth_controller_1 = __webpack_require__(76);
-const axios_1 = __webpack_require__(73);
+const axios_1 = __webpack_require__(74);
 const database_1 = __webpack_require__(9);
 let AuthModule = class AuthModule {
 };
@@ -1857,7 +1882,7 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1869,19 +1894,18 @@ const common_1 = __webpack_require__(1);
 const config_1 = __webpack_require__(5);
 const jwt_1 = __webpack_require__(45);
 const rxjs_1 = __webpack_require__(53);
-const operators_1 = __webpack_require__(72);
+const operators_1 = __webpack_require__(73);
 const exception_1 = __webpack_require__(54);
-const axios_1 = __webpack_require__(73);
+const axios_1 = __webpack_require__(74);
 const event_emitter_1 = __webpack_require__(44);
 const sequelize_1 = __webpack_require__(20);
-const google_auth_library_1 = __webpack_require__(74);
+const google_auth_library_1 = __webpack_require__(75);
 const cache_manager_1 = __webpack_require__(46);
 const account_1 = __webpack_require__(12);
-const axios_2 = __webpack_require__(75);
-const bcrypt_service_1 = __webpack_require__(63);
+const axios_2 = __webpack_require__(63);
+const bcrypt_service_1 = __webpack_require__(61);
 const types_1 = __webpack_require__(16);
 const account_service_1 = __webpack_require__(43);
-const profile_1 = __webpack_require__(14);
 let AuthService = class AuthService {
     constructor(accountModel, jwtService, httpService, cacheService, eventEmitter, bcryptService, configService, accountService) {
         this.accountModel = accountModel;
@@ -1922,41 +1946,53 @@ let AuthService = class AuthService {
     verifyToken(token) {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(token)).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(401, `Token không hợp lệ hoặc đã hết hạn!`)));
     }
-    handleSignUp({ email, password }) {
-        return this.getExistingAccount(email).pipe((0, operators_1.switchMap)((existingUser) => {
-            if (existingUser) {
-                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản đã tồn tại, vui lòng thử lại với email khác!');
+    handleVerifyEmail(body) {
+        return this.accountService.handleVerifyEmail(body);
+    }
+    handleSendTokenVerifyEmail(body) {
+        return this.accountService.getExistingAccount(body.email).pipe((0, operators_1.switchMap)((existingUser) => {
+            if (!existingUser) {
+                return (0, exception_1.throwException)(common_1.HttpStatus.NOT_FOUND, 'Tài khoản không tồn tại, vui lòng thử lại với email khác.');
             }
-            return (0, rxjs_1.from)(this.bcryptService.hashPassword(password)).pipe((0, operators_1.switchMap)((hashedPassword) => (0, rxjs_1.from)(this.accountModel.create({
-                email,
-                password: hashedPassword,
-            })).pipe((0, operators_1.map)((response) => response.toJSON()), (0, operators_1.tap)((result) => {
-                const key = this.getCacheKey(email);
-                this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
-                    key,
-                    value: { ...result, profile: profile_1.DefaultProfileValue },
+            if (existingUser && !existingUser.isVerify) {
+                this.accountService.handleSendTokenVerifyEmail(body.email);
+                return (0, rxjs_1.of)({
+                    message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
                 });
-            }), (0, operators_1.map)((response) => {
-                delete response.password;
-                return response;
-            }), (0, operators_1.switchMap)((data) => (0, rxjs_1.of)({
-                message: 'Tạo tài khoản thành công',
-                data,
-            })))), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, `Database error: ${error.message}`)));
+            }
+            return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản này đã được xác thực, vui lòng thử lại với email khác. ');
+        }));
+    }
+    handleSignUp({ email, password, confirmPassword }) {
+        return this.accountService.getExistingAccount(email).pipe((0, operators_1.switchMap)((existingUser) => {
+            if (existingUser && existingUser?.isVerify) {
+                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản đã tồn tại, vui lòng thử lại với email khác.');
+            }
+            if (existingUser && !existingUser?.isVerify) {
+                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản đã tồn tại nhưng chưa xác thực, xin vui lòng xác thực để đăng nhập.');
+            }
+            return this.accountService.handleCreateAccount({
+                email: email,
+                password: password,
+                confirmPassword,
+            });
         }));
     }
     handleSignIn({ email, password }) {
-        return this.getExistingAccount(email).pipe((0, operators_1.switchMap)((userData) => {
-            if (userData) {
+        return this.accountService.getExistingAccount(email).pipe((0, operators_1.switchMap)((userData) => {
+            if (userData && userData.isVerify) {
+                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản chưa được xác thực, xin vui lòng xác thực để đăng nhập.');
+            }
+            if (userData && userData.isVerify) {
                 return this.bcryptService
                     .comparePassword(password, userData.password)
                     .pipe((0, operators_1.switchMap)((isMatch) => {
                     if (!isMatch) {
-                        return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Mật khẩu không chính xác!');
+                        return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Mật khẩu không chính xác.');
                     }
                     delete userData.password;
                     return (0, rxjs_1.from)(this.generateFullTokens(userData)).pipe((0, operators_1.map)((tokens) => ({
-                        message: 'Đăng nhập thành công!',
+                        message: 'Đăng nhập thành công.',
                         data: {
                             ...userData,
                             tokens,
@@ -1964,17 +2000,16 @@ let AuthService = class AuthService {
                     })));
                 }));
             }
-            return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng!');
+            return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng.');
         }));
     }
     handleSignInWithToken({ token }) {
         return this.verifyToken(token).pipe((0, operators_1.switchMap)(() => {
             const source = this.jwtService.decode(token);
-            console.log('decode value: source', source);
             if (!source?.email) {
-                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng!');
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng.');
             }
-            return this.getExistingAccount(source.email, types_1.CredentialTypeEnum.NONE);
+            return this.accountService.getExistingAccount(source.email, types_1.CredentialTypeEnum.NONE);
         }));
     }
     handleOAuth({ token, credentialType }) {
@@ -1992,6 +2027,28 @@ let AuthService = class AuthService {
             audience: this.googleConfig.clientId,
         })).pipe((0, operators_1.tap)((response) => {
             console.log('Verify google sign in response: ', response);
+        }), (0, operators_1.switchMap)((response) => {
+            // response.??
+            return (0, rxjs_1.of)(1);
+            return this.accountService
+                .getExistingAccount('', types_1.CredentialTypeEnum.GITHUB)
+                .pipe((0, operators_1.switchMap)((existingAccount) => {
+                if (existingAccount) {
+                    delete existingAccount.password;
+                    return this.generateFullTokens(existingAccount).pipe((0, operators_1.map)((tokens) => ({
+                        message: 'Đăng nhập thành công.',
+                        data: { ...existingAccount, tokens },
+                    })));
+                }
+                return this.createNewAccountAndProfile({
+                    email: '',
+                    name: '',
+                    avatarUrl: 'avatar_url',
+                    credentialType: types_1.CredentialTypeEnum.GITHUB,
+                    bio: '',
+                    githubLink: 'html_url',
+                });
+            }));
         }));
     }
     handleOAuthGithub({ token }) {
@@ -2005,7 +2062,7 @@ let AuthService = class AuthService {
         return this.httpService.post(url, payload).pipe((0, operators_1.filter)((response) => !!response?.data), (0, operators_1.map)((response) => {
             const tokenMatch = response?.data?.match(/access_token=([^&]*)/)?.[1];
             if (!tokenMatch) {
-                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Lỗi xác thực người dùng github, vui lòng thử lại!');
+                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Lỗi xác thực người dùng github, vui lòng thử lại.');
             }
             return tokenMatch;
         }), (0, operators_1.switchMap)((token) => {
@@ -2013,7 +2070,7 @@ let AuthService = class AuthService {
             return this.getGithubUserInfo(token);
         }), (0, operators_1.switchMap)((userInfo) => this.handleGetOrCreateGithubAccount(userInfo.data)), (0, operators_1.catchError)((error) => {
             common_1.Logger.error('Error during OAuth sign-in:', error);
-            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Có lỗi xảy ra trong quá trình xác thực người dùng từ github!');
+            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Có lỗi xảy ra trong quá trình xác thực người dùng từ github.');
         }));
     }
     getGithubUserInfo(token) {
@@ -2032,11 +2089,13 @@ let AuthService = class AuthService {
         const { email, name, avatar_url, bio, login, html_url } = userInfo;
         common_1.Logger.log('GitHubUser: ', userInfo);
         const _email = email || login + '@github.com';
-        return this.getExistingAccount(_email, types_1.CredentialTypeEnum.GITHUB).pipe((0, operators_1.switchMap)((existingAccount) => {
+        return this.accountService
+            .getExistingAccount(_email, types_1.CredentialTypeEnum.GITHUB)
+            .pipe((0, operators_1.switchMap)((existingAccount) => {
             if (existingAccount) {
                 delete existingAccount.password;
                 return this.generateFullTokens(existingAccount).pipe((0, operators_1.map)((tokens) => ({
-                    message: 'Đăng nhập thành công!',
+                    message: 'Đăng nhập thành công.',
                     data: { ...existingAccount, tokens },
                 })));
             }
@@ -2052,7 +2111,7 @@ let AuthService = class AuthService {
     }
     createNewAccountAndProfile({ email, name, bio, avatarUrl, credentialType, githubLink, }) {
         let accountData;
-        return (0, rxjs_1.from)(this.accountModel.create({ email, credentialType })).pipe((0, operators_1.map)((account) => {
+        return (0, rxjs_1.from)(this.accountModel.create({ email, credentialType, isVerify: true })).pipe((0, operators_1.map)((account) => {
             accountData = account.toJSON();
             return accountData;
         }), (0, operators_1.switchMap)((account) => this.createProfile({
@@ -2073,7 +2132,7 @@ let AuthService = class AuthService {
         }).pipe((0, operators_1.tap)(() => {
             delete accountData.password;
         }), (0, operators_1.map)((tokens) => ({
-            message: 'Đăng nhập thành công!',
+            message: 'Đăng nhập thành công.',
             data: { ...accountData, tokens, profile },
         })))))));
     }
@@ -2085,30 +2144,7 @@ let AuthService = class AuthService {
             githubLink,
         }, accountId)).pipe((0, operators_1.catchError)((error) => {
             common_1.Logger.error('Error creating profile:', error);
-            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Tạo thông tin người dùng thất bại!');
-        }));
-    }
-    /**
-     *
-     * @param email
-     * @param credentialType
-     * @returns Return the current cached user if it exists; otherwise, fetch it from the database.
-     */
-    getExistingAccount(email, credentialType = types_1.CredentialTypeEnum.NONE) {
-        const cacheKey = this.getCacheKey(email, credentialType);
-        return this.cacheService.get(cacheKey).pipe((0, operators_1.switchMap)((cacheData) => {
-            if (cacheData) {
-                return (0, rxjs_1.of)(cacheData);
-            }
-            return (0, rxjs_1.from)(this.accountModel.findOne({
-                where: { email, credentialType },
-                include: [
-                    {
-                        association: 'profile',
-                        required: false, // Set to true if the profile must exist
-                    },
-                ],
-            })).pipe((0, operators_1.map)((response) => response?.toJSON?.() || null));
+            return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Tạo thông tin người dùng thất bại.');
         }));
     }
     getCacheKey(email, credentialType = types_1.CredentialTypeEnum.NONE) {
@@ -2124,35 +2160,29 @@ exports.AuthService = AuthService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ ((module) => {
 
 module.exports = require("rxjs/operators");
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/axios");
 
 /***/ }),
-/* 74 */
-/***/ ((module) => {
-
-module.exports = require("google-auth-library");
-
-/***/ }),
 /* 75 */
 /***/ ((module) => {
 
-module.exports = require("axios");
+module.exports = require("google-auth-library");
 
 /***/ }),
 /* 76 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(4);
@@ -2160,7 +2190,7 @@ const common_1 = __webpack_require__(1);
 const microservices_1 = __webpack_require__(23);
 const account_1 = __webpack_require__(24);
 const account_2 = __webpack_require__(38);
-const auth_service_1 = __webpack_require__(71);
+const auth_service_1 = __webpack_require__(72);
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -2176,6 +2206,12 @@ let AuthController = class AuthController {
     }
     handleSignUp(body) {
         return this.authService.handleSignUp(body);
+    }
+    handleVerifyEmail(body) {
+        return this.authService.handleVerifyEmail(body);
+    }
+    handleSendTokenVerifyEmail(body) {
+        return this.authService.handleSendTokenVerifyEmail(body);
     }
 };
 exports.AuthController = AuthController;
@@ -2203,6 +2239,18 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_1.CreateAccountDto !== "undefined" && account_1.CreateAccountDto) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "handleSignUp", null);
+tslib_1.__decorate([
+    (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.VerifyEmail),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_1.VerifyEmailOtp !== "undefined" && account_1.VerifyEmailOtp) === "function" ? _f : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "handleVerifyEmail", null);
+tslib_1.__decorate([
+    (0, microservices_1.MessagePattern)(account_2.AuthMsgPattern.SendOtpVerifyEmail),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof account_1.ResendVerifyEmail !== "undefined" && account_1.ResendVerifyEmail) === "function" ? _g : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "handleSendTokenVerifyEmail", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
     (0, common_1.Controller)(),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])

@@ -3,3 +3,7 @@ export enum CredentialTypeEnum {
   GITHUB = 'GITHUB',
   GOOLGE = 'GOOGLE',
 }
+
+export enum AccountVerifyStatusEnum {
+  UNVERIFY = 'UNVERIFY',
+}

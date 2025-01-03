@@ -25,8 +25,14 @@ export class Account extends Model {
   password!: string;
 
   @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+  })
+  isVerify!: boolean;
+
+  @Column({
     defaultValue: CredentialTypeEnum.NONE,
-    type: DataType.STRING
+    type: DataType.STRING,
   })
   credentialType!: CredentialTypeEnum;
 

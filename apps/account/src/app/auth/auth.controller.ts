@@ -5,6 +5,8 @@ import {
   SignInDto,
   SignInOauth,
   AuthenticateDto,
+  ResendVerifyEmail,
+  VerifyEmailOtp,
 } from '@shared/dtos/account';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
 import { AuthService } from './auth.service';
@@ -31,5 +33,15 @@ export class AuthController {
   @MessagePattern(AuthMsgPattern.SignUp)
   handleSignUp(body: CreateAccountDto) {
     return this.authService.handleSignUp(body);
+  }
+
+  @MessagePattern(AuthMsgPattern.VerifyEmail)
+  handleVerifyEmail(body: VerifyEmailOtp) {
+    return this.authService.handleVerifyEmail(body);
+  }
+
+  @MessagePattern(AuthMsgPattern.SendOtpVerifyEmail)
+  handleSendTokenVerifyEmail(body: ResendVerifyEmail) {
+    return this.authService.handleSendTokenVerifyEmail(body);
   }
 }

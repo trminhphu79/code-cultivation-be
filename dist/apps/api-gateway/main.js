@@ -402,20 +402,11 @@ exports.VerifyEmailOtp = VerifyEmailOtp;
 tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
-        description: 'Otp use for verify email',
+        description: 'Token use for verify email',
         example: '123456',
     }),
     tslib_1.__metadata("design:type", String)
-], VerifyEmailOtp.prototype, "otp", void 0);
-tslib_1.__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    (0, swagger_1.ApiProperty)({
-        description: 'Email use for verify email',
-        example: 'tangkinhcode@example.com',
-    }),
-    tslib_1.__metadata("design:type", String)
-], VerifyEmailOtp.prototype, "email", void 0);
+], VerifyEmailOtp.prototype, "token", void 0);
 
 
 /***/ }),
