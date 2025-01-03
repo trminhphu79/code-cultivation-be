@@ -31,7 +31,7 @@ services:
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-      - /tmp/data/postgres:/data/postgres
+      - /var/lib/postgres-data:/data/postgres
     networks:
       - microservice-network
       - database-network
