@@ -2059,7 +2059,18 @@ let AuthService = AuthService_1 = class AuthService {
             if (!decodedData || !decodedData?.email) {
                 return (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.');
             }
-            return this.accountService.getExistingAccount(decodedData.email, decodedData.credentialType);
+            return this.accountService
+                .getExistingAccount(decodedData.email, decodedData.credentialType)
+                .pipe((0, operators_1.switchMap)((cacheData) => {
+                if (cacheData) {
+                    delete cacheData?.password;
+                    return this.generateFullTokens(cacheData).pipe((0, operators_1.map)((tokens) => ({
+                        data: { ...cacheData, tokens },
+                        message: 'Tạo mới token thành công.',
+                    })));
+                }
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.');
+            }));
         }));
     }
     handleOAuthGoogle({ token }) {

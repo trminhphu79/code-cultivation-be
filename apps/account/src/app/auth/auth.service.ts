@@ -284,10 +284,25 @@ export class AuthService {
           );
         }
 
-        return this.accountService.getExistingAccount(
-          decodedData.email,
-          decodedData.credentialType
-        );
+        return this.accountService
+          .getExistingAccount(decodedData.email, decodedData.credentialType)
+          .pipe(
+            switchMap((cacheData) => {
+              if (cacheData) {
+                delete cacheData?.password;
+                return this.generateFullTokens(cacheData).pipe(
+                  map((tokens) => ({
+                    data: { ...cacheData, tokens },
+                    message: 'Tạo mới token thành công.',
+                  }))
+                );
+              }
+              return throwException(
+                HttpStatusCode.Unauthorized,
+                'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
+              );
+            })
+          );
       })
     );
   }
