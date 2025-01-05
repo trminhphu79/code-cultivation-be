@@ -5,14 +5,23 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { JwtConfig } from '@shared/configs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
+  private jwtConfig: JwtConfig | undefined;
 
-  constructor(private reflector: Reflector, private jwtService: JwtService) {}
+  constructor(
+    private reflector: Reflector,
+    private jwtService: JwtService,
+    private configService: ConfigService
+  ) {
+    this.jwtConfig = this.configService.get<JwtConfig>('jwt');
+  }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const isPublic = this.reflector.get<boolean>(
@@ -41,7 +50,9 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const decoded = this.jwtService.verify(token);
+      const decoded = this.jwtService.verify(token, {
+        secret: this.jwtConfig?.secret,
+      });
       request.user = decoded; // Attach user info to the request
       this.logger.log('Token verified successfully');
       return true;

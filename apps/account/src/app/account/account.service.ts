@@ -19,11 +19,12 @@ import { AccountVerifyStatusEnum, CredentialTypeEnum } from '@shared/types';
 import { catchError, from, map, of, switchMap, tap, timer } from 'rxjs';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import { HttpStatusCode } from 'axios';
+import { JwtConfig } from '@shared/configs';
 
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
-
+  private jwtConfig: JwtConfig;
   constructor(
     @InjectModel(Profile)
     private readonly profileModel: typeof Profile,
@@ -35,7 +36,9 @@ export class AccountService {
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheManagerService
-  ) {}
+  ) {
+    this.jwtConfig = this.configService.get<JwtConfig>('jwt');
+  }
 
   handleChangePassword(body: ChangePasswordDto) {
     return of({ message: 'Not impelemnted!!' });
@@ -50,7 +53,9 @@ export class AccountService {
       this.jwtService.verifyAsync<{
         email: string;
         code: string;
-      }>(payload.token)
+      }>(payload.token, {
+        secret: this.jwtConfig?.secret,
+      })
     ).pipe(
       catchError(() => {
         return throwException(
@@ -111,6 +116,7 @@ export class AccountService {
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: { ...result, profile: DefaultProfileValue },
+              ttl: '7d',
             });
             this.handleSendTokenVerifyEmail(result?.email);
           })

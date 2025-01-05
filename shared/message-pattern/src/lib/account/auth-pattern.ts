@@ -7,8 +7,8 @@ export const AuthMsgPattern = Object.freeze({
   SignInOauth: `${AccountModule.Auth}/SignInOauth`,
   Authenticate: `${AccountModule.Auth}/Authenticate`,
 
-  AccessToken: `${AccountModule.Auth}/RefreshToken`,
-  RefreshToken: `${AccountModule.Auth}/AccessToken`,
+  AccessToken: `${AccountModule.Auth}/AccessToken`,
+  RefreshToken: `${AccountModule.Auth}/RefreshToken`,
 
   Update: `${AccountModule.Auth}/Update`,
   ChangePassword: `${AccountModule.Profile}/ChangePassword`,

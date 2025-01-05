@@ -4,8 +4,6 @@ export const Configurations = (): Configuration => ({
   port: parseInt(process.env['POSTGRES_PORT'] as string) || 3000,
   nodeEnv: process.env['NODE_ENV'],
   saltRounds: parseInt(process.env['SALT_ROUNDS'] as string) || 10,
-  jwtSecretKey: process.env['JWT_SECRET_KEY'],
-  jwtPrivateKey: process.env['JWT_PRIVATE_KEY'],
   verifyRedirect: process.env['VERIFY_EMAIL_REDIRECT'],
   github: {
     client_id: process.env['GITHUB_CLIENT_ID'],
@@ -35,5 +33,10 @@ export const Configurations = (): Configuration => ({
     natsUrl: process.env['NATS_URL'],
     natsPort: parseInt(process.env['NATS_PORT'] as string) || 4222,
     natsInterPort: parseInt(process.env['NATS_INTER_PORT'] as string) || 8222,
+  },
+  jwt: {
+    secret: process.env['JWT_SECRET_KEY'],
+    privateKey: process.env['JWT_PRIVATE_KEY'],
+    algorithm: process.env['JWT_ALGORITHM'],
   },
 });

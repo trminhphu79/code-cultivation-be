@@ -7,6 +7,7 @@ import {
   AuthenticateDto,
   ResendVerifyEmail,
   VerifyEmailOtp,
+  RefreshTokenDto,
 } from '@shared/dtos/account';
 import { AuthMsgPattern } from '@shared/message-pattern/account';
 import { AuthService } from './auth.service';
@@ -43,5 +44,11 @@ export class AuthController {
   @MessagePattern(AuthMsgPattern.SendOtpVerifyEmail)
   handleSendTokenVerifyEmail(body: ResendVerifyEmail) {
     return this.authService.handleSendTokenVerifyEmail(body);
+  }
+
+
+  @MessagePattern(AuthMsgPattern.RefreshToken)
+  handleRefreshToken(body: RefreshTokenDto) {
+    return this.authService.handleRefreshToken(body);
   }
 }

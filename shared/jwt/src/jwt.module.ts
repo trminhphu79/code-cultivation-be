@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Configurations } from '@shared/configs';
+import { Configurations, JwtConfig } from '@shared/configs';
 
 @Global()
 @Module({
@@ -14,13 +14,16 @@ import { Configurations } from '@shared/configs';
         }),
       ],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwtSecretKey'),
-        privateKey: configService.get<string>('jwtPrivateKey'),
-        signOptions: {
-          algorithm: 'HS256',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const config = configService.get<JwtConfig>('jwt');
+        return {
+          secret: config?.secret,
+          privateKey: config?.privateKey,
+          signOptions: {
+            algorithm: config?.algorithm,
+          },
+        } as JwtModuleOptions;
+      },
     }),
   ],
   exports: [
@@ -32,13 +35,17 @@ import { Configurations } from '@shared/configs';
         }),
       ],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwtSecretKey'),
-        privateKey: configService.get<string>('jwtPrivateKey'),
-        signOptions: {
-          algorithm: 'HS256',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const config = configService.get<JwtConfig>('jwt');
+        console.log('JwtConfig: ', config);
+        return {
+          secret: config?.secret,
+          privateKey: config?.privateKey,
+          signOptions: {
+            algorithm: config?.algorithm,
+          },
+        } as JwtModuleOptions;
+      },
     }),
   ],
 })

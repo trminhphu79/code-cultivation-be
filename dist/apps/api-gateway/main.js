@@ -29,15 +29,14 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_module_1 = __webpack_require__(6);
-const profile_module_1 = __webpack_require__(33);
-const nats_client_1 = __webpack_require__(35);
-const configs_1 = __webpack_require__(37);
-const config_1 = __webpack_require__(40);
-const jwt_1 = __webpack_require__(41);
-const jwt_2 = __webpack_require__(29);
+const profile_module_1 = __webpack_require__(35);
+const nats_client_1 = __webpack_require__(37);
+const configs_1 = __webpack_require__(39);
+const config_1 = __webpack_require__(30);
 const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(27);
-const cache_health_module_1 = __webpack_require__(43);
+const guard_1 = __webpack_require__(28);
+const cache_health_module_1 = __webpack_require__(42);
+const jwt_1 = __webpack_require__(31);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -46,7 +45,26 @@ exports.AppModule = AppModule = tslib_1.__decorate([
         imports: [
             auth_module_1.AuthModule,
             profile_module_1.ProfileModule,
-            jwt_1.JwtGlobalModule,
+            jwt_1.JwtModule.registerAsync({
+                imports: [
+                    config_1.ConfigModule.forRoot({
+                        load: [configs_1.Configurations],
+                        isGlobal: true,
+                    }),
+                ],
+                inject: [config_1.ConfigService],
+                useFactory: (configService) => {
+                    const config = configService.get('jwt');
+                    console.log('JwtConfig: ', config);
+                    return {
+                        secret: config?.secret,
+                        privateKey: config?.privateKey,
+                        signOptions: {
+                            algorithm: config?.algorithm,
+                        },
+                    };
+                },
+            }),
             nats_client_1.NatsClientModule,
             cache_health_module_1.CacheHealthModule,
             config_1.ConfigModule.forRoot({
@@ -57,7 +75,6 @@ exports.AppModule = AppModule = tslib_1.__decorate([
         ],
         controllers: [],
         providers: [
-            jwt_2.JwtService,
             {
                 provide: core_1.APP_GUARD,
                 useClass: guard_1.AuthGuard,
@@ -83,9 +100,9 @@ exports.AuthModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_controller_1 = __webpack_require__(7);
-const throttler_1 = __webpack_require__(32);
+const throttler_1 = __webpack_require__(34);
 const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(27);
+const guard_1 = __webpack_require__(28);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -115,7 +132,7 @@ exports.AuthModule = AuthModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const tslib_1 = __webpack_require__(5);
@@ -124,8 +141,8 @@ const microservices_1 = __webpack_require__(8);
 const swagger_1 = __webpack_require__(3);
 const account_1 = __webpack_require__(9);
 const account_2 = __webpack_require__(14);
-const guard_1 = __webpack_require__(27);
-const throttler_1 = __webpack_require__(32);
+const guard_1 = __webpack_require__(28);
+const throttler_1 = __webpack_require__(34);
 let AuthController = class AuthController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -135,6 +152,9 @@ let AuthController = class AuthController {
     }
     authenticate(body) {
         return this.natsClient.send(account_1.AuthMsgPattern.Authenticate, body);
+    }
+    refreshToken(body) {
+        return this.natsClient.send(account_1.AuthMsgPattern.RefreshToken, body);
     }
     signInOauth(body) {
         console.log('signInOauth: ', body);
@@ -182,12 +202,21 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "authenticate", null);
 tslib_1.__decorate([
+    (0, common_1.Post)('refreshToken'),
+    (0, guard_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Re new tokens' }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_2.RefreshTokenDto !== "undefined" && account_2.RefreshTokenDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], AuthController.prototype, "refreshToken", null);
+tslib_1.__decorate([
     (0, common_1.Post)('oauth'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Sign in with github or facebook' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof account_2.SignInOauth !== "undefined" && account_2.SignInOauth) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_2.SignInOauth !== "undefined" && account_2.SignInOauth) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signInOauth", null);
 tslib_1.__decorate([
@@ -202,7 +231,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Sign up with email and password' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof account_2.CreateAccountDto !== "undefined" && account_2.CreateAccountDto) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_2.CreateAccountDto !== "undefined" && account_2.CreateAccountDto) === "function" ? _f : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signUp", null);
 tslib_1.__decorate([
@@ -211,7 +240,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Verify email after sign up by email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof account_2.VerifyEmailOtp !== "undefined" && account_2.VerifyEmailOtp) === "function" ? _f : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof account_2.VerifyEmailOtp !== "undefined" && account_2.VerifyEmailOtp) === "function" ? _g : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "verifyEmail", null);
 tslib_1.__decorate([
@@ -226,7 +255,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Send otp to email for verify email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof account_2.ResendVerifyEmail !== "undefined" && account_2.ResendVerifyEmail) === "function" ? _g : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_h = typeof account_2.ResendVerifyEmail !== "undefined" && account_2.ResendVerifyEmail) === "function" ? _h : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "sendOtpVerify", null);
 tslib_1.__decorate([
@@ -234,7 +263,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change password only for user login by email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_h = typeof account_2.ChangePasswordDto !== "undefined" && account_2.ChangePasswordDto) === "function" ? _h : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_j = typeof account_2.ChangePasswordDto !== "undefined" && account_2.ChangePasswordDto) === "function" ? _j : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "changePassword", null);
 tslib_1.__decorate([
@@ -242,7 +271,7 @@ tslib_1.__decorate([
     (0, swagger_1.ApiOperation)({ summary: 'deactivate account only for user login by email' }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_j = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _j : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_k = typeof account_2.DeactivateDto !== "undefined" && account_2.DeactivateDto) === "function" ? _k : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "deactivate", null);
 exports.AuthController = AuthController = tslib_1.__decorate([
@@ -282,8 +311,8 @@ exports.AuthMsgPattern = Object.freeze({
     SignIn: `${module_1.AccountModule.Auth}/SignIn`,
     SignInOauth: `${module_1.AccountModule.Auth}/SignInOauth`,
     Authenticate: `${module_1.AccountModule.Auth}/Authenticate`,
-    AccessToken: `${module_1.AccountModule.Auth}/RefreshToken`,
-    RefreshToken: `${module_1.AccountModule.Auth}/AccessToken`,
+    AccessToken: `${module_1.AccountModule.Auth}/AccessToken`,
+    RefreshToken: `${module_1.AccountModule.Auth}/RefreshToken`,
     Update: `${module_1.AccountModule.Auth}/Update`,
     ChangePassword: `${module_1.AccountModule.Profile}/ChangePassword`,
     Deactivate: `${module_1.AccountModule.Profile}/Deactivate`,
@@ -356,8 +385,9 @@ tslib_1.__exportStar(__webpack_require__(19), exports);
 tslib_1.__exportStar(__webpack_require__(20), exports);
 tslib_1.__exportStar(__webpack_require__(21), exports);
 tslib_1.__exportStar(__webpack_require__(22), exports);
-tslib_1.__exportStar(__webpack_require__(25), exports);
+tslib_1.__exportStar(__webpack_require__(23), exports);
 tslib_1.__exportStar(__webpack_require__(26), exports);
+tslib_1.__exportStar(__webpack_require__(27), exports);
 
 
 /***/ }),
@@ -404,29 +434,6 @@ module.exports = require("class-validator");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.VerifyEmailOtp = void 0;
-const tslib_1 = __webpack_require__(5);
-const swagger_1 = __webpack_require__(3);
-const class_validator_1 = __webpack_require__(16);
-class VerifyEmailOtp {
-}
-exports.VerifyEmailOtp = VerifyEmailOtp;
-tslib_1.__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)({
-        description: 'Token use for verify email',
-        example: '123456',
-    }),
-    tslib_1.__metadata("design:type", String)
-], VerifyEmailOtp.prototype, "token", void 0);
-
-
-/***/ }),
-/* 18 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResendVerifyEmail = void 0;
 const tslib_1 = __webpack_require__(5);
 const swagger_1 = __webpack_require__(3);
@@ -446,7 +453,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -466,6 +473,29 @@ tslib_1.__decorate([
     }),
     tslib_1.__metadata("design:type", String)
 ], DeactivateDto.prototype, "id", void 0);
+
+
+/***/ }),
+/* 19 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VerifyEmailOtp = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class VerifyEmailOtp {
+}
+exports.VerifyEmailOtp = VerifyEmailOtp;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Token use for verify email',
+        example: '123456',
+    }),
+    tslib_1.__metadata("design:type", String)
+], VerifyEmailOtp.prototype, "token", void 0);
 
 
 /***/ }),
@@ -497,6 +527,29 @@ tslib_1.__decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RefreshTokenDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class RefreshTokenDto {
+}
+exports.RefreshTokenDto = RefreshTokenDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'Token use for authenticate user',
+        example: '8685-bdhh34-555123-6662312',
+    }),
+    tslib_1.__metadata("design:type", String)
+], RefreshTokenDto.prototype, "refreshToken", void 0);
+
+
+/***/ }),
+/* 22 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SignInOauth = void 0;
 const tslib_1 = __webpack_require__(5);
 const swagger_1 = __webpack_require__(3);
@@ -523,7 +576,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -531,8 +584,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAccountDto = void 0;
 const tslib_1 = __webpack_require__(5);
 const class_validator_1 = __webpack_require__(16);
-const password_1 = __webpack_require__(23);
-const password_match_1 = __webpack_require__(24);
+const password_1 = __webpack_require__(24);
+const password_match_1 = __webpack_require__(25);
 const swagger_1 = __webpack_require__(3);
 class CreateAccountDto {
 }
@@ -570,7 +623,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -609,7 +662,7 @@ function IsStrongPassword(validationOptions) {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -647,7 +700,30 @@ function IsPasswordMatch(property, validationOptions) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateProfileDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateProfileDto {
+}
+exports.CreateProfileDto = CreateProfileDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        description: 'User name',
+        example: 'Khoi Tran',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateProfileDto.prototype, "fullName", void 0);
+
+
+/***/ }),
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -655,7 +731,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ChangePasswordDto = void 0;
 const tslib_1 = __webpack_require__(5);
 const class_validator_1 = __webpack_require__(16);
-const password_1 = __webpack_require__(23);
+const password_1 = __webpack_require__(24);
 const swagger_1 = __webpack_require__(3);
 class ChangePasswordDto {
 }
@@ -685,58 +761,38 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 26 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CreateProfileDto = void 0;
-const tslib_1 = __webpack_require__(5);
-const swagger_1 = __webpack_require__(3);
-const class_validator_1 = __webpack_require__(16);
-class CreateProfileDto {
-}
-exports.CreateProfileDto = CreateProfileDto;
-tslib_1.__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)({
-        description: 'User name',
-        example: 'Khoi Tran',
-    }),
-    tslib_1.__metadata("design:type", String)
-], CreateProfileDto.prototype, "fullName", void 0);
-
-
-/***/ }),
-/* 27 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(28), exports);
-tslib_1.__exportStar(__webpack_require__(30), exports);
-tslib_1.__exportStar(__webpack_require__(31), exports);
-
-
-/***/ }),
 /* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(29), exports);
+tslib_1.__exportStar(__webpack_require__(32), exports);
+tslib_1.__exportStar(__webpack_require__(33), exports);
+
+
+/***/ }),
+/* 29 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
 var AuthGuard_1;
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthGuard = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
+const config_1 = __webpack_require__(30);
 const core_1 = __webpack_require__(2);
-const jwt_1 = __webpack_require__(29);
+const jwt_1 = __webpack_require__(31);
 let AuthGuard = AuthGuard_1 = class AuthGuard {
-    constructor(reflector, jwtService) {
+    constructor(reflector, jwtService, configService) {
         this.reflector = reflector;
         this.jwtService = jwtService;
+        this.configService = configService;
         this.logger = new common_1.Logger(AuthGuard_1.name);
+        this.jwtConfig = this.configService.get('jwt');
     }
     canActivate(context) {
         const isPublic = this.reflector.get('isPublic', context.getHandler());
@@ -756,7 +812,9 @@ let AuthGuard = AuthGuard_1 = class AuthGuard {
             throw new common_1.UnauthorizedException('Token missing');
         }
         try {
-            const decoded = this.jwtService.verify(token);
+            const decoded = this.jwtService.verify(token, {
+                secret: this.jwtConfig?.secret,
+            });
             request.user = decoded; // Attach user info to the request
             this.logger.log('Token verified successfully');
             return true;
@@ -770,18 +828,24 @@ let AuthGuard = AuthGuard_1 = class AuthGuard {
 exports.AuthGuard = AuthGuard;
 exports.AuthGuard = AuthGuard = AuthGuard_1 = tslib_1.__decorate([
     (0, common_1.Injectable)(),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _c : Object])
 ], AuthGuard);
 
 
 /***/ }),
-/* 29 */
+/* 30 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/config");
+
+/***/ }),
+/* 31 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -794,7 +858,7 @@ exports.Public = Public;
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -802,7 +866,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomThrottleGuard = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const throttler_1 = __webpack_require__(32);
+const throttler_1 = __webpack_require__(34);
 let CustomThrottleGuard = class CustomThrottleGuard extends throttler_1.ThrottlerGuard {
     getErrorMessage(context) {
         const message = 'Quá nhiều yêu cầu, vui lòng thử lại sau.';
@@ -816,13 +880,13 @@ exports.CustomThrottleGuard = CustomThrottleGuard = tslib_1.__decorate([
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/throttler");
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -830,7 +894,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const profile_controller_1 = __webpack_require__(34);
+const profile_controller_1 = __webpack_require__(36);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
@@ -842,7 +906,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -912,17 +976,17 @@ exports.ProfileController = ProfileController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(36), exports);
+tslib_1.__exportStar(__webpack_require__(38), exports);
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -964,18 +1028,18 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(38), exports);
-tslib_1.__exportStar(__webpack_require__(39), exports);
+tslib_1.__exportStar(__webpack_require__(40), exports);
+tslib_1.__exportStar(__webpack_require__(41), exports);
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -983,7 +1047,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -993,8 +1057,6 @@ const Configurations = () => ({
     port: parseInt(process.env['POSTGRES_PORT']) || 3000,
     nodeEnv: process.env['NODE_ENV'],
     saltRounds: parseInt(process.env['SALT_ROUNDS']) || 10,
-    jwtSecretKey: process.env['JWT_SECRET_KEY'],
-    jwtPrivateKey: process.env['JWT_PRIVATE_KEY'],
     verifyRedirect: process.env['VERIFY_EMAIL_REDIRECT'],
     github: {
         client_id: process.env['GITHUB_CLIENT_ID'],
@@ -1025,24 +1087,13 @@ const Configurations = () => ({
         natsPort: parseInt(process.env['NATS_PORT']) || 4222,
         natsInterPort: parseInt(process.env['NATS_INTER_PORT']) || 8222,
     },
+    jwt: {
+        secret: process.env['JWT_SECRET_KEY'],
+        privateKey: process.env['JWT_PRIVATE_KEY'],
+        algorithm: process.env['JWT_ALGORITHM'],
+    },
 });
 exports.Configurations = Configurations;
-
-
-/***/ }),
-/* 40 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/config");
-
-/***/ }),
-/* 41 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(42), exports);
 
 
 /***/ }),
@@ -1051,69 +1102,11 @@ tslib_1.__exportStar(__webpack_require__(42), exports);
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JwtGlobalModule = void 0;
-const tslib_1 = __webpack_require__(5);
-const common_1 = __webpack_require__(1);
-const jwt_1 = __webpack_require__(29);
-const config_1 = __webpack_require__(40);
-const configs_1 = __webpack_require__(37);
-let JwtGlobalModule = class JwtGlobalModule {
-};
-exports.JwtGlobalModule = JwtGlobalModule;
-exports.JwtGlobalModule = JwtGlobalModule = tslib_1.__decorate([
-    (0, common_1.Global)(),
-    (0, common_1.Module)({
-        imports: [
-            jwt_1.JwtModule.registerAsync({
-                imports: [
-                    config_1.ConfigModule.forRoot({
-                        load: [configs_1.Configurations],
-                        isGlobal: true,
-                    }),
-                ],
-                inject: [config_1.ConfigService],
-                useFactory: async (configService) => ({
-                    secret: configService.get('jwtSecretKey'),
-                    privateKey: configService.get('jwtPrivateKey'),
-                    signOptions: {
-                        algorithm: 'HS256',
-                    },
-                }),
-            }),
-        ],
-        exports: [
-            jwt_1.JwtModule.registerAsync({
-                imports: [
-                    config_1.ConfigModule.forRoot({
-                        load: [configs_1.Configurations],
-                        isGlobal: true,
-                    }),
-                ],
-                inject: [config_1.ConfigService],
-                useFactory: async (configService) => ({
-                    secret: configService.get('jwtSecretKey'),
-                    privateKey: configService.get('jwtPrivateKey'),
-                    signOptions: {
-                        algorithm: 'HS256',
-                    },
-                }),
-            }),
-        ],
-    })
-], JwtGlobalModule);
-
-
-/***/ }),
-/* 43 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheHealthModule = void 0;
 const tslib_1 = __webpack_require__(5);
-const cache_manager_1 = __webpack_require__(44);
+const cache_manager_1 = __webpack_require__(43);
 const common_1 = __webpack_require__(1);
-const cache_health_controller_1 = __webpack_require__(53);
+const cache_health_controller_1 = __webpack_require__(52);
 let CacheHealthModule = class CacheHealthModule {
 };
 exports.CacheHealthModule = CacheHealthModule;
@@ -1126,19 +1119,19 @@ exports.CacheHealthModule = CacheHealthModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(45), exports);
-tslib_1.__exportStar(__webpack_require__(48), exports);
-tslib_1.__exportStar(__webpack_require__(51), exports);
+tslib_1.__exportStar(__webpack_require__(44), exports);
+tslib_1.__exportStar(__webpack_require__(47), exports);
+tslib_1.__exportStar(__webpack_require__(50), exports);
 
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1146,9 +1139,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const cache_listener_service_1 = __webpack_require__(46);
-const ioredis_1 = __webpack_require__(49);
-const cache_manager_service_1 = __webpack_require__(51);
+const cache_listener_service_1 = __webpack_require__(45);
+const ioredis_1 = __webpack_require__(48);
+const cache_manager_service_1 = __webpack_require__(50);
 let CacheManagerModule = class CacheManagerModule {
 };
 exports.CacheManagerModule = CacheManagerModule;
@@ -1168,7 +1161,7 @@ exports.CacheManagerModule = CacheManagerModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1178,10 +1171,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheListener = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(47);
-const cache_message_1 = __webpack_require__(48);
-const ioredis_1 = __webpack_require__(49);
-const ioredis_2 = tslib_1.__importDefault(__webpack_require__(50));
+const event_emitter_1 = __webpack_require__(46);
+const cache_message_1 = __webpack_require__(47);
+const ioredis_1 = __webpack_require__(48);
+const ioredis_2 = tslib_1.__importDefault(__webpack_require__(49));
 let CacheListener = CacheListener_1 = class CacheListener {
     constructor(redis) {
         this.redis = redis;
@@ -1191,6 +1184,7 @@ let CacheListener = CacheListener_1 = class CacheListener {
         await this.redis.set(data.key, JSON.stringify(data.value));
         await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
         this.logger.log(`Handled create cache for key: ${data.key}`);
+        console.log(`Handled create cache for key: ${data.key} and value: `, JSON.stringify(data.value));
     }
     async handleUpdateEvent(data) {
         await this.redis.set(data.key, data.value);
@@ -1250,13 +1244,13 @@ exports.CacheListener = CacheListener = CacheListener_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1272,19 +1266,19 @@ var CacheMessageAction;
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs-modules/ioredis");
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ ((module) => {
 
 module.exports = require("ioredis");
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1294,9 +1288,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerService = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const ioredis_1 = tslib_1.__importDefault(__webpack_require__(50));
-const ioredis_2 = __webpack_require__(49);
-const rxjs_1 = __webpack_require__(52);
+const ioredis_1 = tslib_1.__importDefault(__webpack_require__(49));
+const ioredis_2 = __webpack_require__(48);
+const rxjs_1 = __webpack_require__(51);
 let CacheManagerService = CacheManagerService_1 = class CacheManagerService {
     constructor(cache) {
         this.cache = cache;
@@ -1325,13 +1319,13 @@ exports.CacheManagerService = CacheManagerService = CacheManagerService_1 = tsli
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1340,8 +1334,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheHealthController = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const cache_manager_1 = __webpack_require__(44);
-const guard_1 = __webpack_require__(27);
+const cache_manager_1 = __webpack_require__(43);
+const guard_1 = __webpack_require__(28);
 let CacheHealthController = class CacheHealthController {
     constructor(cache) {
         this.cache = cache;

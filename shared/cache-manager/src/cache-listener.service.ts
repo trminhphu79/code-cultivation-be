@@ -15,6 +15,10 @@ export class CacheListener {
     await this.redis.set(data.key, JSON.stringify(data.value));
     await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
     this.logger.log(`Handled create cache for key: ${data.key}`);
+    console.log(
+      `Handled create cache for key: ${data.key} and value: `,
+      JSON.stringify(data.value)
+    );
   }
 
   @OnEvent(CacheMessageAction.Update)

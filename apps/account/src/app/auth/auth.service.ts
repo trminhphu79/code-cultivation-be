@@ -9,7 +9,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/sequelize';
 import { OAuth2Client } from 'google-auth-library';
 import { CacheMessageAction, CacheManagerService } from '@shared/cache-manager';
-import { GitHubConfig, GoogleConfig } from '@shared/configs';
+import { GitHubConfig, GoogleConfig, JwtConfig } from '@shared/configs';
 import {
   CreateAccountDto,
   SignInDto,
@@ -17,6 +17,7 @@ import {
   AuthenticateDto,
   ResendVerifyEmail,
   VerifyEmailOtp,
+  RefreshTokenDto,
 } from '@shared/dtos/account';
 import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
@@ -34,6 +35,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   oauthClient!: OAuth2Client;
   githubConfig!: GitHubConfig;
+  jwtConfig!: JwtConfig;
   googleConfig!: GoogleConfig;
 
   constructor(
@@ -49,6 +51,7 @@ export class AuthService {
   ) {
     this.githubConfig = this.configService.get<GitHubConfig>('github');
     this.googleConfig = this.configService.get<GoogleConfig>('google');
+    this.jwtConfig = this.configService.get<JwtConfig>('jwt');
     this.oauthClient = new OAuth2Client({
       clientId: this.googleConfig?.clientId,
     });
@@ -56,6 +59,7 @@ export class AuthService {
 
   // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   generateFullTokens<T>(payload: T & Object) {
+    console.log(this.jwtService);
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
@@ -66,7 +70,7 @@ export class AuthService {
       map(({ accessToken }) => ({
         accessToken,
         refreshToken: this.jwtService.sign(payload, {
-          expiresIn: '30d',
+          expiresIn: '5m',
         }),
       })),
       tap((token) => this.logger.log('refreshToken: ', token.refreshToken)),
@@ -91,7 +95,9 @@ export class AuthService {
   }
 
   private verifyToken(token: string) {
-    return from(this.jwtService.verifyAsync(token)).pipe(
+    return from(
+      this.jwtService.verifyAsync(token, { secret: this.jwtConfig?.secret })
+    ).pipe(
       catchError(() =>
         throwException(401, `Token không hợp lệ hoặc đã hết hạn!`)
       )
@@ -253,6 +259,37 @@ export class AuthService {
       default:
         return this.handleOAuthGoogle({ token, credentialType });
     }
+  }
+
+  handleRefreshToken({ refreshToken }: RefreshTokenDto) {
+    return from(
+      this.jwtService.verifyAsync<{
+        email: string;
+        credentialType: CredentialTypeEnum;
+      }>(refreshToken, {
+        secret: this.jwtConfig?.secret,
+      })
+    ).pipe(
+      catchError(() =>
+        throwException(
+          HttpStatusCode.Unauthorized,
+          'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
+        )
+      ),
+      switchMap((decodedData) => {
+        if (!decodedData || !decodedData?.email) {
+          return throwException(
+            HttpStatusCode.Unauthorized,
+            'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
+          );
+        }
+
+        return this.accountService.getExistingAccount(
+          decodedData.email,
+          decodedData.credentialType
+        );
+      })
+    );
   }
 
   private handleOAuthGoogle({ token }: SignInOauth) {
@@ -428,6 +465,7 @@ export class AuthService {
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: { ...accountData, email, profile },
+              ttl: '7d',
             });
           }),
           switchMap((profile) =>

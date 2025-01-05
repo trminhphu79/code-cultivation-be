@@ -34,15 +34,20 @@ export type MailerConfig = {
   from: string | undefined;
 };
 
+export type JwtConfig = {
+  secret: string | undefined;
+  privateKey: string | undefined;
+  algorithm: string | undefined;
+};
 export type Configuration = {
   port: number | undefined;
   nodeEnv: string | undefined;
   database: DatabaseConfig;
   saltRounds: number | undefined;
   microservice: NatsMicroserviceConfig;
-  jwtSecretKey: string | undefined;
-  jwtPrivateKey: string | undefined;
   verifyRedirect: string | undefined;
+
+  jwt: JwtConfig;
   github: GitHubConfig;
   google: GoogleConfig;
   mailer: MailerConfig;

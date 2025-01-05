@@ -21,6 +21,7 @@ import {
   AuthenticateDto,
   VerifyEmailOtp,
   ResendVerifyEmail,
+  RefreshTokenDto,
 } from 'shared/dtos/src/account';
 import { Public } from '@shared/guard';
 import { Throttle } from '@nestjs/throttler';
@@ -32,6 +33,12 @@ export class AuthController {
     private natsClient: ClientProxy
   ) {}
 
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
   @Post('signIn')
   @Public()
   @ApiResponse({
@@ -43,6 +50,12 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.SignIn, body);
   }
 
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
   @Post('authenticate')
   @Public()
   @ApiOperation({ summary: 'Sign in with access token' })
@@ -50,6 +63,25 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.Authenticate, body);
   }
 
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
+  @Post('refreshToken')
+  @Public()
+  @ApiOperation({ summary: 'Re new tokens' })
+  refreshToken(@Body() body: RefreshTokenDto) {
+    return this.natsClient.send(AuthMsgPattern.RefreshToken, body);
+  }
+
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
   @Post('oauth')
   @Public()
   @ApiOperation({ summary: 'Sign in with github or facebook' })
@@ -71,6 +103,12 @@ export class AuthController {
     return this.natsClient.send(AuthMsgPattern.SignUp, body);
   }
 
+  @Throttle({
+    default: {
+      limit: 100,
+      ttl: 10000,
+    },
+  })
   @Post('verify')
   @Public()
   @ApiOperation({ summary: 'Verify email after sign up by email' })

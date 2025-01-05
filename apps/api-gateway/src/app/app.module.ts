@@ -2,19 +2,37 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './account/auth/auth.module';
 import { ProfileModule } from './account/profile/profile.module';
 import { NatsClientModule } from '@shared/nats-client';
-import { Configurations } from '@shared/configs';
-import { ConfigModule } from '@nestjs/config';
-import { JwtGlobalModule } from '@shared/jwt';
-import { JwtService } from '@nestjs/jwt';
+import { Configurations, JwtConfig } from '@shared/configs';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from '@shared/guard';
 import { CacheHealthModule } from './cache-health/cache-health.module';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 
 @Module({
   imports: [
     AuthModule,
     ProfileModule,
-    JwtGlobalModule,
+    JwtModule.registerAsync({
+      imports: [
+        ConfigModule.forRoot({
+          load: [Configurations],
+          isGlobal: true,
+        }),
+      ],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const config = configService.get<JwtConfig>('jwt');
+        console.log('JwtConfig: ', config);
+        return {
+          secret: config?.secret,
+          privateKey: config?.privateKey,
+          signOptions: {
+            algorithm: config?.algorithm,
+          },
+        } as JwtModuleOptions;
+      },
+    }),
     NatsClientModule,
     CacheHealthModule,
     ConfigModule.forRoot({
@@ -25,7 +43,6 @@ import { CacheHealthModule } from './cache-health/cache-health.module';
   ],
   controllers: [],
   providers: [
-    JwtService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
