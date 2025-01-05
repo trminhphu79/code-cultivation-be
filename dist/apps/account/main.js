@@ -2055,9 +2055,9 @@ let AuthService = AuthService_1 = class AuthService {
     handleRefreshToken({ refreshToken }) {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(refreshToken, {
             secret: this.jwtConfig?.secret,
-        })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Refresh token không hợp lệ.')), (0, operators_1.switchMap)((decodedData) => {
+        })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.')), (0, operators_1.switchMap)((decodedData) => {
             if (!decodedData || !decodedData?.email) {
-                return (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Refresh token không hợp lệ.');
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.');
             }
             return this.accountService.getExistingAccount(decodedData.email, decodedData.credentialType);
         }));
@@ -2171,7 +2171,7 @@ let AuthService = AuthService_1 = class AuthService {
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key,
                 value: { ...accountData, email, profile },
-                ttl: '7d'
+                ttl: '7d',
             });
         }), (0, operators_1.switchMap)((profile) => this.generateFullTokens({
             ...accountData,

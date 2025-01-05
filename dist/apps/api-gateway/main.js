@@ -180,6 +180,12 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 100,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('signIn'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiResponse)({
@@ -193,6 +199,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signIn", null);
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 100,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('authenticate'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Sign in with access token' }),
@@ -202,6 +214,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "authenticate", null);
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 100,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('refreshToken'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Re new tokens' }),
@@ -211,6 +229,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "refreshToken", null);
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 100,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('oauth'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Sign in with github or facebook' }),
@@ -235,6 +259,12 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], AuthController.prototype, "signUp", null);
 tslib_1.__decorate([
+    (0, throttler_1.Throttle)({
+        default: {
+            limit: 100,
+            ttl: 10000,
+        },
+    }),
     (0, common_1.Post)('verify'),
     (0, guard_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Verify email after sign up by email' }),
