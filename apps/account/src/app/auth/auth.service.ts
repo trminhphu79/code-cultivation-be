@@ -169,14 +169,7 @@ export class AuthService {
   handleSignIn({ email, password }: SignInDto) {
     return this.accountService.getExistingAccount(email).pipe(
       switchMap((userData) => {
-        if (userData && userData.isVerify) {
-          return throwException(
-            HttpStatus.BAD_REQUEST,
-            'Tài khoản chưa được xác thực, xin vui lòng xác thực để đăng nhập.'
-          );
-        }
-
-        if (userData && userData.isVerify) {
+        if (userData) {
           return this.bcryptService
             .comparePassword(password, userData.password)
             .pipe(

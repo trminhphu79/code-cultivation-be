@@ -1989,10 +1989,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     handleSignIn({ email, password }) {
         return this.accountService.getExistingAccount(email).pipe((0, operators_1.switchMap)((userData) => {
-            if (userData && userData.isVerify) {
-                return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản chưa được xác thực, xin vui lòng xác thực để đăng nhập.');
-            }
-            if (userData && userData.isVerify) {
+            if (userData) {
                 return this.bcryptService
                     .comparePassword(password, userData.password)
                     .pipe((0, operators_1.switchMap)((isMatch) => {
