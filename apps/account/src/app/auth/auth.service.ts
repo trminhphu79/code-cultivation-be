@@ -52,6 +52,7 @@ export class AuthService {
     this.githubConfig = this.configService.get<GitHubConfig>('github');
     this.googleConfig = this.configService.get<GoogleConfig>('google');
     this.jwtConfig = this.configService.get<JwtConfig>('jwt');
+    console.log('jwtConfig: ', this.jwtConfig);
     this.oauthClient = new OAuth2Client({
       clientId: this.googleConfig?.clientId,
     });
@@ -63,14 +64,14 @@ export class AuthService {
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
-          expiresIn: '2m',
+          expiresIn: this.jwtConfig.accessExpiry,
         }),
       })),
       tap((token) => this.logger.log('accessToken: ', token?.accessToken)),
       map(({ accessToken }) => ({
         accessToken,
         refreshToken: this.jwtService.sign(payload, {
-          expiresIn: '5m',
+          expiresIn: this.jwtConfig.refreshExpiry,
         }),
       })),
       tap((token) => this.logger.log('refreshToken: ', token.refreshToken)),

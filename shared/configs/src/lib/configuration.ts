@@ -38,5 +38,7 @@ export const Configurations = (): Configuration => ({
     secret: process.env['JWT_SECRET_KEY'],
     privateKey: process.env['JWT_PRIVATE_KEY'],
     algorithm: process.env['JWT_ALGORITHM'],
+    accessExpiry: process.env['JWT_ACCESS_TOKEN_EXPIRY'],
+    refreshExpiry: process.env['JWT_REFRESH_TOKEN_EXPIRY'],
   },
 });

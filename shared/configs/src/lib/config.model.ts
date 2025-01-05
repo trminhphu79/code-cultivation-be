@@ -38,6 +38,8 @@ export type JwtConfig = {
   secret: string | undefined;
   privateKey: string | undefined;
   algorithm: string | undefined;
+  accessExpiry: string | undefined;
+  refreshExpiry: string | undefined;
 };
 export type Configuration = {
   port: number | undefined;

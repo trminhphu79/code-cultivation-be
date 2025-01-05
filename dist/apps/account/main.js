@@ -127,6 +127,8 @@ const Configurations = () => ({
         secret: process.env['JWT_SECRET_KEY'],
         privateKey: process.env['JWT_PRIVATE_KEY'],
         algorithm: process.env['JWT_ALGORITHM'],
+        accessExpiry: process.env['JWT_ACCESS_TOKEN_EXPIRY'],
+        refreshExpiry: process.env['JWT_REFRESH_TOKEN_EXPIRY'],
     },
 });
 exports.Configurations = Configurations;
@@ -1935,6 +1937,7 @@ let AuthService = AuthService_1 = class AuthService {
         this.githubConfig = this.configService.get('github');
         this.googleConfig = this.configService.get('google');
         this.jwtConfig = this.configService.get('jwt');
+        console.log('jwtConfig: ', this.jwtConfig);
         this.oauthClient = new google_auth_library_1.OAuth2Client({
             clientId: this.googleConfig?.clientId,
         });
@@ -1944,12 +1947,12 @@ let AuthService = AuthService_1 = class AuthService {
         console.log(this.jwtService);
         return (0, rxjs_1.of)(payload).pipe((0, operators_1.map)((payload) => ({
             accessToken: this.jwtService.sign(payload, {
-                expiresIn: '2m',
+                expiresIn: this.jwtConfig.accessExpiry,
             }),
         })), (0, operators_1.tap)((token) => this.logger.log('accessToken: ', token?.accessToken)), (0, operators_1.map)(({ accessToken }) => ({
             accessToken,
             refreshToken: this.jwtService.sign(payload, {
-                expiresIn: '5m',
+                expiresIn: this.jwtConfig.refreshExpiry,
             }),
         })), (0, operators_1.tap)((token) => this.logger.log('refreshToken: ', token.refreshToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
