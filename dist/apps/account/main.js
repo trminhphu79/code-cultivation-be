@@ -1234,12 +1234,12 @@ let AccountService = AccountService_1 = class AccountService {
             password: hashPassword,
         })).pipe((0, rxjs_1.map)((response) => response.toJSON()), (0, rxjs_1.tap)((result) => {
             const key = this.getCacheKey(email);
+            const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key,
                 value: { ...result, profile: profile_1.DefaultProfileValue },
-                ttl: '7d',
+                ttl: ttlInSeconds,
             });
-            this.handleSendTokenVerifyEmail(result?.email);
         }))), (0, rxjs_1.map)(() => ({
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
         })));
@@ -1250,7 +1250,10 @@ let AccountService = AccountService_1 = class AccountService {
         this.logger.log(`handleSendTokenVerifyEmail ${token}`);
         this.mailerService
             .sendOtpVerifyEmail(email, verificationLink)
-            .pipe((0, rxjs_1.tap)(() => {
+            .pipe((0, rxjs_1.catchError)((e) => {
+            this.logger.error('Có lỗi sãy ra khi gửi otp verify email');
+            return e;
+        }), (0, rxjs_1.tap)(() => {
             this.logger.log(`Verification email sent to ${email}`);
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key: `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${email}`,
@@ -1404,17 +1407,29 @@ let CacheListener = CacheListener_1 = class CacheListener {
         this.logger = new common_1.Logger(CacheListener_1.name);
     }
     async handleCreateEvent(data) {
-        await this.redis.set(data.key, JSON.stringify(data.value));
-        await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
-        this.logger.log(`Handled create cache for key: ${data.key}`);
-        console.log(`Handled create cache for key: ${data.key} and value: `, JSON.stringify(data.value));
+        if (!data.key || !data.value) {
+            this.logger.warn(`Invalid cache data provided: key or value is missing`);
+            return;
+        }
+        try {
+            const valueToStore = JSON.stringify(data.value);
+            const ttlInSeconds = +data?.ttl || 120; // Default TTL is 120 seconds if not provided
+            await this.redis.set(data.key, valueToStore);
+            await this.redis.expire(data.key, ttlInSeconds);
+            this.logger.log(`Successfully cached key: ${data.key} with TTL: ${ttlInSeconds} seconds`);
+            console.log(`Cached key: ${data.key}, value: ${valueToStore}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to handle cache creation for key: ${data.key}`, error?.stack);
+            throw new Error(`Cache creation failed: ${error?.message}`);
+        }
     }
     async handleUpdateEvent(data) {
         await this.redis.set(data.key, data.value);
         this.logger.log(`Handled update cache for key: ${data.key}`);
     }
     async handleDeleteEvent(key) {
-        console.log("handleDeleteEvent: ", key);
+        console.log('handleDeleteEvent: ', key);
         await this.redis.del(key);
         this.logger.log(`Handled delete cache for key: ${key}`);
     }
@@ -2049,12 +2064,13 @@ let AuthService = AuthService_1 = class AuthService {
             if (!existingUser) {
                 return (0, exception_1.throwException)(common_1.HttpStatus.NOT_FOUND, 'Tài khoản không tồn tại, vui lòng thử lại với email khác.');
             }
+            console.log('existingUser: ', existingUser);
             if (existingUser && !existingUser.isVerify) {
                 return (0, rxjs_1.of)({
                     message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
                 }).pipe((0, operators_1.tap)(() => {
                     this.accountService.handleSendTokenVerifyEmail({
-                        email: existingUser.email,
+                        email: body.email,
                         credentialType: existingUser.credentialType,
                     });
                 }));
@@ -2074,6 +2090,11 @@ let AuthService = AuthService_1 = class AuthService {
                 email: email,
                 password: password,
                 confirmPassword,
+            });
+        }), (0, operators_1.tap)(() => {
+            this.accountService.handleSendTokenVerifyEmail({
+                email,
+                credentialType: types_1.CredentialTypeEnum.NONE,
             });
         }));
     }
@@ -2253,10 +2274,11 @@ let AuthService = AuthService_1 = class AuthService {
             nickName,
         }).pipe((0, operators_1.tap)((profile) => {
             const key = this.getCacheKey(email, credentialType);
+            const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key,
                 value: { ...accountData, email, profile },
-                ttl: '7d',
+                ttl: ttlInSeconds,
             });
         }), (0, operators_1.switchMap)((profile) => this.generateFullTokens({
             ...accountData,

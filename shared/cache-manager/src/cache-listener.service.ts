@@ -12,13 +12,29 @@ export class CacheListener {
 
   @OnEvent(CacheMessageAction.Create)
   async handleCreateEvent(data: { key: string; value: any; ttl: number }) {
-    await this.redis.set(data.key, JSON.stringify(data.value));
-    await this.redis.expire(data.key, data?.ttl || 120); // 60 giây
-    this.logger.log(`Handled create cache for key: ${data.key}`);
-    console.log(
-      `Handled create cache for key: ${data.key} and value: `,
-      JSON.stringify(data.value)
-    );
+    if (!data.key || !data.value) {
+      this.logger.warn(`Invalid cache data provided: key or value is missing`);
+      return;
+    }
+
+    try {
+      const valueToStore = JSON.stringify(data.value);
+      const ttlInSeconds = +data?.ttl || 120; // Default TTL is 120 seconds if not provided
+
+      await this.redis.set(data.key, valueToStore);
+      await this.redis.expire(data.key, ttlInSeconds);
+
+      this.logger.log(
+        `Successfully cached key: ${data.key} with TTL: ${ttlInSeconds} seconds`
+      );
+      console.log(`Cached key: ${data.key}, value: ${valueToStore}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to handle cache creation for key: ${data.key}`,
+        error?.stack
+      );
+      throw new Error(`Cache creation failed: ${error?.message}`);
+    }
   }
 
   @OnEvent(CacheMessageAction.Update)
@@ -29,7 +45,7 @@ export class CacheListener {
 
   @OnEvent(CacheMessageAction.Delete)
   async handleDeleteEvent(key: string) {
-    console.log("handleDeleteEvent: ", key)
+    console.log('handleDeleteEvent: ', key);
     await this.redis.del(key);
     this.logger.log(`Handled delete cache for key: ${key}`);
   }

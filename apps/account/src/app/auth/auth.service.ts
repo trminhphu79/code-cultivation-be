@@ -152,13 +152,15 @@ export class AuthService {
           );
         }
 
+        console.log('existingUser: ', existingUser);
+
         if (existingUser && !existingUser.isVerify) {
           return of({
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
           }).pipe(
             tap(() => {
               this.accountService.handleSendTokenVerifyEmail({
-                email: existingUser.email,
+                email: body.email,
                 credentialType: existingUser.credentialType,
               });
             })
@@ -193,6 +195,12 @@ export class AuthService {
           email: email,
           password: password,
           confirmPassword,
+        });
+      }),
+      tap(() => {
+        this.accountService.handleSendTokenVerifyEmail({
+          email,
+          credentialType: CredentialTypeEnum.NONE,
         });
       })
     );
@@ -503,10 +511,11 @@ export class AuthService {
         }).pipe(
           tap((profile) => {
             const key = this.getCacheKey(email, credentialType);
+            const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: { ...accountData, email, profile },
-              ttl: '7d',
+              ttl: ttlInSeconds,
             });
           }),
           switchMap((profile) =>

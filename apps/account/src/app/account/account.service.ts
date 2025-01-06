@@ -127,12 +127,13 @@ export class AccountService {
           map((response) => response.toJSON()),
           tap((result) => {
             const key = this.getCacheKey(email);
+            const ttlInSeconds = 7 * 24 * 60 * 60;
+
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: { ...result, profile: DefaultProfileValue },
-              ttl: '7d',
+              ttl: ttlInSeconds,
             });
-            this.handleSendTokenVerifyEmail(result?.email);
           })
         )
       ),
@@ -155,6 +156,10 @@ export class AccountService {
     this.mailerService
       .sendOtpVerifyEmail(email, verificationLink)
       .pipe(
+        catchError((e) => {
+          this.logger.error('Có lỗi sãy ra khi gửi otp verify email');
+          return e;
+        }),
         tap(() => {
           this.logger.log(`Verification email sent to ${email}`);
           this.eventEmitter.emit(CacheMessageAction.Create, {
