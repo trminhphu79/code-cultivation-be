@@ -170,15 +170,21 @@ export class AccountService {
       ),
       switchMap((user) => {
         if (user) {
-          return user.destroy();
+          return from(user.destroy()).pipe(
+            tap(() => {
+              this.eventEmitter.emit(
+                CacheMessageAction.Delete,
+                this.getCacheKey(user.email, user.credentialType)
+              );
+            }),
+            map(() => ({ message: 'Xoá tài khoản thành công.', data: body.id }))
+          );
         }
-
         return throwException(
           HttpStatusCode.NotFound,
-          'Tài khoản không tồn tại'
+          'Tài khoản không tồn tại.'
         );
-      }),
-      map(() => ({ message: 'Xoá tài khoản thành công.', data: body.id }))
+      })
     );
   }
 

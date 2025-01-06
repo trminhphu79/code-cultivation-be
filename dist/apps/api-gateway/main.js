@@ -1269,6 +1269,7 @@ let CacheListener = CacheListener_1 = class CacheListener {
         this.logger.log(`Handled update cache for key: ${data.key}`);
     }
     async handleDeleteEvent(key) {
+        console.log("handleDeleteEvent: ", key);
         await this.redis.del(key);
         this.logger.log(`Handled delete cache for key: ${key}`);
     }

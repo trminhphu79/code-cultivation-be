@@ -29,6 +29,7 @@ export class CacheListener {
 
   @OnEvent(CacheMessageAction.Delete)
   async handleDeleteEvent(key: string) {
+    console.log("handleDeleteEvent: ", key)
     await this.redis.del(key);
     this.logger.log(`Handled delete cache for key: ${key}`);
   }

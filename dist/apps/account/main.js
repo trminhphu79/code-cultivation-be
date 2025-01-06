@@ -1267,10 +1267,12 @@ let AccountService = AccountService_1 = class AccountService {
     handleDeleteAccount(body) {
         return (0, rxjs_1.from)(this.accountModel.findOne({ where: { id: body.id } })).pipe((0, rxjs_1.catchError)(() => (0, exception_1.throwException)(axios_1.HttpStatusCode.InternalServerError, 'Có lỗi xảy ra khi xoá tài khoản.')), (0, rxjs_1.switchMap)((user) => {
             if (user) {
-                return user.destroy();
+                return (0, rxjs_1.from)(user.destroy()).pipe((0, rxjs_1.tap)(() => {
+                    this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Delete, this.getCacheKey(user.email, user.credentialType));
+                }), (0, rxjs_1.map)(() => ({ message: 'Xoá tài khoản thành công.', data: body.id })));
             }
-            return (0, exception_1.throwException)(axios_1.HttpStatusCode.NotFound, 'Tài khoản không tồn tại');
-        }), (0, rxjs_1.map)(() => ({ message: 'Xoá tài khoản thành công.', data: body.id })));
+            return (0, exception_1.throwException)(axios_1.HttpStatusCode.NotFound, 'Tài khoản không tồn tại.');
+        }));
     }
     getCacheKey(email, credentialType = types_1.CredentialTypeEnum.NONE) {
         return `ACCOUNT#${email}#${credentialType}`;
@@ -1406,6 +1408,7 @@ let CacheListener = CacheListener_1 = class CacheListener {
         this.logger.log(`Handled update cache for key: ${data.key}`);
     }
     async handleDeleteEvent(key) {
+        console.log("handleDeleteEvent: ", key);
         await this.redis.del(key);
         this.logger.log(`Handled delete cache for key: ${key}`);
     }
