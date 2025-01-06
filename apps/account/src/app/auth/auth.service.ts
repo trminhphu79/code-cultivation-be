@@ -153,24 +153,13 @@ export class AuthService {
         }
 
         if (existingUser && !existingUser.isVerify) {
-          const key = `${AccountVerifyStatusEnum.UNVERIFY}#${body.email}`;
-          return this.cacheService.get(key).pipe(
-            switchMap((cacheData) => {
-              if (cacheData) {
-                return throwException(
-                  HttpStatusCode.BadRequest,
-                  'Vui lòng thử lại sau ít phút.'
-                );
-              }
-              this.accountService.handleSendTokenVerifyEmail({
-                email: cacheData.email,
-                credentialType: cacheData.credentialType,
-              });
-              return of({
-                message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-              });
-            })
-          );
+          this.accountService.handleSendTokenVerifyEmail({
+            email: existingUser.email,
+            credentialType: existingUser.credentialType,
+          });
+          return of({
+            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+          });
         }
 
         return throwException(

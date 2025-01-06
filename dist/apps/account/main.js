@@ -2050,19 +2050,13 @@ let AuthService = AuthService_1 = class AuthService {
                 return (0, exception_1.throwException)(common_1.HttpStatus.NOT_FOUND, 'Tài khoản không tồn tại, vui lòng thử lại với email khác.');
             }
             if (existingUser && !existingUser.isVerify) {
-                const key = `${types_1.AccountVerifyStatusEnum.UNVERIFY}#${body.email}`;
-                return this.cacheService.get(key).pipe((0, operators_1.switchMap)((cacheData) => {
-                    if (cacheData) {
-                        return (0, exception_1.throwException)(axios_2.HttpStatusCode.BadRequest, 'Vui lòng thử lại sau ít phút.');
-                    }
-                    this.accountService.handleSendTokenVerifyEmail({
-                        email: cacheData.email,
-                        credentialType: cacheData.credentialType,
-                    });
-                    return (0, rxjs_1.of)({
-                        message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-                    });
-                }));
+                this.accountService.handleSendTokenVerifyEmail({
+                    email: existingUser.email,
+                    credentialType: existingUser.credentialType,
+                });
+                return (0, rxjs_1.of)({
+                    message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+                });
             }
             return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản này đã được xác thực, vui lòng thử lại với email khác. ');
         }));

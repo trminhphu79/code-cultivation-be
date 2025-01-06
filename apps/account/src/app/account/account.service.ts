@@ -255,6 +255,7 @@ export class AccountService {
               updatedAt: string;
               isVerify: boolean;
               password: string;
+              credentialType: CredentialTypeEnum;
             }
           );
         }
@@ -278,6 +279,7 @@ export class AccountService {
                 updatedAt: string;
                 isVerify: boolean;
                 password: string;
+                credentialType: CredentialTypeEnum;
               }) || null
           )
         );
