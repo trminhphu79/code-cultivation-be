@@ -197,6 +197,10 @@ export class AuthService {
           confirmPassword,
         });
       }),
+      map((response) => ({
+        data: response,
+        message: 'Tạo tài khoản thành công',
+      })),
       tap(() => {
         this.accountService.handleSendTokenVerifyEmail({
           email,
@@ -207,7 +211,11 @@ export class AuthService {
   }
 
   handleSignIn({ email, password }: SignInDto) {
-    return this.accountService.getExistingAccount(email).pipe(
+    return from(
+      this.accountModel.findOne({
+        where: { email, credentialType: CredentialTypeEnum.NONE },
+      })
+    ).pipe(
       switchMap((userData) => {
         if (userData) {
           return this.bcryptService
@@ -221,14 +229,7 @@ export class AuthService {
                   );
                 }
                 delete userData.password;
-                return from(
-                  this.generateFullTokens<{
-                    id: string;
-                    email: string;
-                    createdAt: string;
-                    updatedAt: string;
-                  }>(userData)
-                ).pipe(
+                return from(this.generateFullTokens(userData)).pipe(
                   map((tokens) => ({
                     message: 'Đăng nhập thành công.',
                     data: {
@@ -380,7 +381,6 @@ export class AuthService {
                 credentialType: CredentialTypeEnum.GOOLGE,
                 bio: '',
                 githubLink: '',
-                nickName: response?.email?.split('@')?.[0] || '',
               };
               return this.createNewAccountAndProfile(payload);
             })
@@ -489,7 +489,6 @@ export class AuthService {
     avatarUrl,
     credentialType,
     githubLink,
-    nickName,
   }: CreateAccountAndProfile) {
     let accountData: any;
     this.logger.log('CREATE new account and profile');
@@ -507,7 +506,6 @@ export class AuthService {
           avatarUrl,
           bio,
           githubLink,
-          nickName,
         }).pipe(
           tap((profile) => {
             const key = this.getCacheKey(email, credentialType);
@@ -543,14 +541,12 @@ export class AuthService {
     avatarUrl,
     bio,
     githubLink,
-    nickName,
   }: {
     accountId: string;
     fullName: string;
     avatarUrl: string;
     bio: string;
     githubLink: string;
-    nickName: string;
   }) {
     return from(
       this.accountService.handleCreateProfile(
@@ -559,7 +555,6 @@ export class AuthService {
           avatarUrl,
           bio,
           githubLink,
-          nickName,
         },
         accountId
       )

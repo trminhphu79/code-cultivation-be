@@ -15,5 +15,4 @@ export type CreateAccountAndProfile = {
   avatarUrl: string;
   credentialType: CredentialTypeEnum;
   githubLink: string;
-  nickName: string;
 };

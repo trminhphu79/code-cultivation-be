@@ -198,6 +198,7 @@ exports.DatabaseModels = [account_1.Account, profile_1.Profile, realm_1.Realm];
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var Account_1;
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
@@ -205,12 +206,147 @@ const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(13);
 const profile_model_1 = __webpack_require__(14);
 const types_1 = __webpack_require__(16);
-let Account = class Account extends sequelize_typescript_1.Model {
+let Account = Account_1 = class Account extends sequelize_typescript_1.Model {
     static async createProfile(instance) {
-        return { ...profile_model_1.DefaultProfileValue, accountId: instance.id };
+        const defaultAccount = {
+            ...profile_model_1.DefaultProfileValue,
+            nickName: Account_1.generateRandomNickName(),
+            accountId: instance.id,
+            fullName: Account_1.generateFullName(),
+        };
+        console.log('createProfile....', defaultAccount);
+        try {
+            // Save profile to the database
+            await profile_model_1.Profile.create(defaultAccount);
+            console.log('Profile created successfully!');
+        }
+        catch (error) {
+            console.error('Error creating profile:', error);
+        }
+    }
+    static generateRandomNickName() {
+        const prefixes = [
+            'Dao',
+            'Tien',
+            'Kiem',
+            'Ma',
+            'Chan',
+            'Vuong',
+            'Phong',
+            'Huyen',
+            'Linh',
+            'Nguyen',
+        ]; // Prefixes related to cultivation fantasy
+        const characters = 'GENERATENICKNAMEFROMTMPANKHOITRANVIPPRO79KHCR';
+        const length = Math.floor(Math.random() * (16 - 8 + 1)) + 8; // Random length between 8 and 16 for the main part of the nickname
+        // Select a random prefix
+        const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        // Generate the random main part of the nickname
+        const mainPart = Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+        // Combine prefix and main part
+        const result = `${randomPrefix}_${mainPart}`?.toLowerCase();
+        console.log('NICK NAME:', result);
+        return result;
+    }
+    static generateFullName() {
+        // Chọn họ ngẫu nhiên
+        const familyName = this.familyNames[Math.floor(Math.random() * this.familyNames.length)];
+        // Chọn tên đệm ngẫu nhiên
+        const middleName = this.middleNames[Math.floor(Math.random() * this.middleNames.length)];
+        // Chọn tên chính ngẫu nhiên
+        const givenName = this.givenNames[Math.floor(Math.random() * this.givenNames.length)];
+        // Kết hợp họ, tên đệm, và tên chính
+        return `${familyName} ${middleName} ${givenName}`;
     }
 };
 exports.Account = Account;
+Account.familyNames = [
+    'Tiêu',
+    'Lý',
+    'Trương',
+    'Hoàng',
+    'Nguyễn',
+    'Phạm',
+    'Đặng',
+    'Tôn',
+    'Mạc',
+    'Chu',
+    'Hạ',
+    'Dương',
+    'Vương',
+    'Hàn',
+    'Tần',
+    'Triệu',
+    'Từ',
+    'Lâm',
+    'Bạch',
+    'Thạch',
+    'Kim',
+    'Long',
+    'Phượng',
+];
+Account.middleNames = [
+    'Thiên',
+    'Huyền',
+    'Phong',
+    'Vũ',
+    'Thanh',
+    'Hải',
+    'Ngọc',
+    'Tuyết',
+    'Vân',
+    'Kiếm',
+    'Tâm',
+    'Bích',
+    'Anh',
+    'Minh',
+    'Hùng',
+    'Linh',
+    'Khải',
+    'Huyền',
+    'Chân',
+    'Nguyên',
+    'Đạo',
+    'Lý',
+    'Tiêu',
+    'Vân',
+    'Ngã',
+    'Hoàng',
+    'Minh',
+    'Lãnh',
+    'Thân',
+    'Soái',
+];
+Account.givenNames = [
+    'Anh',
+    'Bình',
+    'Cường',
+    'Dũng',
+    'Hạnh',
+    'Khang',
+    'Lộc',
+    'Mai',
+    'Ngân',
+    'Phong',
+    'Quý',
+    'Sơn',
+    'Tâm',
+    'Uyên',
+    'Việt',
+    'Yến',
+    'Tiêu',
+    'Dương',
+    'Phi',
+    'Nghê',
+    'Điệp',
+    'Nhi',
+    'Lan',
+    'Nhan',
+    'Đình',
+    'Băng',
+    'Nghi',
+    'Hồng',
+];
 tslib_1.__decorate([
     sequelize_typescript_1.PrimaryKey,
     (0, sequelize_typescript_1.Column)({
@@ -265,7 +401,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:paramtypes", [Account]),
     tslib_1.__metadata("design:returntype", Promise)
 ], Account, "createProfile", null);
-exports.Account = Account = tslib_1.__decorate([
+exports.Account = Account = Account_1 = tslib_1.__decorate([
     (0, sequelize_typescript_1.Table)({ tableName: 'account' })
 ], Account);
 
@@ -289,8 +425,6 @@ const sequelize_typescript_1 = __webpack_require__(13);
 const account_model_1 = __webpack_require__(12);
 const realm_model_1 = __webpack_require__(15);
 exports.DefaultProfileValue = {
-    fullName: 'Vô danh',
-    nickName: 'unknown',
     bio: '',
     avatarUrl: '',
     totalExp: 0,
@@ -343,6 +477,7 @@ tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.STRING,
         allowNull: false,
+        unique: true,
     }),
     tslib_1.__metadata("design:type", String)
 ], Profile.prototype, "nickName", void 0);
@@ -1232,17 +1367,26 @@ let AccountService = AccountService_1 = class AccountService {
         return this.bcryptService.hashPassword(password).pipe((0, rxjs_1.switchMap)((hashPassword) => (0, rxjs_1.from)(this.accountModel.create({
             email,
             password: hashPassword,
-        })).pipe((0, rxjs_1.map)((response) => response.toJSON()), (0, rxjs_1.tap)((result) => {
+        })).pipe((0, rxjs_1.map)((response) => response.toJSON()), (0, rxjs_1.switchMap)((accountResponse) => {
+            delete accountResponse?.password;
+            return (0, rxjs_1.from)(this.profileModel.findOne({
+                where: {
+                    accountId: accountResponse?.id,
+                },
+            })).pipe((0, rxjs_1.map)((profile) => ({
+                ...accountResponse,
+                profile,
+            })));
+        }), (0, rxjs_1.tap)((fullyData) => {
+            console.log('fullyData: ', fullyData);
             const key = this.getCacheKey(email);
             const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                 key,
-                value: { ...result, profile: profile_1.DefaultProfileValue },
+                value: fullyData,
                 ttl: ttlInSeconds,
             });
-        }))), (0, rxjs_1.map)(() => ({
-            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-        })));
+        }))));
     }
     handleSendTokenVerifyEmail({ email, credentialType, }) {
         const token = this.generateTokenVerify(email);
@@ -2091,7 +2235,10 @@ let AuthService = AuthService_1 = class AuthService {
                 password: password,
                 confirmPassword,
             });
-        }), (0, operators_1.tap)(() => {
+        }), (0, operators_1.map)((response) => ({
+            data: response,
+            message: 'Tạo tài khoản thành công',
+        })), (0, operators_1.tap)(() => {
             this.accountService.handleSendTokenVerifyEmail({
                 email,
                 credentialType: types_1.CredentialTypeEnum.NONE,
@@ -2099,7 +2246,9 @@ let AuthService = AuthService_1 = class AuthService {
         }));
     }
     handleSignIn({ email, password }) {
-        return this.accountService.getExistingAccount(email).pipe((0, operators_1.switchMap)((userData) => {
+        return (0, rxjs_1.from)(this.accountModel.findOne({
+            where: { email, credentialType: types_1.CredentialTypeEnum.NONE },
+        })).pipe((0, operators_1.switchMap)((userData) => {
             if (userData) {
                 return this.bcryptService
                     .comparePassword(password, userData.password)
@@ -2193,7 +2342,6 @@ let AuthService = AuthService_1 = class AuthService {
                     credentialType: types_1.CredentialTypeEnum.GOOLGE,
                     bio: '',
                     githubLink: '',
-                    nickName: response?.email?.split('@')?.[0] || '',
                 };
                 return this.createNewAccountAndProfile(payload);
             }));
@@ -2259,7 +2407,7 @@ let AuthService = AuthService_1 = class AuthService {
             return this.createNewAccountAndProfile(payload);
         }));
     }
-    createNewAccountAndProfile({ email, name, bio, avatarUrl, credentialType, githubLink, nickName, }) {
+    createNewAccountAndProfile({ email, name, bio, avatarUrl, credentialType, githubLink, }) {
         let accountData;
         this.logger.log('CREATE new account and profile');
         return (0, rxjs_1.from)(this.accountModel.create({ email, credentialType, isVerify: true })).pipe((0, operators_1.map)((account) => {
@@ -2271,7 +2419,6 @@ let AuthService = AuthService_1 = class AuthService {
             avatarUrl,
             bio,
             githubLink,
-            nickName,
         }).pipe((0, operators_1.tap)((profile) => {
             const key = this.getCacheKey(email, credentialType);
             const ttlInSeconds = 7 * 24 * 60 * 60;
@@ -2290,13 +2437,12 @@ let AuthService = AuthService_1 = class AuthService {
             data: { ...accountData, tokens, profile },
         })))))));
     }
-    createProfile({ accountId, fullName, avatarUrl, bio, githubLink, nickName, }) {
+    createProfile({ accountId, fullName, avatarUrl, bio, githubLink, }) {
         return (0, rxjs_1.from)(this.accountService.handleCreateProfile({
             fullName,
             avatarUrl,
             bio,
             githubLink,
-            nickName,
         }, accountId)).pipe((0, operators_1.catchError)((error) => {
             this.logger.error('Error creating profile:', error);
             return (0, exception_1.throwException)(common_1.HttpStatus.INTERNAL_SERVER_ERROR, 'Tạo thông tin người dùng thất bại.');

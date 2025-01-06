@@ -125,21 +125,33 @@ export class AccountService {
           })
         ).pipe(
           map((response) => response.toJSON()),
-          tap((result) => {
+          switchMap((accountResponse) => {
+            delete accountResponse?.password;
+            return from(
+              this.profileModel.findOne({
+                where: {
+                  accountId: accountResponse?.id,
+                },
+              })
+            ).pipe(
+              map((profile) => ({
+                ...accountResponse,
+                profile,
+              }))
+            );
+          }),
+          tap((fullyData) => {
+            console.log('fullyData: ', fullyData);
             const key = this.getCacheKey(email);
             const ttlInSeconds = 7 * 24 * 60 * 60;
-
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
-              value: { ...result, profile: DefaultProfileValue },
+              value: fullyData,
               ttl: ttlInSeconds,
             });
           })
         )
-      ),
-      map(() => ({
-        message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-      }))
+      )
     );
   }
 

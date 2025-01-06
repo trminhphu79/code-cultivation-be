@@ -15,5 +15,5 @@ export class CreateProfileDto {
 
   githubLink!: string;
 
-  nickName!: string;
+  nickName?: string;
 }
