@@ -2050,13 +2050,14 @@ let AuthService = AuthService_1 = class AuthService {
                 return (0, exception_1.throwException)(common_1.HttpStatus.NOT_FOUND, 'Tài khoản không tồn tại, vui lòng thử lại với email khác.');
             }
             if (existingUser && !existingUser.isVerify) {
-                this.accountService.handleSendTokenVerifyEmail({
-                    email: existingUser.email,
-                    credentialType: existingUser.credentialType,
-                });
                 return (0, rxjs_1.of)({
                     message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-                });
+                }).pipe((0, operators_1.tap)(() => {
+                    this.accountService.handleSendTokenVerifyEmail({
+                        email: existingUser.email,
+                        credentialType: existingUser.credentialType,
+                    });
+                }));
             }
             return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản này đã được xác thực, vui lòng thử lại với email khác. ');
         }));

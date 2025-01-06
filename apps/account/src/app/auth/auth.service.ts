@@ -153,13 +153,16 @@ export class AuthService {
         }
 
         if (existingUser && !existingUser.isVerify) {
-          this.accountService.handleSendTokenVerifyEmail({
-            email: existingUser.email,
-            credentialType: existingUser.credentialType,
-          });
           return of({
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
-          });
+          }).pipe(
+            tap(() => {
+              this.accountService.handleSendTokenVerifyEmail({
+                email: existingUser.email,
+                credentialType: existingUser.credentialType,
+              });
+            })
+          );
         }
 
         return throwException(
