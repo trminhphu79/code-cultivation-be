@@ -68,7 +68,12 @@ export class AccountService {
         const key = `${AccountVerifyStatusEnum.UNVERIFY}#${source.email}`;
         return this.cacheService.get(key).pipe(
           switchMap(
-            (response: { email: string; code: string; token: string }) => {
+            (response: {
+              email: string;
+              code: string;
+              token: string;
+              credentialType: CredentialTypeEnum;
+            }) => {
               if (!response) {
                 return throwException(
                   HttpStatusCode.BadRequest,
@@ -83,9 +88,21 @@ export class AccountService {
                 );
               }
 
-              return this.accountModel.update(
-                { isVerify: true },
-                { where: { email: response.email } }
+              return from(
+                this.accountModel.update(
+                  { isVerify: true },
+                  {
+                    where: {
+                      email: response?.email,
+                      credentialType: response?.credentialType,
+                    },
+                  }
+                )
+              ).pipe(
+                map(() => ({
+                  email: response.email,
+                  credentialType: response.credentialType,
+                }))
               );
             }
           ),
@@ -93,11 +110,7 @@ export class AccountService {
             this.removeVerifyTokenCache(source.email);
           })
         );
-      }),
-      map(() => ({
-        data: true,
-        message: 'Tài khoản đã được xác thực thành công.',
-      }))
+      })
     );
   }
 
@@ -129,7 +142,13 @@ export class AccountService {
     );
   }
 
-  handleSendTokenVerifyEmail(email: string) {
+  handleSendTokenVerifyEmail({
+    email,
+    credentialType,
+  }: {
+    email: string;
+    credentialType: CredentialTypeEnum;
+  }) {
     const token = this.generateTokenVerify(email);
     const verificationLink = this.getVerifyLink(token);
     this.logger.log(`handleSendTokenVerifyEmail ${token}`);
@@ -143,6 +162,7 @@ export class AccountService {
             value: {
               token,
               email,
+              credentialType,
             },
             ttl: 180, // 3 phut
           });

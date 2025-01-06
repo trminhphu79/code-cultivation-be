@@ -109,7 +109,37 @@ export class AuthService {
   }
 
   handleVerifyEmail(body: VerifyEmailOtp) {
-    return this.accountService.handleVerifyEmail(body);
+    return this.accountService.handleVerifyEmail(body).pipe(
+      switchMap(
+        (response: { email: string; credentialType: CredentialTypeEnum }) => {
+          return this.accountModel.findOne({
+            where: {
+              email: response.email,
+              credentialType: response.credentialType,
+            },
+            include: [
+              {
+                association: 'profile',
+                required: false, // Set to true if the profile must exist
+              },
+            ],
+          });
+        }
+      ),
+      switchMap((userData) => {
+        const jsonData = userData?.toJSON?.();
+        delete jsonData.password;
+        return this.generateFullTokens(jsonData).pipe(
+          map((tokens) => ({
+            data: {
+              ...jsonData,
+              tokens,
+            },
+            message: 'Xác thực tài khoản thành công.',
+          }))
+        );
+      })
+    );
   }
 
   handleSendTokenVerifyEmail(body: ResendVerifyEmail) {
@@ -132,13 +162,13 @@ export class AuthService {
                   'Vui lòng thử lại sau ít phút.'
                 );
               }
-
+              this.accountService.handleSendTokenVerifyEmail({
+                email: cacheData.email,
+                credentialType: cacheData.credentialType,
+              });
               return of({
                 message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
               });
-            }),
-            tap(() => {
-              this.accountService.handleSendTokenVerifyEmail(body.email);
             })
           );
         }

@@ -1213,14 +1213,19 @@ let AccountService = AccountService_1 = class AccountService {
                 if (payload?.token !== response?.token) {
                     return (0, exception_1.throwException)(axios_1.HttpStatusCode.BadRequest, 'Có lỗi xảy ra trong quá trình xác thực, xin vui lòng thử lại.');
                 }
-                return this.accountModel.update({ isVerify: true }, { where: { email: response.email } });
+                return (0, rxjs_1.from)(this.accountModel.update({ isVerify: true }, {
+                    where: {
+                        email: response?.email,
+                        credentialType: response?.credentialType,
+                    },
+                })).pipe((0, rxjs_1.map)(() => ({
+                    email: response.email,
+                    credentialType: response.credentialType,
+                })));
             }), (0, rxjs_1.tap)(() => {
                 this.removeVerifyTokenCache(source.email);
             }));
-        }), (0, rxjs_1.map)(() => ({
-            data: true,
-            message: 'Tài khoản đã được xác thực thành công.',
-        })));
+        }));
     }
     handleCreateAccount({ password, email }) {
         this.logger.log('handleCreateAccount...', email);
@@ -1239,7 +1244,7 @@ let AccountService = AccountService_1 = class AccountService {
             message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
         })));
     }
-    handleSendTokenVerifyEmail(email) {
+    handleSendTokenVerifyEmail({ email, credentialType, }) {
         const token = this.generateTokenVerify(email);
         const verificationLink = this.getVerifyLink(token);
         this.logger.log(`handleSendTokenVerifyEmail ${token}`);
@@ -1252,6 +1257,7 @@ let AccountService = AccountService_1 = class AccountService {
                 value: {
                     token,
                     email,
+                    credentialType,
                 },
                 ttl: 180, // 3 phut
             });
@@ -2013,7 +2019,30 @@ let AuthService = AuthService_1 = class AuthService {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(token, { secret: this.jwtConfig?.secret })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(401, `Token không hợp lệ hoặc đã hết hạn!`)));
     }
     handleVerifyEmail(body) {
-        return this.accountService.handleVerifyEmail(body);
+        return this.accountService.handleVerifyEmail(body).pipe((0, operators_1.switchMap)((response) => {
+            return this.accountModel.findOne({
+                where: {
+                    email: response.email,
+                    credentialType: response.credentialType,
+                },
+                include: [
+                    {
+                        association: 'profile',
+                        required: false, // Set to true if the profile must exist
+                    },
+                ],
+            });
+        }), (0, operators_1.switchMap)((userData) => {
+            const jsonData = userData?.toJSON?.();
+            delete jsonData.password;
+            return this.generateFullTokens(jsonData).pipe((0, operators_1.map)((tokens) => ({
+                data: {
+                    ...jsonData,
+                    tokens,
+                },
+                message: 'Xác thực tài khoản thành công.',
+            })));
+        }));
     }
     handleSendTokenVerifyEmail(body) {
         return this.accountService.getExistingAccount(body.email).pipe((0, operators_1.switchMap)((existingUser) => {
@@ -2026,11 +2055,13 @@ let AuthService = AuthService_1 = class AuthService {
                     if (cacheData) {
                         return (0, exception_1.throwException)(axios_2.HttpStatusCode.BadRequest, 'Vui lòng thử lại sau ít phút.');
                     }
+                    this.accountService.handleSendTokenVerifyEmail({
+                        email: cacheData.email,
+                        credentialType: cacheData.credentialType,
+                    });
                     return (0, rxjs_1.of)({
                         message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
                     });
-                }), (0, operators_1.tap)(() => {
-                    this.accountService.handleSendTokenVerifyEmail(body.email);
                 }));
             }
             return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, 'Tài khoản này đã được xác thực, vui lòng thử lại với email khác. ');
