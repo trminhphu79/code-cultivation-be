@@ -1472,7 +1472,7 @@ let MetadataModule = class MetadataModule {
 exports.MetadataModule = MetadataModule;
 exports.MetadataModule = MetadataModule = tslib_1.__decorate([
     (0, common_1.Module)({
-        controllers: [metadata_controller_1.MedataController],
+        controllers: [metadata_controller_1.MetadataController],
         imports: [
             throttler_1.ThrottlerModule.forRoot([
                 {
@@ -1501,14 +1501,14 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
 
 var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MedataController = void 0;
+exports.MetadataController = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const metadata_service_1 = __webpack_require__(56);
 const metadata_1 = __webpack_require__(70);
 const guard_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(3);
-let MedataController = class MedataController {
+let MetadataController = class MetadataController {
     constructor(service) {
         this.service = service;
     }
@@ -1549,7 +1549,7 @@ let MedataController = class MedataController {
         return this.service.deleteSect({ id });
     }
 };
-exports.MedataController = MedataController;
+exports.MetadataController = MetadataController;
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('realm/create'),
@@ -1572,7 +1572,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof metadata_1.CreateRealmDto !== "undefined" && metadata_1.CreateRealmDto) === "function" ? _b : Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "createRealm", null);
+], MetadataController.prototype, "createRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Patch)('realm/update'),
@@ -1580,7 +1580,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "updateRealm", null);
+], MetadataController.prototype, "updateRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('realm/:id'),
@@ -1588,7 +1588,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "deleteRealm", null);
+], MetadataController.prototype, "deleteRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('materialArt/create'),
@@ -1596,7 +1596,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof metadata_1.CreateMaterialArtDto !== "undefined" && metadata_1.CreateMaterialArtDto) === "function" ? _c : Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "createMaterialArt", null);
+], MetadataController.prototype, "createMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Patch)('materialArt/update'),
@@ -1604,7 +1604,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "updateMaterialArt", null);
+], MetadataController.prototype, "updateMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('materialArt/:id'),
@@ -1612,7 +1612,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "deleteMaterialArt", null);
+], MetadataController.prototype, "deleteMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('achievement/create'),
@@ -1635,7 +1635,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof metadata_1.CreateAchievementDto !== "undefined" && metadata_1.CreateAchievementDto) === "function" ? _d : Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "createAchievement", null);
+], MetadataController.prototype, "createAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Patch)('achievement/update'),
@@ -1643,7 +1643,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "updateAchievement", null);
+], MetadataController.prototype, "updateAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('achievement/:id'),
@@ -1651,7 +1651,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "deleteAchievement", null);
+], MetadataController.prototype, "deleteAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('sect/create'),
@@ -1675,7 +1675,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof metadata_1.CreateSectDto !== "undefined" && metadata_1.CreateSectDto) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "createSect", null);
+], MetadataController.prototype, "createSect", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Patch)('sect/update'),
@@ -1683,7 +1683,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "updateSect", null);
+], MetadataController.prototype, "updateSect", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('sect/:id'),
@@ -1691,11 +1691,11 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
     tslib_1.__metadata("design:returntype", void 0)
-], MedataController.prototype, "deleteSect", null);
-exports.MedataController = MedataController = tslib_1.__decorate([
+], MetadataController.prototype, "deleteSect", null);
+exports.MetadataController = MetadataController = tslib_1.__decorate([
     (0, common_1.Controller)('metadata'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof metadata_service_1.MetadataService !== "undefined" && metadata_service_1.MetadataService) === "function" ? _a : Object])
-], MedataController);
+], MetadataController);
 // materialals
 // realm
 

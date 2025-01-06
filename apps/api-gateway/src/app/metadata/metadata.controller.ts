@@ -10,7 +10,7 @@ import { Public } from '@shared/guard';
 import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('metadata')
-export class MedataController {
+export class MetadataController {
   constructor(private service: MetadataService) {}
 
   @Public()

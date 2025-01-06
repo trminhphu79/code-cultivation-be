@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MedataController } from './metadata.controller';
+import { MetadataController } from './metadata.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { CustomThrottleGuard } from '@shared/guard';
@@ -7,7 +7,7 @@ import { DatabaseConfigFeature, DatabaseConfigModule } from '@shared/database';
 import { MetadataService } from './metadata.service';
 
 @Module({
-  controllers: [MedataController],
+  controllers: [MetadataController],
   imports: [
     ThrottlerModule.forRoot([
       {
