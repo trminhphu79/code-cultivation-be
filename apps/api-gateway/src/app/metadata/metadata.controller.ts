@@ -7,7 +7,7 @@ import {
   CreateSectDto,
 } from '@shared/dtos/metadata';
 import { Public } from '@shared/guard';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 @Controller('metadata')
 export class MetadataController {
@@ -41,7 +41,10 @@ export class MetadataController {
   }
 
   @Public()
-  @Delete('realm/:id')
+  @Delete('realm/delete/:id')
+  @ApiOperation({
+    summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên.',
+  })
   deleteRealm(@Param('id') id) {
     return this.service.deleteRealm({ id });
   }
@@ -59,7 +62,10 @@ export class MetadataController {
   }
 
   @Public()
-  @Delete('materialArt/:id')
+  @ApiOperation({
+    summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên.',
+  })
+  @Delete('materialArt/delete/:id')
   deleteMaterialArt(@Param('id') id) {
     return this.service.deleteMaterialArt({ id });
   }
@@ -90,7 +96,10 @@ export class MetadataController {
     return this.service.updateAchievement(dto);
   }
   @Public()
-  @Delete('achievement/:id')
+  @Delete('achievement/delete/:id')
+  @ApiOperation({
+    summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên.',
+  })
   deleteAchievement(@Param('id') id) {
     return this.service.deleteAchievement({ id });
   }
@@ -122,7 +131,10 @@ export class MetadataController {
   }
 
   @Public()
-  @Delete('sect/:id')
+  @Delete('sect/delete/:id')
+  @ApiOperation({
+    summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên.',
+  })
   deleteSect(@Param('id') id) {
     return this.service.deleteSect({ id });
   }

@@ -1583,7 +1583,10 @@ tslib_1.__decorate([
 ], MetadataController.prototype, "updateRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Delete)('realm/:id'),
+    (0, common_1.Delete)('realm/delete/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên.',
+    }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
@@ -1607,7 +1610,10 @@ tslib_1.__decorate([
 ], MetadataController.prototype, "updateMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Delete)('materialArt/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên.',
+    }),
+    (0, common_1.Delete)('materialArt/delete/:id'),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
@@ -1646,7 +1652,10 @@ tslib_1.__decorate([
 ], MetadataController.prototype, "updateAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Delete)('achievement/:id'),
+    (0, common_1.Delete)('achievement/delete/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên.',
+    }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),
@@ -1686,7 +1695,10 @@ tslib_1.__decorate([
 ], MetadataController.prototype, "updateSect", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Delete)('sect/:id'),
+    (0, common_1.Delete)('sect/delete/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên.',
+    }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [Object]),

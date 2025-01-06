@@ -15,7 +15,7 @@ import { Sect } from '@shared/models/sect';
 
 @Injectable()
 export class MetadataService {
-  constructor(
+constructor(
     @InjectModel(Sect)
     private readonly sectModel: typeof Sect,
     @InjectModel(Realm)
