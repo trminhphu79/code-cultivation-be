@@ -1589,7 +1589,7 @@ tslib_1.__decorate([
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [String]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteRealm", null);
 tslib_1.__decorate([
@@ -1616,7 +1616,7 @@ tslib_1.__decorate([
     (0, common_1.Delete)('materialArt/delete/:id'),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [String]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteMaterialArt", null);
 tslib_1.__decorate([
@@ -1658,7 +1658,7 @@ tslib_1.__decorate([
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [String]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteAchievement", null);
 tslib_1.__decorate([
@@ -1701,7 +1701,7 @@ tslib_1.__decorate([
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [String]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteSect", null);
 exports.MetadataController = MetadataController = tslib_1.__decorate([
