@@ -23,7 +23,6 @@ import { Account } from '@shared/models/account';
 import { HttpStatusCode } from 'axios';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import {
-  AccountVerifyStatusEnum,
   CreateAccountAndProfile,
   CredentialTypeEnum,
   GitHubUser,

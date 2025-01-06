@@ -20,6 +20,7 @@
       "@shared/configs": ["shared/configs/src/index.ts"],
       "@shared/database": ["shared/database/src/index.ts"],
       "@shared/dtos/account": ["shared/dtos/src/account/index.ts"],
+      "@shared/dtos/metadata": ["shared/dtos/src/metadata/index.ts"],
       "@shared/event-emitter": ["shared/event-emitter/src/index.ts"],
       "@shared/exception": ["shared/exception/src/index.ts"],
       "@shared/guard": ["shared/guard/src/index.ts"],
@@ -30,6 +31,17 @@
       ],
       "@shared/models/account": ["shared/models/src/account.model.ts"],
       "@shared/models/profile": ["shared/models/src/profile.model.ts"],
+      "@shared/models/sect": ["shared/models/src/sect.model.ts"],
+      "@shared/models/achievement": ["shared/models/src/achievement.model.ts"],
+      "@shared/models/material-art": [
+        "shared/models/src/material-art.model.ts"
+      ],
+      "@shared/models/profile-achievement": [
+        "shared/models/src/profile-achievement.model.ts"
+      ],
+      "@shared/models/profile-material-art": [
+        "shared/models/src/profile-material-art.model.ts"
+      ],
       "@shared/models/realm": ["shared/models/src/realm.model.ts"],
       "@shared/nats-client": ["shared/nats-client/src/index.ts"],
       "@shared/types": ["shared/types/src/index.ts"],

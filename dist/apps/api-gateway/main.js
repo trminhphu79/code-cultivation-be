@@ -37,6 +37,7 @@ const core_1 = __webpack_require__(2);
 const guard_1 = __webpack_require__(29);
 const cache_health_module_1 = __webpack_require__(43);
 const jwt_1 = __webpack_require__(32);
+const metadata_module_1 = __webpack_require__(54);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = tslib_1.__decorate([
         imports: [
             auth_module_1.AuthModule,
             profile_module_1.ProfileModule,
+            metadata_module_1.MetadataModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [
                     config_1.ConfigModule.forRoot({
@@ -1448,6 +1450,1455 @@ exports.CacheHealthController = CacheHealthController = tslib_1.__decorate([
     (0, common_1.Controller)('cache-health'),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof cache_manager_1.CacheManagerService !== "undefined" && cache_manager_1.CacheManagerService) === "function" ? _a : Object])
 ], CacheHealthController);
+
+
+/***/ }),
+/* 54 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MetadataModule = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const metadata_controller_1 = __webpack_require__(55);
+const throttler_1 = __webpack_require__(35);
+const core_1 = __webpack_require__(2);
+const guard_1 = __webpack_require__(29);
+const database_1 = __webpack_require__(76);
+const metadata_service_1 = __webpack_require__(56);
+let MetadataModule = class MetadataModule {
+};
+exports.MetadataModule = MetadataModule;
+exports.MetadataModule = MetadataModule = tslib_1.__decorate([
+    (0, common_1.Module)({
+        controllers: [metadata_controller_1.MedataController],
+        imports: [
+            throttler_1.ThrottlerModule.forRoot([
+                {
+                    ttl: 1000,
+                    limit: 100,
+                },
+            ]),
+            database_1.DatabaseConfigModule,
+            database_1.DatabaseConfigFeature,
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: guard_1.CustomThrottleGuard,
+            },
+            metadata_service_1.MetadataService,
+        ],
+    })
+], MetadataModule);
+
+
+/***/ }),
+/* 55 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MedataController = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const metadata_service_1 = __webpack_require__(56);
+const metadata_1 = __webpack_require__(70);
+const guard_1 = __webpack_require__(29);
+const swagger_1 = __webpack_require__(3);
+let MedataController = class MedataController {
+    constructor(service) {
+        this.service = service;
+    }
+    createRealm(dto) {
+        return this.service.createRealm(dto);
+    }
+    updateRealm(dto) {
+        return this.service.updateRealm(dto);
+    }
+    deleteRealm(id) {
+        return this.service.deleteRealm({ id });
+    }
+    createMaterialArt(dto) {
+        return this.service.createMaterialArt(dto);
+    }
+    updateMaterialArt(dto) {
+        return this.service.updateMaterialArt(dto);
+    }
+    deleteMaterialArt(id) {
+        return this.service.deleteMaterialArt({ id });
+    }
+    createAchievement(dto) {
+        return this.service.createAchievement(dto);
+    }
+    updateAchievement(dto) {
+        return this.service.updateAchievement(dto);
+    }
+    deleteAchievement(id) {
+        return this.service.deleteAchievement({ id });
+    }
+    createSect(dto) {
+        return this.service.createSect(dto);
+    }
+    updateSect(dto) {
+        return this.service.updateSect(dto);
+    }
+    deleteSect(id) {
+        return this.service.deleteSect({ id });
+    }
+};
+exports.MedataController = MedataController;
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('realm/create'),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tạo ra một cảnh giới thành công.',
+        schema: {
+            example: {
+                data: {
+                    createdAt: '2025-01-06T17:18:59.169Z',
+                    updatedAt: '2025-01-06T17:18:59.170Z',
+                    id: '154dd1e2-4613-426e-b004-d230fa5e4a99',
+                    name: 'Luyện khí cảnh',
+                    description: 'Mô tả cấp bậc cảnh giới hiện tại',
+                },
+                message: 'Tạo thành công cấp bậc tu luyện.',
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof metadata_1.CreateRealmDto !== "undefined" && metadata_1.CreateRealmDto) === "function" ? _b : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "createRealm", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('realm/update'),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "updateRealm", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Delete)('realm/:id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "deleteRealm", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('materialArt/create'),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof metadata_1.CreateMaterialArtDto !== "undefined" && metadata_1.CreateMaterialArtDto) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "createMaterialArt", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('materialArt/update'),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "updateMaterialArt", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Delete)('materialArt/:id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "deleteMaterialArt", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('achievement/create'),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tạo ra một cảnh giới thành công.',
+        schema: {
+            example: {
+                data: {
+                    id: '9b2f6a4b-8489-4d01-9ad4-4008b76b8268',
+                    name: 'Sơ cấp thuật đạo',
+                    logo: 'Hình ảnh mô tả cấp bậc cảnh giới hiện tại',
+                    updatedAt: '2025-01-06T17:19:30.161Z',
+                    createdAt: '2025-01-06T17:19:30.161Z',
+                },
+                message: 'Tạo thành công thành tựu.',
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof metadata_1.CreateAchievementDto !== "undefined" && metadata_1.CreateAchievementDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "createAchievement", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('achievement/update'),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "updateAchievement", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Delete)('achievement/:id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "deleteAchievement", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('sect/create'),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tạo ra một cảnh giới thành công.',
+        schema: {
+            example: {
+                data: {
+                    id: '7b01a7b1-ebcc-491e-af5e-68126001c848',
+                    name: 'Frontend',
+                    description: 'Mô môn phái hiện tại.',
+                    logo: 'Mô tả hình ảnh của môn phái',
+                    updatedAt: '2025-01-06T17:19:57.289Z',
+                    createdAt: '2025-01-06T17:19:57.289Z',
+                },
+                message: 'Tạo thành công môn phái.',
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof metadata_1.CreateSectDto !== "undefined" && metadata_1.CreateSectDto) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "createSect", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('sect/update'),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "updateSect", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Delete)('sect/:id'),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MedataController.prototype, "deleteSect", null);
+exports.MedataController = MedataController = tslib_1.__decorate([
+    (0, common_1.Controller)('metadata'),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof metadata_service_1.MetadataService !== "undefined" && metadata_service_1.MetadataService) === "function" ? _a : Object])
+], MedataController);
+// materialals
+// realm
+
+
+/***/ }),
+/* 56 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MetadataService = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const realm_1 = __webpack_require__(57);
+const rxjs_1 = __webpack_require__(52);
+const sequelize_1 = __webpack_require__(69);
+const material_art_1 = __webpack_require__(67);
+const achievement_1 = __webpack_require__(65);
+const sect_1 = __webpack_require__(68);
+let MetadataService = class MetadataService {
+    constructor(sectModel, realmModel, materialArtModel, achievementModel) {
+        this.sectModel = sectModel;
+        this.realmModel = realmModel;
+        this.materialArtModel = materialArtModel;
+        this.achievementModel = achievementModel;
+    }
+    // Create Realm
+    createRealm(body) {
+        return (0, rxjs_1.from)(this.realmModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
+            data: res.toJSON(),
+            message: 'Tạo thành công cấp bậc tu luyện.',
+        })));
+    }
+    // Update Realm
+    updateRealm(body) {
+        const { id, ...rest } = body;
+        return (0, rxjs_1.from)(this.realmModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((realm) => {
+            if (!realm) {
+                return (0, rxjs_1.of)({
+                    message: 'Cấp bậc tu luyện không tồn tại.',
+                });
+            }
+            return (0, rxjs_1.from)(realm.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
+                data: updated.toJSON(),
+                message: 'Cập nhật thành công cấp bậc tu luyện.',
+            })));
+        }));
+    }
+    // Delete Realm
+    deleteRealm(body) {
+        return (0, rxjs_1.from)(this.realmModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((realm) => {
+            if (!realm) {
+                return (0, rxjs_1.of)({ message: 'Cấp bậc tu luyện không tồn tại.' });
+            }
+            return (0, rxjs_1.from)(realm.destroy()).pipe((0, rxjs_1.map)(() => ({
+                message: 'Xóa thành công cấp bậc tu luyện.',
+            })));
+        }));
+    }
+    // Create Material Art
+    createMaterialArt(body) {
+        return (0, rxjs_1.from)(this.materialArtModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
+            data: res.toJSON(),
+            message: 'Tạo thành công bộ môn võ học.',
+        })));
+    }
+    // Update Material Art
+    updateMaterialArt(body) {
+        const { id, ...rest } = body;
+        return (0, rxjs_1.from)(this.materialArtModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((materialArt) => {
+            if (!materialArt) {
+                return (0, rxjs_1.of)({
+                    message: 'Bộ môn võ học không tồn tại.',
+                });
+            }
+            return (0, rxjs_1.from)(materialArt.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
+                data: updated.toJSON(),
+                message: 'Cập nhật thành công bộ môn võ học.',
+            })));
+        }));
+    }
+    // Delete Material Art
+    deleteMaterialArt(body) {
+        return (0, rxjs_1.from)(this.materialArtModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((materialArt) => {
+            if (!materialArt) {
+                return (0, rxjs_1.of)({ message: 'Bộ môn võ học không tồn tại.' });
+            }
+            return (0, rxjs_1.from)(materialArt.destroy()).pipe((0, rxjs_1.map)(() => ({
+                message: 'Xóa thành công bộ môn võ học.',
+            })));
+        }));
+    }
+    // Create Achievement
+    createAchievement(body) {
+        return (0, rxjs_1.from)(this.achievementModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
+            data: res.toJSON(),
+            message: 'Tạo thành công thành tựu.',
+        })));
+    }
+    // Update Achievement
+    updateAchievement(body) {
+        const { id, ...rest } = body;
+        return (0, rxjs_1.from)(this.achievementModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((achievement) => {
+            if (!achievement) {
+                return (0, rxjs_1.of)({
+                    message: 'Thành tựu không tồn tại.',
+                });
+            }
+            return (0, rxjs_1.from)(achievement.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
+                data: updated.toJSON(),
+                message: 'Cập nhật thành công thành tựu.',
+            })));
+        }));
+    }
+    // Delete Achievement
+    deleteAchievement(body) {
+        return (0, rxjs_1.from)(this.achievementModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((achievement) => {
+            if (!achievement) {
+                return (0, rxjs_1.of)({ message: 'Thành tựu không tồn tại.' });
+            }
+            return (0, rxjs_1.from)(achievement.destroy()).pipe((0, rxjs_1.map)(() => ({
+                message: 'Xóa thành công thành tựu.',
+            })));
+        }));
+    }
+    // Create Sect
+    createSect(body) {
+        return (0, rxjs_1.from)(this.sectModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
+            data: res.toJSON(),
+            message: 'Tạo thành công môn phái.',
+        })));
+    }
+    // Update Sect
+    updateSect(body) {
+        const { id, ...rest } = body;
+        return (0, rxjs_1.from)(this.sectModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((sect) => {
+            if (!sect) {
+                return (0, rxjs_1.of)({
+                    message: 'Môn phái không tồn tại.',
+                });
+            }
+            return (0, rxjs_1.from)(sect.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
+                data: updated.toJSON(),
+                message: 'Cập nhật thành công môn phái.',
+            })));
+        }));
+    }
+    // Delete Sect
+    deleteSect(body) {
+        return (0, rxjs_1.from)(this.sectModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((sect) => {
+            if (!sect) {
+                return (0, rxjs_1.of)({ message: 'Môn phái không tồn tại.' });
+            }
+            return (0, rxjs_1.from)(sect.destroy()).pipe((0, rxjs_1.map)(() => ({
+                message: 'Xóa thành công môn phái.',
+            })));
+        }));
+    }
+};
+exports.MetadataService = MetadataService;
+exports.MetadataService = MetadataService = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__param(0, (0, sequelize_1.InjectModel)(sect_1.Sect)),
+    tslib_1.__param(1, (0, sequelize_1.InjectModel)(realm_1.Realm)),
+    tslib_1.__param(2, (0, sequelize_1.InjectModel)(material_art_1.MaterialArt)),
+    tslib_1.__param(3, (0, sequelize_1.InjectModel)(achievement_1.Achievement)),
+    tslib_1.__metadata("design:paramtypes", [Object, Object, Object, Object])
+], MetadataService);
+
+
+/***/ }),
+/* 57 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Realm = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const profile_model_1 = __webpack_require__(59);
+let Realm = class Realm extends sequelize_typescript_1.Model {
+};
+exports.Realm = Realm;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Realm.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+        unique: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Realm.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Realm.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => profile_model_1.Profile),
+    tslib_1.__metadata("design:type", Array)
+], Realm.prototype, "profiles", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Realm.prototype, "createdAt", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Realm.prototype, "updatedAt", void 0);
+exports.Realm = Realm = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'realm' })
+], Realm);
+
+
+/***/ }),
+/* 58 */
+/***/ ((module) => {
+
+module.exports = require("sequelize-typescript");
+
+/***/ }),
+/* 59 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Profile = exports.DefaultProfileValue = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const account_model_1 = __webpack_require__(60);
+const realm_model_1 = __webpack_require__(57);
+const profile_achievement_model_1 = __webpack_require__(64);
+const profile_material_art_model_1 = __webpack_require__(66);
+exports.DefaultProfileValue = {
+    bio: '',
+    avatarUrl: '',
+    totalExp: 0,
+    streak: 0,
+    isActive: true,
+};
+let Profile = class Profile extends sequelize_typescript_1.Model {
+};
+exports.Profile = Profile;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => account_model_1.Account),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "accountId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => account_model_1.Account),
+    tslib_1.__metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
+], Profile.prototype, "account", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => realm_model_1.Realm),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "realmId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => realm_model_1.Realm),
+    tslib_1.__metadata("design:type", typeof (_b = typeof realm_model_1.Realm !== "undefined" && realm_model_1.Realm) === "function" ? _b : Object)
+], Profile.prototype, "realm", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "fullName", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+        unique: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "nickName", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "bio", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "avatarUrl", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+        defaultValue: '0',
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Profile.prototype, "totalExp", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.INTEGER,
+        defaultValue: 0,
+    }),
+    tslib_1.__metadata("design:type", Number)
+], Profile.prototype, "streak", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.BOOLEAN,
+        defaultValue: true,
+    }),
+    tslib_1.__metadata("design:type", Boolean)
+], Profile.prototype, "isActive", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        defaultValue: '',
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Profile.prototype, "githubLink", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Profile.prototype, "createdAt", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Profile.prototype, "updatedAt", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => profile_achievement_model_1.ProfileAchievement),
+    tslib_1.__metadata("design:type", Array)
+], Profile.prototype, "profileAchievements", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => profile_material_art_model_1.ProfileMaterialArt),
+    tslib_1.__metadata("design:type", Array)
+], Profile.prototype, "profileMaterialArts", void 0);
+exports.Profile = Profile = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'profile' })
+], Profile);
+
+
+/***/ }),
+/* 60 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Account = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const profile_model_1 = __webpack_require__(59);
+const types_1 = __webpack_require__(61);
+function generateRandomNickName() {
+    const prefixes = [
+        'Dao',
+        'Tien',
+        'Kiem',
+        'Ma',
+        'Chan',
+        'Vuong',
+        'Phong',
+        'Huyen',
+        'Linh',
+        'Nguyen',
+    ]; // Prefixes related to cultivation fantasy
+    const characters = 'GENERATENICKNAMEFROMTMPANKHOITRANVIPPRO79KHCR';
+    const length = Math.floor(Math.random() * (16 - 8 + 1)) + 8; // Random length between 8 and 16 for the main part of the nickname
+    // Select a random prefix
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    // Generate the random main part of the nickname
+    const mainPart = Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+    // Combine prefix and main part
+    const result = `${randomPrefix}_${mainPart}`?.toLowerCase();
+    console.log('NICK NAME:', result);
+    return result;
+}
+const familyNames = [
+    'Tiêu',
+    'Lý',
+    'Trương',
+    'Hoàng',
+    'Nguyễn',
+    'Phạm',
+    'Đặng',
+    'Tôn',
+    'Mạc',
+    'Chu',
+    'Hạ',
+    'Dương',
+    'Vương',
+    'Hàn',
+    'Tần',
+    'Triệu',
+    'Từ',
+    'Lâm',
+    'Bạch',
+    'Thạch',
+    'Kim',
+    'Long',
+    'Phượng',
+];
+const middleNames = [
+    'Thiên',
+    'Huyền',
+    'Phong',
+    'Vũ',
+    'Thanh',
+    'Hải',
+    'Ngọc',
+    'Tuyết',
+    'Vân',
+    'Kiếm',
+    'Tâm',
+    'Bích',
+    'Anh',
+    'Minh',
+    'Hùng',
+    'Linh',
+    'Khải',
+    'Huyền',
+    'Chân',
+    'Nguyên',
+    'Đạo',
+    'Lý',
+    'Tiêu',
+    'Vân',
+    'Ngã',
+    'Hoàng',
+    'Minh',
+    'Lãnh',
+    'Thân',
+    'Soái',
+];
+const givenNames = [
+    'Anh',
+    'Bình',
+    'Cường',
+    'Dũng',
+    'Hạnh',
+    'Khang',
+    'Lộc',
+    'Mai',
+    'Ngân',
+    'Phong',
+    'Quý',
+    'Sơn',
+    'Tâm',
+    'Uyên',
+    'Việt',
+    'Yến',
+    'Tiêu',
+    'Dương',
+    'Phi',
+    'Nghê',
+    'Điệp',
+    'Nhi',
+    'Lan',
+    'Nhan',
+    'Đình',
+    'Băng',
+    'Nghi',
+    'Hồng',
+];
+function generateFullName() {
+    // Chọn họ ngẫu nhiên
+    const familyName = familyNames[Math.floor(Math.random() * familyNames.length)];
+    // Chọn tên đệm ngẫu nhiên
+    const middleName = middleNames[Math.floor(Math.random() * middleNames.length)];
+    // Chọn tên chính ngẫu nhiên
+    const givenName = givenNames[Math.floor(Math.random() * givenNames.length)];
+    // Kết hợp họ, tên đệm, và tên chính
+    return `${familyName} ${middleName} ${givenName}`;
+}
+let Account = class Account extends sequelize_typescript_1.Model {
+    static async createProfile(instance) {
+        const defaultAccount = {
+            ...profile_model_1.DefaultProfileValue,
+            nickName: generateRandomNickName(),
+            accountId: instance.id,
+            fullName: generateFullName(),
+        };
+        try {
+            await profile_model_1.Profile.create(defaultAccount);
+        }
+        catch (error) {
+            console.error('Error creating profile:', error);
+        }
+    }
+};
+exports.Account = Account;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Account.prototype, "id", void 0);
+tslib_1.__decorate([
+    sequelize_typescript_1.Column,
+    tslib_1.__metadata("design:type", String)
+], Account.prototype, "email", void 0);
+tslib_1.__decorate([
+    sequelize_typescript_1.Column,
+    tslib_1.__metadata("design:type", String)
+], Account.prototype, "password", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.BOOLEAN,
+        defaultValue: false,
+    }),
+    tslib_1.__metadata("design:type", Boolean)
+], Account.prototype, "isVerify", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        defaultValue: types_1.CredentialTypeEnum.NONE,
+        type: sequelize_typescript_1.DataType.STRING,
+    }),
+    tslib_1.__metadata("design:type", typeof (_a = typeof types_1.CredentialTypeEnum !== "undefined" && types_1.CredentialTypeEnum) === "function" ? _a : Object)
+], Account.prototype, "credentialType", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasOne)(() => profile_model_1.Profile),
+    tslib_1.__metadata("design:type", typeof (_b = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _b : Object)
+], Account.prototype, "profile", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Account.prototype, "createdAt", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+], Account.prototype, "updatedAt", void 0);
+tslib_1.__decorate([
+    sequelize_typescript_1.AfterCreate,
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [Account]),
+    tslib_1.__metadata("design:returntype", Promise)
+], Account, "createProfile", null);
+exports.Account = Account = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'account' })
+], Account);
+
+
+/***/ }),
+/* 61 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(62), exports);
+tslib_1.__exportStar(__webpack_require__(63), exports);
+
+
+/***/ }),
+/* 62 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 63 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccountVerifyStatusEnum = exports.CredentialTypeEnum = void 0;
+var CredentialTypeEnum;
+(function (CredentialTypeEnum) {
+    CredentialTypeEnum["NONE"] = "NONE";
+    CredentialTypeEnum["GITHUB"] = "GITHUB";
+    CredentialTypeEnum["GOOLGE"] = "GOOGLE";
+})(CredentialTypeEnum || (exports.CredentialTypeEnum = CredentialTypeEnum = {}));
+var AccountVerifyStatusEnum;
+(function (AccountVerifyStatusEnum) {
+    AccountVerifyStatusEnum["UNVERIFY"] = "UNVERIFY";
+})(AccountVerifyStatusEnum || (exports.AccountVerifyStatusEnum = AccountVerifyStatusEnum = {}));
+
+
+/***/ }),
+/* 64 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProfileAchievement = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const profile_model_1 = __webpack_require__(59);
+const achievement_model_1 = __webpack_require__(65);
+let ProfileAchievement = class ProfileAchievement extends sequelize_typescript_1.Model {
+};
+exports.ProfileAchievement = ProfileAchievement;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileAchievement.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => profile_model_1.Profile),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileAchievement.prototype, "profileId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => profile_model_1.Profile),
+    tslib_1.__metadata("design:type", typeof (_a = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _a : Object)
+], ProfileAchievement.prototype, "profile", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => achievement_model_1.Achievement),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileAchievement.prototype, "achievementId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => achievement_model_1.Achievement),
+    tslib_1.__metadata("design:type", typeof (_b = typeof achievement_model_1.Achievement !== "undefined" && achievement_model_1.Achievement) === "function" ? _b : Object)
+], ProfileAchievement.prototype, "achievement", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        allowNull: false,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], ProfileAchievement.prototype, "createdAt", void 0);
+exports.ProfileAchievement = ProfileAchievement = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'profile_achievements' })
+], ProfileAchievement);
+
+
+/***/ }),
+/* 65 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Achievement = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const profile_achievement_model_1 = __webpack_require__(64);
+let Achievement = class Achievement extends sequelize_typescript_1.Model {
+};
+exports.Achievement = Achievement;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Achievement.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+        unique: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Achievement.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Achievement.prototype, "logo", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => profile_achievement_model_1.ProfileAchievement),
+    tslib_1.__metadata("design:type", Array)
+], Achievement.prototype, "profileAchievements", void 0);
+exports.Achievement = Achievement = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'achievements' })
+], Achievement);
+
+
+/***/ }),
+/* 66 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProfileMaterialArt = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const profile_model_1 = __webpack_require__(59);
+const material_art_model_1 = __webpack_require__(67);
+let ProfileMaterialArt = class ProfileMaterialArt extends sequelize_typescript_1.Model {
+};
+exports.ProfileMaterialArt = ProfileMaterialArt;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileMaterialArt.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => profile_model_1.Profile),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileMaterialArt.prototype, "profileId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => profile_model_1.Profile),
+    tslib_1.__metadata("design:type", typeof (_a = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _a : Object)
+], ProfileMaterialArt.prototype, "profile", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => material_art_model_1.MaterialArt),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileMaterialArt.prototype, "materialArtId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => material_art_model_1.MaterialArt),
+    tslib_1.__metadata("design:type", typeof (_b = typeof material_art_model_1.MaterialArt !== "undefined" && material_art_model_1.MaterialArt) === "function" ? _b : Object)
+], ProfileMaterialArt.prototype, "materialArt", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+        defaultValue: '0',
+    }),
+    tslib_1.__metadata("design:type", String)
+], ProfileMaterialArt.prototype, "masteryLevel", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.DATE,
+        allowNull: false,
+        defaultValue: sequelize_typescript_1.DataType.NOW,
+    }),
+    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], ProfileMaterialArt.prototype, "createdAt", void 0);
+exports.ProfileMaterialArt = ProfileMaterialArt = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'profile_material_arts' })
+], ProfileMaterialArt);
+
+
+/***/ }),
+/* 67 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MaterialArt = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const sect_model_1 = __webpack_require__(68);
+const profile_material_art_model_1 = __webpack_require__(66);
+let MaterialArt = class MaterialArt extends sequelize_typescript_1.Model {
+};
+exports.MaterialArt = MaterialArt;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], MaterialArt.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.ForeignKey)(() => sect_model_1.Sect),
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], MaterialArt.prototype, "sectId", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.BelongsTo)(() => sect_model_1.Sect),
+    tslib_1.__metadata("design:type", typeof (_a = typeof sect_model_1.Sect !== "undefined" && sect_model_1.Sect) === "function" ? _a : Object)
+], MaterialArt.prototype, "sect", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+        unique: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], MaterialArt.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], MaterialArt.prototype, "logo", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], MaterialArt.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => profile_material_art_model_1.ProfileMaterialArt),
+    tslib_1.__metadata("design:type", Array)
+], MaterialArt.prototype, "profileMaterialArts", void 0);
+exports.MaterialArt = MaterialArt = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'material_arts' })
+], MaterialArt);
+
+
+/***/ }),
+/* 68 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Sect = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_typescript_1 = __webpack_require__(58);
+const material_art_model_1 = __webpack_require__(67);
+let Sect = class Sect extends sequelize_typescript_1.Model {
+};
+exports.Sect = Sect;
+tslib_1.__decorate([
+    sequelize_typescript_1.PrimaryKey,
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.UUID,
+        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Sect.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+        unique: true
+    }),
+    tslib_1.__metadata("design:type", String)
+], Sect.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: false,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Sect.prototype, "logo", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Sect.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.HasMany)(() => material_art_model_1.MaterialArt),
+    tslib_1.__metadata("design:type", Array)
+], Sect.prototype, "materialArts", void 0);
+exports.Sect = Sect = tslib_1.__decorate([
+    (0, sequelize_typescript_1.Table)({ tableName: 'sects' })
+], Sect);
+
+
+/***/ }),
+/* 69 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/sequelize");
+
+/***/ }),
+/* 70 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(71), exports);
+tslib_1.__exportStar(__webpack_require__(72), exports);
+tslib_1.__exportStar(__webpack_require__(73), exports);
+tslib_1.__exportStar(__webpack_require__(74), exports);
+tslib_1.__exportStar(__webpack_require__(75), exports);
+
+
+/***/ }),
+/* 71 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeleteDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class DeleteDto {
+}
+exports.DeleteDto = DeleteDto;
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'id here...',
+        default: '',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], DeleteDto.prototype, "id", void 0);
+
+
+/***/ }),
+/* 72 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateSectDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateSectDto {
+}
+exports.CreateSectDto = CreateSectDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Frontend',
+        default: 'Frontend',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateSectDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô môn phái hiện tại.',
+        default: 'Mô môn phái hiện tại.',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], CreateSectDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả hình ảnh của môn phái',
+        default: 'Mô tả hình ảnh của môn phái',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateSectDto.prototype, "logo", void 0);
+
+
+/***/ }),
+/* 73 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateRealmDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateRealmDto {
+}
+exports.CreateRealmDto = CreateRealmDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Luyện khí cảnh',
+        default: 'Luyện khí cảnh',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateRealmDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả cấp bậc cảnh giới hiện tại',
+        default: 'Mô tả cấp bậc cảnh giới hiện tại',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], CreateRealmDto.prototype, "description", void 0);
+
+
+/***/ }),
+/* 74 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateAchievementDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateAchievementDto {
+}
+exports.CreateAchievementDto = CreateAchievementDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Sơ cấp thuật đạo',
+        default: 'Sơ cấp thuật đạo',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateAchievementDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Hình ảnh mô tả cấp bậc cảnh giới hiện tại',
+        default: 'url',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", String)
+], CreateAchievementDto.prototype, "logo", void 0);
+
+
+/***/ }),
+/* 75 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateMaterialArtDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class CreateMaterialArtDto {
+}
+exports.CreateMaterialArtDto = CreateMaterialArtDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Angular Thần Công',
+        default: 'Angular Thần Công',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateMaterialArtDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả môn võ học',
+        default: 'Description',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateMaterialArtDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Thông tin Id của môn phái tạo ra môn võ học này.',
+        default: 'xxxx',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateMaterialArtDto.prototype, "sectId", void 0);
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả hình ảnh của bộ môn võ công',
+        default: 'url',
+    }),
+    tslib_1.__metadata("design:type", String)
+], CreateMaterialArtDto.prototype, "logo", void 0);
+
+
+/***/ }),
+/* 76 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(77), exports);
+tslib_1.__exportStar(__webpack_require__(79), exports);
+tslib_1.__exportStar(__webpack_require__(78), exports);
+
+
+/***/ }),
+/* 77 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.sequelizeModuleOptions = void 0;
+const config_1 = __webpack_require__(31);
+const configs_1 = __webpack_require__(40);
+const database_models_1 = __webpack_require__(78);
+exports.sequelizeModuleOptions = {
+    imports: [
+        config_1.ConfigModule.forRoot({
+            load: [configs_1.Configurations],
+        }),
+    ],
+    inject: [config_1.ConfigService],
+    useFactory(configService) {
+        const configs = configService.get('database');
+        return {
+            host: configs?.host,
+            port: configs?.port,
+            dialect: configs?.dialect,
+            username: configs?.username,
+            password: configs?.password,
+            database: configs?.database,
+            autoLoadModels: true,
+            synchronize: true,
+            models: database_models_1.DatabaseModels,
+        };
+    },
+};
+
+
+/***/ }),
+/* 78 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DatabaseModels = void 0;
+const account_1 = __webpack_require__(60);
+const achievement_1 = __webpack_require__(65);
+const material_art_1 = __webpack_require__(67);
+const profile_1 = __webpack_require__(59);
+const profile_achievement_1 = __webpack_require__(64);
+const profile_material_art_1 = __webpack_require__(66);
+const realm_1 = __webpack_require__(57);
+const sect_1 = __webpack_require__(68);
+exports.DatabaseModels = [
+    account_1.Account,
+    profile_1.Profile,
+    realm_1.Realm,
+    material_art_1.MaterialArt,
+    achievement_1.Achievement,
+    sect_1.Sect,
+    profile_achievement_1.ProfileAchievement,
+    profile_material_art_1.ProfileMaterialArt,
+];
+
+
+/***/ }),
+/* 79 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DatabaseConfigModule = exports.DatabaseConfigFeature = void 0;
+const tslib_1 = __webpack_require__(5);
+const sequelize_1 = __webpack_require__(69);
+const database_config_1 = __webpack_require__(77);
+const common_1 = __webpack_require__(1);
+const database_models_1 = __webpack_require__(78);
+exports.DatabaseConfigFeature = Object.freeze(sequelize_1.SequelizeModule.forFeature(database_models_1.DatabaseModels));
+let DatabaseConfigModule = class DatabaseConfigModule {
+};
+exports.DatabaseConfigModule = DatabaseConfigModule;
+exports.DatabaseConfigModule = DatabaseConfigModule = tslib_1.__decorate([
+    (0, common_1.Module)({
+        imports: [sequelize_1.SequelizeModule.forRootAsync(database_config_1.sequelizeModuleOptions)],
+        exports: [sequelize_1.SequelizeModule.forRootAsync(database_config_1.sequelizeModuleOptions)],
+    })
+], DatabaseConfigModule);
 
 
 /***/ })

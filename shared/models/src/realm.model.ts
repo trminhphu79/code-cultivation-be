@@ -19,13 +19,14 @@ export class Realm extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
+    unique: true,
   })
   name!: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   description!: string;
 
@@ -35,14 +36,12 @@ export class Realm extends Model {
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
-    allowNull: false,
   })
   override createdAt!: Date;
 
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
-    allowNull: false,
   })
   override updatedAt!: Date;
 }

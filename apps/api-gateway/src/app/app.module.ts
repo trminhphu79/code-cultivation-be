@@ -8,11 +8,13 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from '@shared/guard';
 import { CacheHealthModule } from './cache-health/cache-health.module';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { MetadataModule } from './metadata/metadata.module';
 
 @Module({
   imports: [
     AuthModule,
     ProfileModule,
+    MetadataModule,
     JwtModule.registerAsync({
       imports: [
         ConfigModule.forRoot({

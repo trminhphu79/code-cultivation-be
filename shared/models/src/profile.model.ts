@@ -6,9 +6,13 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
+  BeforeCreate,
 } from 'sequelize-typescript';
 import { Account } from './account.model';
 import { Realm } from './realm.model';
+import { ProfileAchievement } from './profile-achievement.model';
+import { ProfileMaterialArt } from './profile-material-art.model';
 
 export const DefaultProfileValue = {
   bio: '',
@@ -111,10 +115,9 @@ export class Profile extends Model {
   })
   override updatedAt!: Date;
 
-  // @BeforeCreate
-  // static async generateUniqueNickName(instance: Profile) {
-  //   if (!instance.nickName) {
-  //     instance.nickName = Profile.generateRandomNickName();
-  //   }
-  // }
+  @HasMany(() => ProfileAchievement)
+  profileAchievements!: ProfileAchievement[];
+
+  @HasMany(() => ProfileMaterialArt)
+  profileMaterialArts!: ProfileMaterialArt[];
 }
