@@ -1957,12 +1957,12 @@ let AuthService = AuthService_1 = class AuthService {
         })), (0, operators_1.tap)((token) => this.logger.log('refreshToken: ', token.refreshToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
     // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
-    generateAccessTokens(payload) {
+    generateAccessToken(payload) {
         return (0, rxjs_1.of)(payload).pipe((0, operators_1.map)((payload) => ({
             accessToken: this.jwtService.sign(payload, {
-                expiresIn: '2m',
+                expiresIn: this.jwtConfig.accessExpiry,
             }),
-        })), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
+        })), (0, operators_1.tap)((token) => this.logger.log('generateAccessTokens: ', token.accessToken)), (0, operators_1.catchError)((error) => (0, exception_1.throwException)(500, `Lỗi tạo token ${error.message}`)));
     }
     verifyToken(token) {
         return (0, rxjs_1.from)(this.jwtService.verifyAsync(token, { secret: this.jwtConfig?.secret })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(401, `Token không hợp lệ hoặc đã hết hạn!`)));
@@ -2067,8 +2067,8 @@ let AuthService = AuthService_1 = class AuthService {
                 .pipe((0, operators_1.switchMap)((cacheData) => {
                 if (cacheData) {
                     delete cacheData?.password;
-                    return this.generateFullTokens(cacheData).pipe((0, operators_1.map)((tokens) => ({
-                        data: { ...cacheData, tokens },
+                    return this.generateAccessToken(cacheData).pipe((0, operators_1.map)((token) => ({
+                        data: token,
                         message: 'Tạo mới token thành công.',
                     })));
                 }

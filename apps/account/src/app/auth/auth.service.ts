@@ -82,13 +82,16 @@ export class AuthService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
-  generateAccessTokens<T>(payload: T & Object) {
+  generateAccessToken<T>(payload: T & Object) {
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
-          expiresIn: '2m',
+          expiresIn: this.jwtConfig.accessExpiry,
         }),
       })),
+      tap((token) =>
+        this.logger.log('generateAccessTokens: ', token.accessToken)
+      ),
       catchError((error) =>
         throwException(500, `Lỗi tạo token ${error.message}`)
       )
@@ -291,9 +294,9 @@ export class AuthService {
             switchMap((cacheData) => {
               if (cacheData) {
                 delete cacheData?.password;
-                return this.generateFullTokens(cacheData).pipe(
-                  map((tokens) => ({
-                    data: { ...cacheData, tokens },
+                return this.generateAccessToken(cacheData).pipe(
+                  map((token) => ({
+                    data: token,
                     message: 'Tạo mới token thành công.',
                   }))
                 );
