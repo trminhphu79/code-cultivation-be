@@ -1,5 +1,6 @@
 export * from './sign-in.dto';
 export * from './resend-otp.dto';
+export * from './delete-accoount.dto';
 export * from './deactivate.dto';
 export * from './verify-email.dto';
 export * from './authenticate.dto';

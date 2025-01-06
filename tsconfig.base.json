@@ -24,6 +24,7 @@
       "@shared/exception": ["shared/exception/src/index.ts"],
       "@shared/guard": ["shared/guard/src/index.ts"],
       "@shared/jwt": ["shared/jwt/src/index.ts"],
+      "@shared/mailer": ["shared/mailer/src/index.ts"],
       "@shared/message-pattern/account": [
         "shared/message-pattern/src/lib/account/index.ts"
       ],
@@ -38,7 +39,7 @@
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
       ],
-      "@shared/mailer": ["shared/mailer/src/index.ts"]
+      "@tangkinhcode-api/file-storage": ["shared/file-storage/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

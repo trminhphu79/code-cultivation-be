@@ -276,14 +276,14 @@ export class AuthService {
     ).pipe(
       catchError(() =>
         throwException(
-          HttpStatusCode.Unauthorized,
+          HttpStatusCode.Forbidden,
           'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
         )
       ),
       switchMap((decodedData) => {
         if (!decodedData || !decodedData?.email) {
           return throwException(
-            HttpStatusCode.Unauthorized,
+            HttpStatusCode.Forbidden,
             'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
           );
         }
@@ -302,7 +302,7 @@ export class AuthService {
                 );
               }
               return throwException(
-                HttpStatusCode.Unauthorized,
+                HttpStatusCode.Forbidden,
                 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
               );
             })

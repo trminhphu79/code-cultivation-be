@@ -6,6 +6,8 @@ export const ProfileMsgPattern = Object.freeze({
   UpdateRealm: `${AccountModule.Profile}/UpdateRealm`,
   UpdatePersonal: `${AccountModule.Profile}/UpdatePersonal`,
   Deactivate: `${AccountModule.Profile}/Deactivate`,
+  Delete: `${AccountModule.Profile}/Delete`,
+  ChangePassword: `${AccountModule.Profile}/ChangePassword`,
 
   AddAchivement: `${AccountModule.Profile}/AddAchivement`,
   RemoveAchivement: `${AccountModule.Profile}/RemoveAchivement`,

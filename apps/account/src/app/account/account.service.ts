@@ -10,6 +10,7 @@ import {
   CreateProfileDto,
   VerifyEmailOtp,
   CreateAccountDto,
+  DeleteAccountDto,
 } from '@shared/dtos/account';
 import { throwException } from '@shared/exception';
 import { EmailService } from '@shared/mailer';
@@ -156,6 +157,28 @@ export class AccountService {
         ...body,
         accountId,
       })
+    );
+  }
+
+  handleDeleteAccount(body: DeleteAccountDto) {
+    return from(this.accountModel.findOne({ where: { id: body.id } })).pipe(
+      catchError(() =>
+        throwException(
+          HttpStatusCode.InternalServerError,
+          'Có lỗi xảy ra khi xoá tài khoản.'
+        )
+      ),
+      switchMap((user) => {
+        if (user) {
+          return user.destroy();
+        }
+
+        return throwException(
+          HttpStatusCode.NotFound,
+          'Tài khoản không tồn tại'
+        );
+      }),
+      map(() => ({ message: 'Xoá tài khoản thành công.', data: body.id }))
     );
   }
 

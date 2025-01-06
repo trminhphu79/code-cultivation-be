@@ -1,5 +1,18 @@
-import { Body, Controller, HttpStatus, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpStatus,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { ApiOperation, ApiProperty, ApiResponse } from '@nestjs/swagger';
+import { DeleteAccountDto } from '@shared/dtos/account';
+import { Public } from '@shared/guard';
+import { ProfileMsgPattern } from '@shared/message-pattern/account';
 
 class UpdateStreakDto {
   @ApiProperty()
@@ -16,7 +29,11 @@ class UpdateExpDto {
 
 @Controller('profile')
 export class ProfileController {
-  
+  constructor(
+    @Inject('NATS_SERVICE')
+    private natsClient: ClientProxy
+  ) {}
+
   @Patch('updateStreak')
   @ApiOperation({ summary: 'Update Streak' })
   @ApiResponse({
@@ -41,5 +58,12 @@ export class ProfileController {
       message: 'update exp successfully',
       data: dto,
     };
+  }
+
+  @Delete('delete/:id')
+  @Public()
+  @ApiOperation({ summary: 'Pernament delete account.' })
+  delete(@Param('id') id: string) {
+    return this.natsClient.send(ProfileMsgPattern.Delete, { id });
   }
 }
