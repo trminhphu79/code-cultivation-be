@@ -127,7 +127,7 @@ export class AuthService {
       ),
       switchMap((userData) => {
         const jsonData = userData?.toJSON?.();
-        delete jsonData.password;
+        delete jsonData?.password;
         return this.generateFullTokens(jsonData).pipe(
           map((tokens) => ({
             data: {
@@ -213,10 +213,17 @@ export class AuthService {
     return from(
       this.accountModel.findOne({
         where: { email, credentialType: CredentialTypeEnum.NONE },
+        include: [
+          {
+            association: 'profile',
+            required: false, // Set to true if the profile must exist
+          },
+        ],
       })
     ).pipe(
       switchMap((userData) => {
         if (userData) {
+          userData = userData.toJSON();
           return this.bcryptService
             .comparePassword(password, userData.password)
             .pipe(
@@ -521,7 +528,7 @@ export class AuthService {
               fullName: profile.fullName,
             }).pipe(
               tap(() => {
-                delete accountData.password;
+                delete accountData?.password;
               }),
               map((tokens) => ({
                 message: 'Đăng nhập thành công.',

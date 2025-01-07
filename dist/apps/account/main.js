@@ -2503,7 +2503,7 @@ let AuthService = AuthService_1 = class AuthService {
             });
         }), (0, operators_1.switchMap)((userData) => {
             const jsonData = userData?.toJSON?.();
-            delete jsonData.password;
+            delete jsonData?.password;
             return this.generateFullTokens(jsonData).pipe((0, operators_1.map)((tokens) => ({
                 data: {
                     ...jsonData,
@@ -2558,8 +2558,15 @@ let AuthService = AuthService_1 = class AuthService {
     handleSignIn({ email, password }) {
         return (0, rxjs_1.from)(this.accountModel.findOne({
             where: { email, credentialType: types_1.CredentialTypeEnum.NONE },
+            include: [
+                {
+                    association: 'profile',
+                    required: false, // Set to true if the profile must exist
+                },
+            ],
         })).pipe((0, operators_1.switchMap)((userData) => {
             if (userData) {
+                userData = userData.toJSON();
                 return this.bcryptService
                     .comparePassword(password, userData.password)
                     .pipe((0, operators_1.switchMap)((isMatch) => {
@@ -2741,7 +2748,7 @@ let AuthService = AuthService_1 = class AuthService {
             ...accountData,
             fullName: profile.fullName,
         }).pipe((0, operators_1.tap)(() => {
-            delete accountData.password;
+            delete accountData?.password;
         }), (0, operators_1.map)((tokens) => ({
             message: 'Đăng nhập thành công.',
             data: { ...accountData, tokens, profile },
