@@ -30,6 +30,12 @@ export class Realm extends Model {
   })
   description!: string;
 
+  @Column({
+    type: DataType.NUMBER,
+    allowNull: true,
+  })
+  level!: string;
+
   @HasMany(() => Profile)
   profiles!: Profile[];
 

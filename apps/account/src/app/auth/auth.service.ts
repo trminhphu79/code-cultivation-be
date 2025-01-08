@@ -51,7 +51,6 @@ export class AuthService {
     this.githubConfig = this.configService.get<GitHubConfig>('github');
     this.googleConfig = this.configService.get<GoogleConfig>('google');
     this.jwtConfig = this.configService.get<JwtConfig>('jwt');
-    console.log('jwtConfig: ', this.jwtConfig);
     this.oauthClient = new OAuth2Client({
       clientId: this.googleConfig?.clientId,
     });
@@ -264,7 +263,6 @@ export class AuthService {
           credentialType: CredentialTypeEnum;
         };
 
-        console.log('source: ', source);
         if (!source?.email) {
           return throwException(
             HttpStatusCode.NotFound,
@@ -364,7 +362,6 @@ export class AuthService {
       ),
       map((googlResponse) => googlResponse.getPayload()),
       switchMap((response) => {
-        console.log('Oauth google resposne: ', response);
         return this.accountService
           .getExistingAccount(response.email, CredentialTypeEnum.GOOLGE)
           .pipe(

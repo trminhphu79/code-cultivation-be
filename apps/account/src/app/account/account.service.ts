@@ -141,7 +141,6 @@ export class AccountService {
             );
           }),
           tap((fullyData) => {
-            console.log('fullyData: ', fullyData);
             const key = this.getCacheKey(email);
             const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(CacheMessageAction.Create, {

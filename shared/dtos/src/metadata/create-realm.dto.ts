@@ -10,9 +10,16 @@ export class CreateRealmDto {
   name!: string;
 
   @ApiProperty({
+    example: 'Mô tả cảnh giới hiện tại',
+    default: 'Mô tả cảnh giới hiện tại',
+  })
+  @IsNotEmpty()
+  description!: string;
+
+  @ApiProperty({
     example: 'Mô tả cấp bậc cảnh giới hiện tại',
     default: 'Mô tả cấp bậc cảnh giới hiện tại',
   })
   @IsNotEmpty()
-  description!: string;
+  level!: number;
 }

@@ -20,6 +20,7 @@ export class MetadataController {
     schema: {
       example: {
         data: {
+          level: 1,
           createdAt: '2025-01-06T17:18:59.169Z',
           updatedAt: '2025-01-06T17:18:59.170Z',
           id: '154dd1e2-4613-426e-b004-d230fa5e4a99',
@@ -43,7 +44,8 @@ export class MetadataController {
   @Public()
   @Delete('realm/delete/:id')
   @ApiOperation({
-    summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên đại thế giới.',
+    summary:
+      'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên đại thế giới.',
   })
   deleteRealm(@Param('id') id: string) {
     return this.service.deleteRealm({ id });
@@ -63,7 +65,8 @@ export class MetadataController {
 
   @Public()
   @ApiOperation({
-    summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên đại thế giới.',
+    summary:
+      'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên đại thế giới.',
   })
   @Delete('materialArt/delete/:id')
   deleteMaterialArt(@Param('id') id: string) {
@@ -98,7 +101,8 @@ export class MetadataController {
   @Public()
   @Delete('achievement/delete/:id')
   @ApiOperation({
-    summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên đại thế giới.',
+    summary:
+      'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên đại thế giới.',
   })
   deleteAchievement(@Param('id') id: string) {
     return this.service.deleteAchievement({ id });
@@ -133,7 +137,8 @@ export class MetadataController {
   @Public()
   @Delete('sect/delete/:id')
   @ApiOperation({
-    summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên đại thế giới.',
+    summary:
+      'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên đại thế giới.',
   })
   deleteSect(@Param('id') id: string) {
     return this.service.deleteSect({ id });
