@@ -30,12 +30,11 @@
         "shared/message-pattern/src/lib/account/index.ts"
       ],
       "@shared/models/account": ["shared/models/src/account.model.ts"],
-      "@shared/models/profile": ["shared/models/src/profile.model.ts"],
-      "@shared/models/sect": ["shared/models/src/sect.model.ts"],
       "@shared/models/achievement": ["shared/models/src/achievement.model.ts"],
       "@shared/models/material-art": [
         "shared/models/src/material-art.model.ts"
       ],
+      "@shared/models/profile": ["shared/models/src/profile.model.ts"],
       "@shared/models/profile-achievement": [
         "shared/models/src/profile-achievement.model.ts"
       ],
@@ -43,6 +42,7 @@
         "shared/models/src/profile-material-art.model.ts"
       ],
       "@shared/models/realm": ["shared/models/src/realm.model.ts"],
+      "@shared/models/sect": ["shared/models/src/sect.model.ts"],
       "@shared/nats-client": ["shared/nats-client/src/index.ts"],
       "@shared/types": ["shared/types/src/index.ts"],
       "@shared/validation/password": [
@@ -51,7 +51,8 @@
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
       ],
-      "@tangkinhcode-api/file-storage": ["shared/file-storage/src/index.ts"]
+      "@tangkinhcode-api/file-storage": ["shared/file-storage/src/index.ts"],
+      "@shared/file-uploader": ["shared/file-uploader/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

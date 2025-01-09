@@ -604,6 +604,13 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", String)
 ], Realm.prototype, "description", void 0);
 tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.NUMBER,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Realm.prototype, "level", void 0);
+tslib_1.__decorate([
     (0, sequelize_typescript_1.HasMany)(() => profile_model_1.Profile),
     tslib_1.__metadata("design:type", Array)
 ], Realm.prototype, "profiles", void 0);
@@ -1688,7 +1695,6 @@ let AccountService = AccountService_1 = class AccountService {
                 profile,
             })));
         }), (0, rxjs_1.tap)((fullyData) => {
-            console.log('fullyData: ', fullyData);
             const key = this.getCacheKey(email);
             const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
@@ -2457,7 +2463,6 @@ let AuthService = AuthService_1 = class AuthService {
         this.githubConfig = this.configService.get('github');
         this.googleConfig = this.configService.get('google');
         this.jwtConfig = this.configService.get('jwt');
-        console.log('jwtConfig: ', this.jwtConfig);
         this.oauthClient = new google_auth_library_1.OAuth2Client({
             clientId: this.googleConfig?.clientId,
         });
@@ -2589,7 +2594,6 @@ let AuthService = AuthService_1 = class AuthService {
     handleSignInWithToken({ token }) {
         return this.verifyToken(token).pipe((0, operators_1.switchMap)(() => {
             const source = this.jwtService.decode(token);
-            console.log('source: ', source);
             if (!source?.email) {
                 return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, 'Không tìm thấy người dùng.');
             }
@@ -2640,7 +2644,6 @@ let AuthService = AuthService_1 = class AuthService {
             idToken: token,
             audience: this.googleConfig.clientId,
         })).pipe((0, operators_1.catchError)(() => (0, exception_1.throwException)(axios_2.HttpStatusCode.BadRequest, 'Có lỗi xảy ra trong quá trình xác thực người dùng từ gmail.')), (0, operators_1.map)((googlResponse) => googlResponse.getPayload()), (0, operators_1.switchMap)((response) => {
-            console.log('Oauth google resposne: ', response);
             return this.accountService
                 .getExistingAccount(response.email, types_1.CredentialTypeEnum.GOOLGE)
                 .pipe((0, operators_1.switchMap)((existingAccount) => {

@@ -1465,8 +1465,9 @@ const metadata_controller_1 = __webpack_require__(55);
 const throttler_1 = __webpack_require__(35);
 const core_1 = __webpack_require__(2);
 const guard_1 = __webpack_require__(29);
-const database_1 = __webpack_require__(76);
+const database_1 = __webpack_require__(88);
 const metadata_service_1 = __webpack_require__(56);
+const file_uploader_1 = __webpack_require__(70);
 let MetadataModule = class MetadataModule {
 };
 exports.MetadataModule = MetadataModule;
@@ -1480,6 +1481,11 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
                     limit: 100,
                 },
             ]),
+            file_uploader_1.FileUploaderModule.forRoot({
+                publicKey: process.env['IMAGE_KIT_PUBLIC_KEY'],
+                urlEndpoint: process.env['IMAGE_KIT_ENDPOINT'],
+                privateKey: process.env['IMAGE_KIT_PRIVATE_KEY'],
+            }),
             database_1.DatabaseConfigModule,
             database_1.DatabaseConfigFeature,
         ],
@@ -1501,13 +1507,29 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
 
 var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MetadataController = void 0;
+exports.MetadataController = exports.ApiFile = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const metadata_service_1 = __webpack_require__(56);
-const metadata_1 = __webpack_require__(70);
+const metadata_1 = __webpack_require__(81);
 const guard_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(3);
+const platform_express_1 = __webpack_require__(87);
+const swagger_2 = __webpack_require__(3);
+const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
+    (0, swagger_2.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                [fileName]: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    })(target, propertyKey, descriptor);
+};
+exports.ApiFile = ApiFile;
 let MetadataController = class MetadataController {
     constructor(service) {
         this.service = service;
@@ -1521,8 +1543,10 @@ let MetadataController = class MetadataController {
     deleteRealm(id) {
         return this.service.deleteRealm({ id });
     }
-    createMaterialArt(dto) {
-        return this.service.createMaterialArt(dto);
+    createMaterialArt(file, dto) {
+        console.log('createMaterialArt DTO: ', dto);
+        console.log('createMaterialArt file: ', typeof file);
+        return this.service.createMaterialArt({ ...dto, logo: file });
     }
     updateMaterialArt(dto) {
         return this.service.updateMaterialArt(dto);
@@ -1558,6 +1582,7 @@ tslib_1.__decorate([
         schema: {
             example: {
                 data: {
+                    level: 1,
                     createdAt: '2025-01-06T17:18:59.169Z',
                     updatedAt: '2025-01-06T17:18:59.170Z',
                     id: '154dd1e2-4613-426e-b004-d230fa5e4a99',
@@ -1595,9 +1620,13 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('materialArt/create'),
-    tslib_1.__param(0, (0, common_1.Body)()),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, exports.ApiFile)('logo'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    tslib_1.__param(0, (0, common_1.UploadedFile)()),
+    tslib_1.__param(1, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof metadata_1.CreateMaterialArtDto !== "undefined" && metadata_1.CreateMaterialArtDto) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:paramtypes", [Object, typeof (_c = typeof metadata_1.CreateMaterialArtDto !== "undefined" && metadata_1.CreateMaterialArtDto) === "function" ? _c : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createMaterialArt", null);
 tslib_1.__decorate([
@@ -1717,6 +1746,7 @@ exports.MetadataController = MetadataController = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataService = void 0;
 const tslib_1 = __webpack_require__(5);
@@ -1727,12 +1757,17 @@ const sequelize_1 = __webpack_require__(69);
 const material_art_1 = __webpack_require__(67);
 const achievement_1 = __webpack_require__(65);
 const sect_1 = __webpack_require__(68);
+const file_uploader_1 = __webpack_require__(70);
+const exception_1 = __webpack_require__(77);
+const axios_1 = __webpack_require__(80);
 let MetadataService = class MetadataService {
-    constructor(sectModel, realmModel, materialArtModel, achievementModel) {
+    constructor(sectModel, realmModel, materialArtModel, achievementModel, fileUploader) {
         this.sectModel = sectModel;
         this.realmModel = realmModel;
         this.materialArtModel = materialArtModel;
         this.achievementModel = achievementModel;
+        this.fileUploader = fileUploader;
+        console.log('fileUploader: ', this.fileUploader);
     }
     // Create Realm
     createRealm(body) {
@@ -1769,10 +1804,25 @@ let MetadataService = class MetadataService {
     }
     // Create Material Art
     createMaterialArt(body) {
-        return (0, rxjs_1.from)(this.materialArtModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
-            data: res.toJSON(),
-            message: 'Tạo thành công bộ môn võ học.',
-        })));
+        return this.fileUploader
+            .upload({
+            file: 'https://www.milofoundation.org/wp-content/uploads/2024/09/20240928130759.jpg',
+            fileName: 'test_material',
+            folder: 'logo',
+        })
+            .pipe((0, rxjs_1.catchError)((err) => {
+            console.log('Error upload: ', err);
+            return (0, exception_1.throwException)(axios_1.HttpStatusCode.InternalServerError, 'Tải lên hình ảnh không thành công.');
+        }), (0, rxjs_1.switchMap)((response) => {
+            console.log('Upload response: ', response);
+            if (response && response?.url) {
+                return (0, rxjs_1.from)(this.materialArtModel.create({ ...body, logo: response.url })).pipe((0, rxjs_1.map)((res) => ({
+                    data: res.toJSON(),
+                    message: 'Tạo thành công bộ môn võ học.',
+                })));
+            }
+            (0, exception_1.throwException)(axios_1.HttpStatusCode.InternalServerError, 'Tải lên hình ảnh không thành công.');
+        }));
     }
     // Update Material Art
     updateMaterialArt(body) {
@@ -1874,7 +1924,8 @@ exports.MetadataService = MetadataService = tslib_1.__decorate([
     tslib_1.__param(1, (0, sequelize_1.InjectModel)(realm_1.Realm)),
     tslib_1.__param(2, (0, sequelize_1.InjectModel)(material_art_1.MaterialArt)),
     tslib_1.__param(3, (0, sequelize_1.InjectModel)(achievement_1.Achievement)),
-    tslib_1.__metadata("design:paramtypes", [Object, Object, Object, Object])
+    tslib_1.__param(4, (0, file_uploader_1.InjectFileUploader)()),
+    tslib_1.__metadata("design:paramtypes", [Object, Object, Object, Object, typeof (_a = typeof file_uploader_1.FileUploader !== "undefined" && file_uploader_1.FileUploader) === "function" ? _a : Object])
 ], MetadataService);
 
 
@@ -1915,6 +1966,13 @@ tslib_1.__decorate([
     }),
     tslib_1.__metadata("design:type", String)
 ], Realm.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.NUMBER,
+        allowNull: true,
+    }),
+    tslib_1.__metadata("design:type", String)
+], Realm.prototype, "level", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.HasMany)(() => profile_model_1.Profile),
     tslib_1.__metadata("design:type", Array)
@@ -2642,12 +2700,255 @@ const tslib_1 = __webpack_require__(5);
 tslib_1.__exportStar(__webpack_require__(71), exports);
 tslib_1.__exportStar(__webpack_require__(72), exports);
 tslib_1.__exportStar(__webpack_require__(73), exports);
-tslib_1.__exportStar(__webpack_require__(74), exports);
 tslib_1.__exportStar(__webpack_require__(75), exports);
+tslib_1.__exportStar(__webpack_require__(76), exports);
 
 
 /***/ }),
 /* 71 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileUploader = void 0;
+class FileUploader {
+}
+exports.FileUploader = FileUploader;
+
+
+/***/ }),
+/* 72 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var FileUploaderModule_1;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileUploaderModule = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const file_uploader_service_1 = __webpack_require__(73);
+const file_uploader_constants_1 = __webpack_require__(76);
+let FileUploaderModule = FileUploaderModule_1 = class FileUploaderModule {
+    static forRoot(options) {
+        const provider = {
+            provide: file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN,
+            useValue: options,
+        };
+        const fileUploader = {
+            provide: file_uploader_constants_1.FILE_UPLOADER_TOKEN,
+            useClass: file_uploader_service_1.FileUploaderService,
+        };
+        return {
+            exports: [provider, fileUploader],
+            module: FileUploaderModule_1,
+            providers: [provider, fileUploader],
+        };
+    }
+    static forRootAsync(options) {
+        const fileUploaderProvider = {
+            inject: [file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN],
+            provide: file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN,
+            useFactory: (_options) => options.useFactory,
+        };
+        const asyncProviders = FileUploaderModule_1.createAsyncProviders(options);
+        return {
+            module: FileUploaderModule_1,
+            imports: [...(options.imports || [])],
+            providers: [...asyncProviders, fileUploaderProvider],
+            exports: [fileUploaderProvider],
+        };
+    }
+    static createAsyncProviders(options) {
+        if (options.useFactory || options.useExisting) {
+            return [FileUploaderModule_1.createAsyncOptionsProvider(options)];
+        }
+        return [
+            FileUploaderModule_1.createAsyncOptionsProvider(options),
+            {
+                provide: options.useClass,
+                useClass: options.useClass,
+                inject: options.inject,
+            },
+        ];
+    }
+    static createAsyncOptionsProvider(options) {
+        if (options.useFactory) {
+            return {
+                provide: file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN,
+                useFactory: options.useFactory,
+                inject: options.inject || [],
+            };
+        }
+        return {
+            provide: file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN,
+            useFactory: async (optionsFactory) => await optionsFactory.createFileUploaderModuleOptions(),
+            inject: options.useClass ? [options.useClass] : [],
+        };
+    }
+};
+exports.FileUploaderModule = FileUploaderModule;
+exports.FileUploaderModule = FileUploaderModule = FileUploaderModule_1 = tslib_1.__decorate([
+    (0, common_1.Global)(),
+    (0, common_1.Module)({})
+], FileUploaderModule);
+
+
+/***/ }),
+/* 73 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var FileUploaderService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FileUploaderService = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const ImageKit = __webpack_require__(74);
+const file_uploader_decorator_1 = __webpack_require__(75);
+const file_uploader_type_1 = __webpack_require__(71);
+const rxjs_1 = __webpack_require__(52);
+let FileUploaderService = FileUploaderService_1 = class FileUploaderService {
+    constructor(options) {
+        this.logger = new common_1.Logger(FileUploaderService_1.name);
+        this.initizeUploader(options);
+    }
+    initizeUploader(options) {
+        this.instance = new ImageKit(options);
+        this.logger.log('Init uploader instance....');
+        console.log('initizeUploader: ', this.instance);
+    }
+    upload(payload) {
+        this.logger.log('Start upload file to image kit....', payload.fileName);
+        console.log('initizeUploader payload: ', payload);
+        return (0, rxjs_1.from)(this.instance.upload(payload));
+    }
+};
+exports.FileUploaderService = FileUploaderService;
+exports.FileUploaderService = FileUploaderService = FileUploaderService_1 = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__param(0, (0, file_uploader_decorator_1.InjectFileUploaderOptions)()),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof file_uploader_type_1.FileUploaderOptions !== "undefined" && file_uploader_type_1.FileUploaderOptions) === "function" ? _a : Object])
+], FileUploaderService);
+
+
+/***/ }),
+/* 74 */
+/***/ ((module) => {
+
+module.exports = require("imagekit");
+
+/***/ }),
+/* 75 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.InjectFileUploaderOptions = InjectFileUploaderOptions;
+exports.InjectFileUploader = InjectFileUploader;
+const common_1 = __webpack_require__(1);
+const file_uploader_constants_1 = __webpack_require__(76);
+function InjectFileUploaderOptions() {
+    return (0, common_1.Inject)(file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN);
+}
+function InjectFileUploader() {
+    return (0, common_1.Inject)(file_uploader_constants_1.FILE_UPLOADER_TOKEN);
+}
+
+
+/***/ }),
+/* 76 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FILE_UPLOADER_OPTIONS_TOKEN = exports.FILE_UPLOADER_MODULE_TOKEN = exports.FILE_UPLOADER_TOKEN = void 0;
+exports.FILE_UPLOADER_TOKEN = 'FILE_UPLOADER_TOKEN';
+exports.FILE_UPLOADER_MODULE_TOKEN = 'FILE_UPLOADER_MODULE_TOKEN';
+exports.FILE_UPLOADER_OPTIONS_TOKEN = 'FILE_UPLOADER_OPTIONS_TOKEN';
+
+
+/***/ }),
+/* 77 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(78), exports);
+tslib_1.__exportStar(__webpack_require__(79), exports);
+
+
+/***/ }),
+/* 78 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GlobalRpcExceptionFilter = exports.CustomRpcException = void 0;
+const tslib_1 = __webpack_require__(5);
+const microservices_1 = __webpack_require__(8);
+const common_1 = __webpack_require__(1);
+const rxjs_1 = __webpack_require__(52);
+class CustomRpcException extends microservices_1.RpcException {
+    constructor(statusCode, message) {
+        super({ statusCode, message });
+        this.statusCode = statusCode;
+        this.message = message;
+    }
+}
+exports.CustomRpcException = CustomRpcException;
+let GlobalRpcExceptionFilter = class GlobalRpcExceptionFilter {
+    catch(exception, host) {
+        return (0, rxjs_1.throwError)(() => ({
+            statusCode: exception.statusCode,
+            message: exception.message,
+        }));
+    }
+};
+exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter;
+exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter = tslib_1.__decorate([
+    (0, common_1.Catch)(CustomRpcException)
+], GlobalRpcExceptionFilter);
+
+
+/***/ }),
+/* 79 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.throwException = void 0;
+const rxjs_1 = __webpack_require__(52);
+const rcp_exception_1 = __webpack_require__(78);
+const throwException = (code, message) => (0, rxjs_1.throwError)(() => {
+    return new rcp_exception_1.CustomRpcException(code, message);
+});
+exports.throwException = throwException;
+
+
+/***/ }),
+/* 80 */
+/***/ ((module) => {
+
+module.exports = require("axios");
+
+/***/ }),
+/* 81 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(82), exports);
+tslib_1.__exportStar(__webpack_require__(83), exports);
+tslib_1.__exportStar(__webpack_require__(84), exports);
+tslib_1.__exportStar(__webpack_require__(85), exports);
+tslib_1.__exportStar(__webpack_require__(86), exports);
+
+
+/***/ }),
+/* 82 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2662,7 +2963,6 @@ exports.DeleteDto = DeleteDto;
 tslib_1.__decorate([
     (0, swagger_1.ApiProperty)({
         example: 'id here...',
-        default: '',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     tslib_1.__metadata("design:type", String)
@@ -2670,7 +2970,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 72 */
+/* 83 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2686,14 +2986,12 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Frontend',
-        default: 'Frontend',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateSectDto.prototype, "name", void 0);
 tslib_1.__decorate([
     (0, swagger_1.ApiProperty)({
         example: 'Mô môn phái hiện tại.',
-        default: 'Mô môn phái hiện tại.',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     tslib_1.__metadata("design:type", String)
@@ -2702,14 +3000,13 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Mô tả hình ảnh của môn phái',
-        default: 'Mô tả hình ảnh của môn phái',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateSectDto.prototype, "logo", void 0);
 
 
 /***/ }),
-/* 73 */
+/* 84 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2725,22 +3022,27 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Luyện khí cảnh',
-        default: 'Luyện khí cảnh',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateRealmDto.prototype, "name", void 0);
 tslib_1.__decorate([
     (0, swagger_1.ApiProperty)({
-        example: 'Mô tả cấp bậc cảnh giới hiện tại',
-        default: 'Mô tả cấp bậc cảnh giới hiện tại',
+        example: 'Mô tả cảnh giới hiện tại',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     tslib_1.__metadata("design:type", String)
 ], CreateRealmDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả cấp bậc cảnh giới hiện tại',
+    }),
+    (0, class_validator_1.IsNotEmpty)(),
+    tslib_1.__metadata("design:type", Number)
+], CreateRealmDto.prototype, "level", void 0);
 
 
 /***/ }),
-/* 74 */
+/* 85 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2756,14 +3058,12 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Sơ cấp thuật đạo',
-        default: 'Sơ cấp thuật đạo',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateAchievementDto.prototype, "name", void 0);
 tslib_1.__decorate([
     (0, swagger_1.ApiProperty)({
         example: 'Hình ảnh mô tả cấp bậc cảnh giới hiện tại',
-        default: 'url',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     tslib_1.__metadata("design:type", String)
@@ -2771,7 +3071,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 75 */
+/* 86 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2787,14 +3087,13 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Angular Thần Công',
-        default: 'Angular Thần Công',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateMaterialArtDto.prototype, "name", void 0);
 tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Mô tả môn võ học',
-        default: 'Description',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateMaterialArtDto.prototype, "description", void 0);
@@ -2802,34 +3101,31 @@ tslib_1.__decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({
         example: 'Thông tin Id của môn phái tạo ra môn võ học này.',
-        default: 'xxxx',
     }),
     tslib_1.__metadata("design:type", String)
 ], CreateMaterialArtDto.prototype, "sectId", void 0);
-tslib_1.__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)({
-        example: 'Mô tả hình ảnh của bộ môn võ công',
-        default: 'url',
-    }),
-    tslib_1.__metadata("design:type", String)
-], CreateMaterialArtDto.prototype, "logo", void 0);
 
 
 /***/ }),
-/* 76 */
+/* 87 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/platform-express");
+
+/***/ }),
+/* 88 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(77), exports);
-tslib_1.__exportStar(__webpack_require__(79), exports);
-tslib_1.__exportStar(__webpack_require__(78), exports);
+tslib_1.__exportStar(__webpack_require__(89), exports);
+tslib_1.__exportStar(__webpack_require__(91), exports);
+tslib_1.__exportStar(__webpack_require__(90), exports);
 
 
 /***/ }),
-/* 77 */
+/* 89 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2837,7 +3133,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.sequelizeModuleOptions = void 0;
 const config_1 = __webpack_require__(31);
 const configs_1 = __webpack_require__(40);
-const database_models_1 = __webpack_require__(78);
+const database_models_1 = __webpack_require__(90);
 exports.sequelizeModuleOptions = {
     imports: [
         config_1.ConfigModule.forRoot({
@@ -2863,7 +3159,7 @@ exports.sequelizeModuleOptions = {
 
 
 /***/ }),
-/* 78 */
+/* 90 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2890,7 +3186,7 @@ exports.DatabaseModels = [
 
 
 /***/ }),
-/* 79 */
+/* 91 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2898,9 +3194,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DatabaseConfigModule = exports.DatabaseConfigFeature = void 0;
 const tslib_1 = __webpack_require__(5);
 const sequelize_1 = __webpack_require__(69);
-const database_config_1 = __webpack_require__(77);
+const database_config_1 = __webpack_require__(89);
 const common_1 = __webpack_require__(1);
-const database_models_1 = __webpack_require__(78);
+const database_models_1 = __webpack_require__(90);
 exports.DatabaseConfigFeature = Object.freeze(sequelize_1.SequelizeModule.forFeature(database_models_1.DatabaseModels));
 let DatabaseConfigModule = class DatabaseConfigModule {
 };

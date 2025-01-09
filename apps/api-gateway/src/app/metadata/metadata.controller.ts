@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { MetadataService } from './metadata.service';
 import {
   CreateAchievementDto,
@@ -7,7 +17,25 @@ import {
   CreateSectDto,
 } from '@shared/dtos/metadata';
 import { Public } from '@shared/guard';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiConsumes, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody } from '@nestjs/swagger';
+
+export const ApiFile =
+  (fileName: string): MethodDecorator =>
+  (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          [fileName]: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    })(target, propertyKey, descriptor);
+  };
 
 @Controller('metadata')
 export class MetadataController {
@@ -53,8 +81,13 @@ export class MetadataController {
 
   @Public()
   @Post('materialArt/create')
-  createMaterialArt(@Body() dto: CreateMaterialArtDto) {
-    return this.service.createMaterialArt(dto);
+  @ApiConsumes('multipart/form-data')
+  @ApiFile('logo')
+  @UseInterceptors(FileInterceptor('file'))
+  createMaterialArt(@UploadedFile() file, @Body() dto: CreateMaterialArtDto) {
+    console.log('createMaterialArt DTO: ', dto);
+    console.log('createMaterialArt file: ', typeof file);
+    return this.service.createMaterialArt({ ...dto, logo: file });
   }
 
   @Public()

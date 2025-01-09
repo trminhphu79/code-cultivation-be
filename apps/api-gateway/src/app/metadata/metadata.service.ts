@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Realm } from '@shared/models/realm';
-import { from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { InjectModel } from '@nestjs/sequelize';
 import {
   CreateAchievementDto,
@@ -12,10 +12,14 @@ import {
 import { MaterialArt } from '@shared/models/material-art';
 import { Achievement } from '@shared/models/achievement';
 import { Sect } from '@shared/models/sect';
+import { InjectFileUploader, FileUploader } from '@shared/file-uploader';
+import { throwException } from '@shared/exception';
+import { HttpStatusCode } from 'axios';
+import { ReadStream } from 'fs';
 
 @Injectable()
 export class MetadataService {
-constructor(
+  constructor(
     @InjectModel(Sect)
     private readonly sectModel: typeof Sect,
     @InjectModel(Realm)
@@ -23,8 +27,12 @@ constructor(
     @InjectModel(MaterialArt)
     private readonly materialArtModel: typeof MaterialArt,
     @InjectModel(Achievement)
-    private readonly achievementModel: typeof Achievement
-  ) {}
+    private readonly achievementModel: typeof Achievement,
+    @InjectFileUploader()
+    private readonly fileUploader: FileUploader
+  ) {
+    console.log('fileUploader: ', this.fileUploader);
+  }
 
   // Create Realm
   createRealm(body: CreateRealmDto) {
@@ -73,13 +81,42 @@ constructor(
   }
 
   // Create Material Art
-  createMaterialArt(body: CreateMaterialArtDto) {
-    return from(this.materialArtModel.create({ ...body })).pipe(
-      map((res) => ({
-        data: res.toJSON(),
-        message: 'Tạo thành công bộ môn võ học.',
-      }))
-    );
+  createMaterialArt(
+    body: CreateMaterialArtDto & { logo: string | Buffer | ReadStream }
+  ) {
+    return this.fileUploader
+      .upload({
+        file: 'https://www.milofoundation.org/wp-content/uploads/2024/09/20240928130759.jpg',
+        fileName: 'test_material',
+        folder: 'logo',
+      })
+      .pipe(
+        catchError((err) => {
+          console.log('Error upload: ', err);
+          return throwException(
+            HttpStatusCode.InternalServerError,
+            'Tải lên hình ảnh không thành công.'
+          );
+        }),
+        switchMap((response) => {
+          console.log('Upload response: ', response);
+          if (response && response?.url) {
+            return from(
+              this.materialArtModel.create({ ...body, logo: response.url })
+            ).pipe(
+              map((res) => ({
+                data: res.toJSON(),
+                message: 'Tạo thành công bộ môn võ học.',
+              }))
+            );
+          }
+          
+          throwException(
+            HttpStatusCode.InternalServerError,
+            'Tải lên hình ảnh không thành công.'
+          );
+        })
+      );
   }
 
   // Update Material Art
