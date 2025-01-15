@@ -10,6 +10,7 @@ import {
   Delete,
   Get,
   Inject,
+  Logger,
   Param,
   Patch,
   Post,
@@ -29,6 +30,7 @@ import { Public } from '@shared/guard';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
+import { tap } from 'rxjs';
 
 export const ApiFile =
   (fileName: string): MethodDecorator =>
@@ -432,7 +434,9 @@ export class MetadataController {
     },
   })
   findAllAchievement(@Body() dto: MetadataPaginationDto) {
-    return this.natsClient.send(AchievementPattern.FindAll, dto);
+    return this.natsClient.send(AchievementPattern.FindAll, dto).pipe(
+      tap(()=> Logger.log('findAllAchievement success'))
+    );
   }
 
   @Public()
@@ -571,7 +575,9 @@ export class MetadataController {
     },
   })
   findAllSect(@Body() dto: MetadataPaginationDto) {
-    return this.natsClient.send(SectPattern.FindAll, dto);
+    return this.natsClient.send(SectPattern.FindAll, dto).pipe(
+      tap(()=> Logger.log('findAllSect success'))
+    );
   }
 
   @Public()

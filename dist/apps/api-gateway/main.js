@@ -1463,29 +1463,12 @@ exports.MetadataModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const metadata_controller_1 = __webpack_require__(55);
-const throttler_1 = __webpack_require__(35);
-const core_1 = __webpack_require__(2);
-const guard_1 = __webpack_require__(29);
 let MetadataModule = class MetadataModule {
 };
 exports.MetadataModule = MetadataModule;
 exports.MetadataModule = MetadataModule = tslib_1.__decorate([
     (0, common_1.Module)({
         controllers: [metadata_controller_1.MetadataController],
-        imports: [
-            throttler_1.ThrottlerModule.forRoot([
-                {
-                    ttl: 1000,
-                    limit: 100,
-                },
-            ]),
-        ],
-        providers: [
-            {
-                provide: core_1.APP_GUARD,
-                useClass: guard_1.CustomThrottleGuard,
-            },
-        ],
     })
 ], MetadataModule);
 
@@ -1506,6 +1489,7 @@ const guard_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(3);
 const swagger_2 = __webpack_require__(3);
 const microservices_1 = __webpack_require__(8);
+const rxjs_1 = __webpack_require__(52);
 const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
     (0, swagger_2.ApiBody)({
         schema: {
@@ -1561,7 +1545,7 @@ let MetadataController = class MetadataController {
         return this.natsClient.send(metadata_1.AchievementPattern.FindOne, id);
     }
     findAllAchievement(dto) {
-        return this.natsClient.send(metadata_1.AchievementPattern.FindAll, dto);
+        return this.natsClient.send(metadata_1.AchievementPattern.FindAll, dto).pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllAchievement success')));
     }
     updateAchievement(dto) {
         return this.natsClient.send(metadata_1.AchievementPattern.Update, dto);
@@ -1576,7 +1560,7 @@ let MetadataController = class MetadataController {
         return this.natsClient.send(metadata_1.SectPattern.FindOne, id);
     }
     findAllSect(dto) {
-        return this.natsClient.send(metadata_1.SectPattern.FindAll, dto);
+        return this.natsClient.send(metadata_1.SectPattern.FindAll, dto).pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllSect success')));
     }
     updateSect(dto) {
         return this.natsClient.send(metadata_1.SectPattern.Update, dto);
