@@ -378,6 +378,7 @@ exports.MicroServiceName = Object.freeze({
     Account: 'AccountService',
     Guild: 'GuildService',
     Scripture: 'ScriptureService',
+    Core: 'CoreService',
 });
 
 
@@ -1465,9 +1466,6 @@ const metadata_controller_1 = __webpack_require__(55);
 const throttler_1 = __webpack_require__(35);
 const core_1 = __webpack_require__(2);
 const guard_1 = __webpack_require__(29);
-const database_1 = __webpack_require__(88);
-const metadata_service_1 = __webpack_require__(56);
-const file_uploader_1 = __webpack_require__(70);
 let MetadataModule = class MetadataModule {
 };
 exports.MetadataModule = MetadataModule;
@@ -1481,20 +1479,12 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
                     limit: 100,
                 },
             ]),
-            file_uploader_1.FileUploaderModule.forRoot({
-                publicKey: process.env['IMAGE_KIT_PUBLIC_KEY'],
-                urlEndpoint: process.env['IMAGE_KIT_ENDPOINT'],
-                privateKey: process.env['IMAGE_KIT_PRIVATE_KEY'],
-            }),
-            database_1.DatabaseConfigModule,
-            database_1.DatabaseConfigFeature,
         ],
         providers: [
             {
                 provide: core_1.APP_GUARD,
                 useClass: guard_1.CustomThrottleGuard,
             },
-            metadata_service_1.MetadataService,
         ],
     })
 ], MetadataModule);
@@ -1505,17 +1495,17 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataController = exports.ApiFile = void 0;
 const tslib_1 = __webpack_require__(5);
+const metadata_1 = __webpack_require__(56);
 const common_1 = __webpack_require__(1);
-const metadata_service_1 = __webpack_require__(56);
-const metadata_1 = __webpack_require__(81);
+const metadata_2 = __webpack_require__(62);
 const guard_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(3);
-const platform_express_1 = __webpack_require__(87);
 const swagger_2 = __webpack_require__(3);
+const microservices_1 = __webpack_require__(8);
 const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
     (0, swagger_2.ApiBody)({
         schema: {
@@ -1531,86 +1521,217 @@ const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
 };
 exports.ApiFile = ApiFile;
 let MetadataController = class MetadataController {
-    constructor(service) {
-        this.service = service;
+    constructor(natsClient) {
+        this.natsClient = natsClient;
     }
     createRealm(dto) {
-        return this.service.createRealm(dto);
+        return this.natsClient.send(metadata_1.RealmPattern.Create, dto);
     }
     updateRealm(dto) {
-        return this.service.updateRealm(dto);
+        return this.natsClient.send(metadata_1.RealmPattern.Update, dto);
+    }
+    findOneRealm(id) {
+        return this.natsClient.send(metadata_1.RealmPattern.FindOne, id);
+    }
+    findAllRealm(dto) {
+        return this.natsClient.send(metadata_1.RealmPattern.FindAll, dto);
     }
     deleteRealm(id) {
-        return this.service.deleteRealm({ id });
+        return this.natsClient.send(metadata_1.RealmPattern.Delete, id);
     }
-    createMaterialArt(file, dto) {
-        console.log('createMaterialArt DTO: ', dto);
-        console.log('createMaterialArt file: ', typeof file);
-        return this.service.createMaterialArt({ ...dto, logo: file });
+    createMaterialArt(dto) {
+        return this.natsClient.send(metadata_1.MaterialArtPattern.Create, dto);
+    }
+    findOneMaterialArt(id) {
+        return this.natsClient.send(metadata_1.MaterialArtPattern.FindOne, id);
+    }
+    findAllMaterialArt(dto) {
+        return this.natsClient.send(metadata_1.MaterialArtPattern.FindAll, dto);
     }
     updateMaterialArt(dto) {
-        return this.service.updateMaterialArt(dto);
+        return this.natsClient.send(metadata_1.MaterialArtPattern.Update, dto);
     }
     deleteMaterialArt(id) {
-        return this.service.deleteMaterialArt({ id });
+        return this.natsClient.send(metadata_1.MaterialArtPattern.Delete, id);
     }
     createAchievement(dto) {
-        return this.service.createAchievement(dto);
+        return this.natsClient.send(metadata_1.AchievementPattern.Create, dto);
+    }
+    findOneAchievement(id) {
+        return this.natsClient.send(metadata_1.AchievementPattern.FindOne, id);
+    }
+    findAllAchievement(dto) {
+        return this.natsClient.send(metadata_1.AchievementPattern.FindAll, dto);
     }
     updateAchievement(dto) {
-        return this.service.updateAchievement(dto);
+        return this.natsClient.send(metadata_1.AchievementPattern.Update, dto);
     }
     deleteAchievement(id) {
-        return this.service.deleteAchievement({ id });
+        return this.natsClient.send(metadata_1.AchievementPattern.Delete, id);
     }
     createSect(dto) {
-        return this.service.createSect(dto);
+        return this.natsClient.send(metadata_1.SectPattern.Create, dto);
+    }
+    findOneSect(id) {
+        return this.natsClient.send(metadata_1.SectPattern.FindOne, id);
+    }
+    findAllSect(dto) {
+        return this.natsClient.send(metadata_1.SectPattern.FindAll, dto);
     }
     updateSect(dto) {
-        return this.service.updateSect(dto);
+        return this.natsClient.send(metadata_1.SectPattern.Update, dto);
     }
     deleteSect(id) {
-        return this.service.deleteSect({ id });
+        return this.natsClient.send(metadata_1.SectPattern.Delete, id);
     }
 };
 exports.MetadataController = MetadataController;
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('realm/create'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một cảnh giới tu luyện' }),
     (0, swagger_1.ApiOkResponse)({
-        description: 'Tạo ra một cảnh giới thành công.',
+        description: 'Tạo ra một cảnh giới thành công',
         schema: {
-            example: {
+            properties: {
                 data: {
-                    level: 1,
-                    createdAt: '2025-01-06T17:18:59.169Z',
-                    updatedAt: '2025-01-06T17:18:59.170Z',
-                    id: '154dd1e2-4613-426e-b004-d230fa5e4a99',
-                    name: 'Luyện khí cảnh',
-                    description: 'Mô tả cấp bậc cảnh giới hiện tại',
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: '154dd1e2-4613-426e-b004-d230fa5e4a99',
+                        },
+                        name: { type: 'string', example: 'Luyện khí cảnh' },
+                        level: { type: 'number', example: 1 },
+                        description: {
+                            type: 'string',
+                            example: 'Mô tả cấp bậc cảnh giới hiện tại',
+                        },
+                        createdAt: { type: 'string', example: '2025-01-06T17:18:59.169Z' },
+                        updatedAt: { type: 'string', example: '2025-01-06T17:18:59.170Z' },
+                    },
                 },
-                message: 'Tạo thành công cấp bậc tu luyện.',
+                message: { type: 'string', example: 'Tạo thành công cấp bậc tu luyện' },
             },
         },
     }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof metadata_1.CreateRealmDto !== "undefined" && metadata_1.CreateRealmDto) === "function" ? _b : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof metadata_2.CreateRealmDto !== "undefined" && metadata_2.CreateRealmDto) === "function" ? _b : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Patch)('realm/update'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin cảnh giới' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Cập nhật cảnh giới thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        level: { type: 'number' },
+                        description: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Cập nhật cảnh giới thành công' },
+            },
+        },
+    }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof metadata_2.UpdateRealmDto !== "undefined" && metadata_2.UpdateRealmDto) === "function" ? _c : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateRealm", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
+    (0, common_1.Get)('realm/findOne/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một cảnh giới theo ID' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tìm thấy cảnh giới',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        level: { type: 'number' },
+                        description: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Tìm thấy cảnh giới' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findOneRealm", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('realm/findAll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả cảnh giới với phân trang' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Lấy danh sách cảnh giới thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            level: { type: 'number' },
+                            description: { type: 'string' },
+                            createdAt: { type: 'string' },
+                            updatedAt: { type: 'string' },
+                        },
+                    },
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        total: { type: 'number' },
+                        page: { type: 'number' },
+                        limit: { type: 'number' },
+                    },
+                },
+                message: {
+                    type: 'string',
+                    example: 'Lấy danh sách cảnh giới thành công',
+                },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof metadata_2.MetadataPaginationDto !== "undefined" && metadata_2.MetadataPaginationDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findAllRealm", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
     (0, common_1.Delete)('realm/delete/:id'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên đại thế giới.',
+        summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên đại thế giới',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Xóa cảnh giới thành công',
+        schema: {
+            properties: {
+                data: null,
+                message: { type: 'string', example: 'Đã xóa cảnh giới thành công' },
+            },
+        },
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
@@ -1620,29 +1741,151 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('materialArt/create'),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, exports.ApiFile)('logo'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    tslib_1.__param(0, (0, common_1.UploadedFile)()),
-    tslib_1.__param(1, (0, common_1.Body)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một võ học' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tạo ra một võ học thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: '7b01a7b1-ebcc-491e-af5e-68126001c848',
+                        },
+                        name: { type: 'string', example: 'Kiếm Đạo' },
+                        description: { type: 'string', example: 'Mô tả về võ học' },
+                        level: { type: 'number', example: 1 },
+                        sectId: {
+                            type: 'string',
+                            example: '9b2f6a4b-8489-4d01-9ad4-4008b76b8268',
+                        },
+                        createdAt: { type: 'string', example: '2025-01-06T17:19:57.289Z' },
+                        updatedAt: { type: 'string', example: '2025-01-06T17:19:57.289Z' },
+                    },
+                },
+                message: { type: 'string', example: 'Tạo thành công võ học' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object, typeof (_c = typeof metadata_1.CreateMaterialArtDto !== "undefined" && metadata_1.CreateMaterialArtDto) === "function" ? _c : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof metadata_2.CreateMaterialArtDto !== "undefined" && metadata_2.CreateMaterialArtDto) === "function" ? _e : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Patch)('materialArt/update'),
+    (0, common_1.Get)('materialArt/findOne/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một võ học theo ID' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tìm thấy võ học',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        description: { type: 'string' },
+                        level: { type: 'number' },
+                        sectId: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Tìm thấy võ học' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findOneMaterialArt", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('materialArt/findAll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả võ học với phân trang' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Lấy danh sách võ học thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            description: { type: 'string' },
+                            level: { type: 'number' },
+                            sectId: { type: 'string' },
+                            createdAt: { type: 'string' },
+                            updatedAt: { type: 'string' },
+                        },
+                    },
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        total: { type: 'number' },
+                        page: { type: 'number' },
+                        limit: { type: 'number' },
+                    },
+                },
+                message: { type: 'string', example: 'Lấy danh sách võ học thành công' },
+            },
+        },
+    }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_f = typeof metadata_2.MetadataPaginationDto !== "undefined" && metadata_2.MetadataPaginationDto) === "function" ? _f : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findAllMaterialArt", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('materialArt/update'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin võ học' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Cập nhật võ học thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        description: { type: 'string' },
+                        level: { type: 'number' },
+                        sectId: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Cập nhật võ học thành công' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_g = typeof metadata_2.UpdateMaterialArtDto !== "undefined" && metadata_2.UpdateMaterialArtDto) === "function" ? _g : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateMaterialArt", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên đại thế giới.',
-    }),
     (0, common_1.Delete)('materialArt/delete/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên đại thế giới',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Xóa võ học thành công',
+        schema: {
+            properties: {
+                data: null,
+                message: { type: 'string', example: 'Đã xóa võ học thành công' },
+            },
+        },
+    }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
     tslib_1.__metadata("design:paramtypes", [String]),
@@ -1651,39 +1894,145 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('achievement/create'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một thành tựu' }),
     (0, swagger_1.ApiOkResponse)({
-        description: 'Tạo ra một cảnh giới thành công.',
+        description: 'Tạo ra một thành tựu thành công',
         schema: {
-            example: {
+            properties: {
                 data: {
-                    id: '9b2f6a4b-8489-4d01-9ad4-4008b76b8268',
-                    name: 'Sơ cấp thuật đạo',
-                    logo: 'Hình ảnh mô tả cấp bậc cảnh giới hiện tại',
-                    updatedAt: '2025-01-06T17:19:30.161Z',
-                    createdAt: '2025-01-06T17:19:30.161Z',
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: '9b2f6a4b-8489-4d01-9ad4-4008b76b8268',
+                        },
+                        name: { type: 'string', example: 'Sơ cấp thuật đạo' },
+                        logo: {
+                            type: 'string',
+                            example: 'Hình ảnh mô tả thành tựu',
+                        },
+                        createdAt: { type: 'string', example: '2025-01-06T17:19:30.161Z' },
+                        updatedAt: { type: 'string', example: '2025-01-06T17:19:30.161Z' },
+                    },
                 },
-                message: 'Tạo thành công thành tựu.',
+                message: { type: 'string', example: 'Tạo thành công thành tựu' },
             },
         },
     }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_d = typeof metadata_1.CreateAchievementDto !== "undefined" && metadata_1.CreateAchievementDto) === "function" ? _d : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_h = typeof metadata_2.CreateAchievementDto !== "undefined" && metadata_2.CreateAchievementDto) === "function" ? _h : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Patch)('achievement/update'),
+    (0, common_1.Get)('achievement/findOne/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một thành tựu theo ID' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tìm thấy thành tựu',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        logo: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Tìm thấy thành tựu' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findOneAchievement", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('achievement/findAll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả thành tựu với phân trang' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Lấy danh sách thành tựu thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            logo: { type: 'string' },
+                            createdAt: { type: 'string' },
+                            updatedAt: { type: 'string' },
+                        },
+                    },
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        total: { type: 'number' },
+                        page: { type: 'number' },
+                        limit: { type: 'number' },
+                    },
+                },
+                message: {
+                    type: 'string',
+                    example: 'Lấy danh sách thành tựu thành công',
+                },
+            },
+        },
+    }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_j = typeof metadata_2.MetadataPaginationDto !== "undefined" && metadata_2.MetadataPaginationDto) === "function" ? _j : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findAllAchievement", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('achievement/update'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin thành tựu' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Cập nhật thành tựu thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        logo: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Cập nhật thành tựu thành công' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_k = typeof metadata_2.UpdateAchievementDto !== "undefined" && metadata_2.UpdateAchievementDto) === "function" ? _k : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateAchievement", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('achievement/delete/:id'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên đại thế giới.',
+        summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên đại thế giới',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Xóa thành tựu thành công',
+        schema: {
+            properties: {
+                data: null,
+                message: { type: 'string', example: 'Đã xóa thành tựu thành công' },
+            },
+        },
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
@@ -1693,40 +2042,146 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Post)('sect/create'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một môn phái' }),
     (0, swagger_1.ApiOkResponse)({
-        description: 'Tạo ra một cảnh giới thành công.',
+        description: 'Tạo ra một môn phái thành công',
         schema: {
-            example: {
+            properties: {
                 data: {
-                    id: '7b01a7b1-ebcc-491e-af5e-68126001c848',
-                    name: 'Frontend',
-                    description: 'Mô môn phái hiện tại.',
-                    logo: 'Mô tả hình ảnh của môn phái',
-                    updatedAt: '2025-01-06T17:19:57.289Z',
-                    createdAt: '2025-01-06T17:19:57.289Z',
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: '7b01a7b1-ebcc-491e-af5e-68126001c848',
+                        },
+                        name: { type: 'string', example: 'Frontend' },
+                        description: { type: 'string', example: 'Mô tả môn phái hiện tại' },
+                        logo: { type: 'string', example: 'Mô tả hình ảnh của môn phái' },
+                        updatedAt: { type: 'string', example: '2025-01-06T17:19:57.289Z' },
+                        createdAt: { type: 'string', example: '2025-01-06T17:19:57.289Z' },
+                    },
                 },
-                message: 'Tạo thành công môn phái.',
+                message: { type: 'string', example: 'Tạo thành công môn phái' },
             },
         },
     }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_e = typeof metadata_1.CreateSectDto !== "undefined" && metadata_1.CreateSectDto) === "function" ? _e : Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_l = typeof metadata_2.CreateSectDto !== "undefined" && metadata_2.CreateSectDto) === "function" ? _l : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createSect", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
-    (0, common_1.Patch)('sect/update'),
+    (0, common_1.Get)('sect/findOne/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một môn phái theo ID' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Tìm thấy môn phái',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        description: { type: 'string' },
+                        logo: { type: 'string' },
+                        createdAt: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Tìm thấy môn phái' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Param)('id')),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [String]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findOneSect", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Post)('sect/findAll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả môn phái với phân trang' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Lấy danh sách môn phái thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string' },
+                            name: { type: 'string' },
+                            description: { type: 'string' },
+                            logo: { type: 'string' },
+                            createdAt: { type: 'string' },
+                            updatedAt: { type: 'string' },
+                        },
+                    },
+                },
+                meta: {
+                    type: 'object',
+                    properties: {
+                        total: { type: 'number' },
+                        page: { type: 'number' },
+                        limit: { type: 'number' },
+                    },
+                },
+                message: {
+                    type: 'string',
+                    example: 'Lấy danh sách môn phái thành công',
+                },
+            },
+        },
+    }),
     tslib_1.__param(0, (0, common_1.Body)()),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_m = typeof metadata_2.MetadataPaginationDto !== "undefined" && metadata_2.MetadataPaginationDto) === "function" ? _m : Object]),
+    tslib_1.__metadata("design:returntype", void 0)
+], MetadataController.prototype, "findAllSect", null);
+tslib_1.__decorate([
+    (0, guard_1.Public)(),
+    (0, common_1.Patch)('sect/update'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin môn phái' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Cập nhật môn phái thành công',
+        schema: {
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string' },
+                        name: { type: 'string' },
+                        description: { type: 'string' },
+                        logo: { type: 'string' },
+                        updatedAt: { type: 'string' },
+                        createdAt: { type: 'string' },
+                    },
+                },
+                message: { type: 'string', example: 'Cập nhật môn phái thành công' },
+            },
+        },
+    }),
+    tslib_1.__param(0, (0, common_1.Body)()),
+    tslib_1.__metadata("design:type", Function),
+    tslib_1.__metadata("design:paramtypes", [typeof (_o = typeof metadata_2.UpdateSectDto !== "undefined" && metadata_2.UpdateSectDto) === "function" ? _o : Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateSect", null);
 tslib_1.__decorate([
     (0, guard_1.Public)(),
     (0, common_1.Delete)('sect/delete/:id'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên đại thế giới.',
+        summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên đại thế giới',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Xóa môn phái thành công',
+        schema: {
+            properties: {
+                data: null,
+                message: { type: 'string', example: 'Đã xóa môn phái thành công' },
+            },
+        },
     }),
     tslib_1.__param(0, (0, common_1.Param)('id')),
     tslib_1.__metadata("design:type", Function),
@@ -1735,10 +2190,9 @@ tslib_1.__decorate([
 ], MetadataController.prototype, "deleteSect", null);
 exports.MetadataController = MetadataController = tslib_1.__decorate([
     (0, common_1.Controller)('metadata'),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof metadata_service_1.MetadataService !== "undefined" && metadata_service_1.MetadataService) === "function" ? _a : Object])
+    tslib_1.__param(0, (0, common_1.Inject)('NATS_SERVICE')),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof microservices_1.ClientProxy !== "undefined" && microservices_1.ClientProxy) === "function" ? _a : Object])
 ], MetadataController);
-// materialals
-// realm
 
 
 /***/ }),
@@ -1746,187 +2200,12 @@ exports.MetadataController = MetadataController = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MetadataService = void 0;
 const tslib_1 = __webpack_require__(5);
-const common_1 = __webpack_require__(1);
-const realm_1 = __webpack_require__(57);
-const rxjs_1 = __webpack_require__(52);
-const sequelize_1 = __webpack_require__(69);
-const material_art_1 = __webpack_require__(67);
-const achievement_1 = __webpack_require__(65);
-const sect_1 = __webpack_require__(68);
-const file_uploader_1 = __webpack_require__(70);
-const exception_1 = __webpack_require__(77);
-const axios_1 = __webpack_require__(80);
-let MetadataService = class MetadataService {
-    constructor(sectModel, realmModel, materialArtModel, achievementModel, fileUploader) {
-        this.sectModel = sectModel;
-        this.realmModel = realmModel;
-        this.materialArtModel = materialArtModel;
-        this.achievementModel = achievementModel;
-        this.fileUploader = fileUploader;
-        console.log('fileUploader: ', this.fileUploader);
-    }
-    // Create Realm
-    createRealm(body) {
-        return (0, rxjs_1.from)(this.realmModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
-            data: res.toJSON(),
-            message: 'Tạo thành công cấp bậc tu luyện.',
-        })));
-    }
-    // Update Realm
-    updateRealm(body) {
-        const { id, ...rest } = body;
-        return (0, rxjs_1.from)(this.realmModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((realm) => {
-            if (!realm) {
-                return (0, rxjs_1.of)({
-                    message: 'Cấp bậc tu luyện không tồn tại.',
-                });
-            }
-            return (0, rxjs_1.from)(realm.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
-                data: updated.toJSON(),
-                message: 'Cập nhật thành công cấp bậc tu luyện.',
-            })));
-        }));
-    }
-    // Delete Realm
-    deleteRealm(body) {
-        return (0, rxjs_1.from)(this.realmModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((realm) => {
-            if (!realm) {
-                return (0, rxjs_1.of)({ message: 'Cấp bậc tu luyện không tồn tại.' });
-            }
-            return (0, rxjs_1.from)(realm.destroy()).pipe((0, rxjs_1.map)(() => ({
-                message: 'Xóa thành công cấp bậc tu luyện.',
-            })));
-        }));
-    }
-    // Create Material Art
-    createMaterialArt(body) {
-        return this.fileUploader
-            .upload({
-            file: 'https://www.milofoundation.org/wp-content/uploads/2024/09/20240928130759.jpg',
-            fileName: 'test_material',
-            folder: 'logo',
-        })
-            .pipe((0, rxjs_1.catchError)((err) => {
-            console.log('Error upload: ', err);
-            return (0, exception_1.throwException)(axios_1.HttpStatusCode.InternalServerError, 'Tải lên hình ảnh không thành công.');
-        }), (0, rxjs_1.switchMap)((response) => {
-            console.log('Upload response: ', response);
-            if (response && response?.url) {
-                return (0, rxjs_1.from)(this.materialArtModel.create({ ...body, logo: response.url })).pipe((0, rxjs_1.map)((res) => ({
-                    data: res.toJSON(),
-                    message: 'Tạo thành công bộ môn võ học.',
-                })));
-            }
-            (0, exception_1.throwException)(axios_1.HttpStatusCode.InternalServerError, 'Tải lên hình ảnh không thành công.');
-        }));
-    }
-    // Update Material Art
-    updateMaterialArt(body) {
-        const { id, ...rest } = body;
-        return (0, rxjs_1.from)(this.materialArtModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((materialArt) => {
-            if (!materialArt) {
-                return (0, rxjs_1.of)({
-                    message: 'Bộ môn võ học không tồn tại.',
-                });
-            }
-            return (0, rxjs_1.from)(materialArt.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
-                data: updated.toJSON(),
-                message: 'Cập nhật thành công bộ môn võ học.',
-            })));
-        }));
-    }
-    // Delete Material Art
-    deleteMaterialArt(body) {
-        return (0, rxjs_1.from)(this.materialArtModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((materialArt) => {
-            if (!materialArt) {
-                return (0, rxjs_1.of)({ message: 'Bộ môn võ học không tồn tại.' });
-            }
-            return (0, rxjs_1.from)(materialArt.destroy()).pipe((0, rxjs_1.map)(() => ({
-                message: 'Xóa thành công bộ môn võ học.',
-            })));
-        }));
-    }
-    // Create Achievement
-    createAchievement(body) {
-        return (0, rxjs_1.from)(this.achievementModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
-            data: res.toJSON(),
-            message: 'Tạo thành công thành tựu.',
-        })));
-    }
-    // Update Achievement
-    updateAchievement(body) {
-        const { id, ...rest } = body;
-        return (0, rxjs_1.from)(this.achievementModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((achievement) => {
-            if (!achievement) {
-                return (0, rxjs_1.of)({
-                    message: 'Thành tựu không tồn tại.',
-                });
-            }
-            return (0, rxjs_1.from)(achievement.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
-                data: updated.toJSON(),
-                message: 'Cập nhật thành công thành tựu.',
-            })));
-        }));
-    }
-    // Delete Achievement
-    deleteAchievement(body) {
-        return (0, rxjs_1.from)(this.achievementModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((achievement) => {
-            if (!achievement) {
-                return (0, rxjs_1.of)({ message: 'Thành tựu không tồn tại.' });
-            }
-            return (0, rxjs_1.from)(achievement.destroy()).pipe((0, rxjs_1.map)(() => ({
-                message: 'Xóa thành công thành tựu.',
-            })));
-        }));
-    }
-    // Create Sect
-    createSect(body) {
-        return (0, rxjs_1.from)(this.sectModel.create({ ...body })).pipe((0, rxjs_1.map)((res) => ({
-            data: res.toJSON(),
-            message: 'Tạo thành công môn phái.',
-        })));
-    }
-    // Update Sect
-    updateSect(body) {
-        const { id, ...rest } = body;
-        return (0, rxjs_1.from)(this.sectModel.findByPk(id)).pipe((0, rxjs_1.switchMap)((sect) => {
-            if (!sect) {
-                return (0, rxjs_1.of)({
-                    message: 'Môn phái không tồn tại.',
-                });
-            }
-            return (0, rxjs_1.from)(sect.update({ ...rest })).pipe((0, rxjs_1.map)((updated) => ({
-                data: updated.toJSON(),
-                message: 'Cập nhật thành công môn phái.',
-            })));
-        }));
-    }
-    // Delete Sect
-    deleteSect(body) {
-        return (0, rxjs_1.from)(this.sectModel.findByPk(body.id)).pipe((0, rxjs_1.switchMap)((sect) => {
-            if (!sect) {
-                return (0, rxjs_1.of)({ message: 'Môn phái không tồn tại.' });
-            }
-            return (0, rxjs_1.from)(sect.destroy()).pipe((0, rxjs_1.map)(() => ({
-                message: 'Xóa thành công môn phái.',
-            })));
-        }));
-    }
-};
-exports.MetadataService = MetadataService;
-exports.MetadataService = MetadataService = tslib_1.__decorate([
-    (0, common_1.Injectable)(),
-    tslib_1.__param(0, (0, sequelize_1.InjectModel)(sect_1.Sect)),
-    tslib_1.__param(1, (0, sequelize_1.InjectModel)(realm_1.Realm)),
-    tslib_1.__param(2, (0, sequelize_1.InjectModel)(material_art_1.MaterialArt)),
-    tslib_1.__param(3, (0, sequelize_1.InjectModel)(achievement_1.Achievement)),
-    tslib_1.__param(4, (0, file_uploader_1.InjectFileUploader)()),
-    tslib_1.__metadata("design:paramtypes", [Object, Object, Object, Object, typeof (_a = typeof file_uploader_1.FileUploader !== "undefined" && file_uploader_1.FileUploader) === "function" ? _a : Object])
-], MetadataService);
+tslib_1.__exportStar(__webpack_require__(57), exports);
+tslib_1.__exportStar(__webpack_require__(59), exports);
+tslib_1.__exportStar(__webpack_require__(60), exports);
+tslib_1.__exportStar(__webpack_require__(61), exports);
 
 
 /***/ }),
@@ -1934,216 +2213,49 @@ exports.MetadataService = MetadataService = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Realm = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const profile_model_1 = __webpack_require__(59);
-let Realm = class Realm extends sequelize_typescript_1.Model {
-};
-exports.Realm = Realm;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Realm.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-        unique: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Realm.prototype, "name", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Realm.prototype, "description", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.NUMBER,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Realm.prototype, "level", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => profile_model_1.Profile),
-    tslib_1.__metadata("design:type", Array)
-], Realm.prototype, "profiles", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
-], Realm.prototype, "createdAt", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
-], Realm.prototype, "updatedAt", void 0);
-exports.Realm = Realm = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'realm' })
-], Realm);
+exports.SectPattern = void 0;
+const module_1 = __webpack_require__(58);
+exports.SectPattern = Object.freeze({
+    Create: `${module_1.CoreModule.Sect}/Create`,
+    Update: `${module_1.CoreModule.Sect}/Update`,
+    Delete: `${module_1.CoreModule.Sect}/Delete`,
+    FindOne: `${module_1.CoreModule.Sect}/FindOne`,
+    FindAll: `${module_1.CoreModule.Sect}/FindAll`,
+});
 
 
 /***/ }),
 /* 58 */
-/***/ ((module) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-module.exports = require("sequelize-typescript");
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CoreModule = void 0;
+const __1 = __webpack_require__(12);
+exports.CoreModule = Object.freeze({
+    Sect: `${__1.MicroServiceName.Core}/Sect`,
+    Realm: `${__1.MicroServiceName.Core}/Realm`,
+    Achievement: `${__1.MicroServiceName.Core}/Achievement`,
+    MaterialArt: `${__1.MicroServiceName.Core}/MaterialArt`,
+});
+
 
 /***/ }),
 /* 59 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Profile = exports.DefaultProfileValue = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const account_model_1 = __webpack_require__(60);
-const realm_model_1 = __webpack_require__(57);
-const profile_achievement_model_1 = __webpack_require__(64);
-const profile_material_art_model_1 = __webpack_require__(66);
-exports.DefaultProfileValue = {
-    bio: '',
-    avatarUrl: '',
-    totalExp: 0,
-    streak: 0,
-    isActive: true,
-};
-let Profile = class Profile extends sequelize_typescript_1.Model {
-};
-exports.Profile = Profile;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => account_model_1.Account),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "accountId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => account_model_1.Account),
-    tslib_1.__metadata("design:type", typeof (_a = typeof account_model_1.Account !== "undefined" && account_model_1.Account) === "function" ? _a : Object)
-], Profile.prototype, "account", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => realm_model_1.Realm),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "realmId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => realm_model_1.Realm),
-    tslib_1.__metadata("design:type", typeof (_b = typeof realm_model_1.Realm !== "undefined" && realm_model_1.Realm) === "function" ? _b : Object)
-], Profile.prototype, "realm", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "fullName", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-        unique: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "nickName", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "bio", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "avatarUrl", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-        defaultValue: '0',
-    }),
-    tslib_1.__metadata("design:type", Number)
-], Profile.prototype, "totalExp", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.INTEGER,
-        defaultValue: 0,
-    }),
-    tslib_1.__metadata("design:type", Number)
-], Profile.prototype, "streak", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.BOOLEAN,
-        defaultValue: true,
-    }),
-    tslib_1.__metadata("design:type", Boolean)
-], Profile.prototype, "isActive", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        defaultValue: '',
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Profile.prototype, "githubLink", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
-], Profile.prototype, "createdAt", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
-], Profile.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => profile_achievement_model_1.ProfileAchievement),
-    tslib_1.__metadata("design:type", Array)
-], Profile.prototype, "profileAchievements", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => profile_material_art_model_1.ProfileMaterialArt),
-    tslib_1.__metadata("design:type", Array)
-], Profile.prototype, "profileMaterialArts", void 0);
-exports.Profile = Profile = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'profile' })
-], Profile);
+exports.RealmPattern = void 0;
+const module_1 = __webpack_require__(58);
+exports.RealmPattern = Object.freeze({
+    Create: `${module_1.CoreModule.Realm}/Create`,
+    Update: `${module_1.CoreModule.Realm}/Update`,
+    Delete: `${module_1.CoreModule.Realm}/Delete`,
+    FindOne: `${module_1.CoreModule.Realm}/FindOne`,
+    FindAll: `${module_1.CoreModule.Realm}/FindAll`,
+});
 
 
 /***/ }),
@@ -2151,208 +2263,16 @@ exports.Profile = Profile = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Account = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const profile_model_1 = __webpack_require__(59);
-const types_1 = __webpack_require__(61);
-function generateRandomNickName() {
-    const prefixes = [
-        'Dao',
-        'Tien',
-        'Kiem',
-        'Ma',
-        'Chan',
-        'Vuong',
-        'Phong',
-        'Huyen',
-        'Linh',
-        'Nguyen',
-    ]; // Prefixes related to cultivation fantasy
-    const characters = 'GENERATENICKNAMEFROMTMPANKHOITRANVIPPRO79KHCR';
-    const length = Math.floor(Math.random() * (16 - 8 + 1)) + 8; // Random length between 8 and 16 for the main part of the nickname
-    // Select a random prefix
-    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    // Generate the random main part of the nickname
-    const mainPart = Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
-    // Combine prefix and main part
-    const result = `${randomPrefix}_${mainPart}`?.toLowerCase();
-    console.log('NICK NAME:', result);
-    return result;
-}
-const familyNames = [
-    'Tiêu',
-    'Lý',
-    'Trương',
-    'Hoàng',
-    'Nguyễn',
-    'Phạm',
-    'Đặng',
-    'Tôn',
-    'Mạc',
-    'Chu',
-    'Hạ',
-    'Dương',
-    'Vương',
-    'Hàn',
-    'Tần',
-    'Triệu',
-    'Từ',
-    'Lâm',
-    'Bạch',
-    'Thạch',
-    'Kim',
-    'Long',
-    'Phượng',
-];
-const middleNames = [
-    'Thiên',
-    'Huyền',
-    'Phong',
-    'Vũ',
-    'Thanh',
-    'Hải',
-    'Ngọc',
-    'Tuyết',
-    'Vân',
-    'Kiếm',
-    'Tâm',
-    'Bích',
-    'Anh',
-    'Minh',
-    'Hùng',
-    'Linh',
-    'Khải',
-    'Huyền',
-    'Chân',
-    'Nguyên',
-    'Đạo',
-    'Lý',
-    'Tiêu',
-    'Vân',
-    'Ngã',
-    'Hoàng',
-    'Minh',
-    'Lãnh',
-    'Thân',
-    'Soái',
-];
-const givenNames = [
-    'Anh',
-    'Bình',
-    'Cường',
-    'Dũng',
-    'Hạnh',
-    'Khang',
-    'Lộc',
-    'Mai',
-    'Ngân',
-    'Phong',
-    'Quý',
-    'Sơn',
-    'Tâm',
-    'Uyên',
-    'Việt',
-    'Yến',
-    'Tiêu',
-    'Dương',
-    'Phi',
-    'Nghê',
-    'Điệp',
-    'Nhi',
-    'Lan',
-    'Nhan',
-    'Đình',
-    'Băng',
-    'Nghi',
-    'Hồng',
-];
-function generateFullName() {
-    // Chọn họ ngẫu nhiên
-    const familyName = familyNames[Math.floor(Math.random() * familyNames.length)];
-    // Chọn tên đệm ngẫu nhiên
-    const middleName = middleNames[Math.floor(Math.random() * middleNames.length)];
-    // Chọn tên chính ngẫu nhiên
-    const givenName = givenNames[Math.floor(Math.random() * givenNames.length)];
-    // Kết hợp họ, tên đệm, và tên chính
-    return `${familyName} ${middleName} ${givenName}`;
-}
-let Account = class Account extends sequelize_typescript_1.Model {
-    static async createProfile(instance) {
-        const defaultAccount = {
-            ...profile_model_1.DefaultProfileValue,
-            nickName: generateRandomNickName(),
-            accountId: instance.id,
-            fullName: generateFullName(),
-        };
-        try {
-            await profile_model_1.Profile.create(defaultAccount);
-        }
-        catch (error) {
-            console.error('Error creating profile:', error);
-        }
-    }
-};
-exports.Account = Account;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Account.prototype, "id", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
-], Account.prototype, "email", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.Column,
-    tslib_1.__metadata("design:type", String)
-], Account.prototype, "password", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.BOOLEAN,
-        defaultValue: false,
-    }),
-    tslib_1.__metadata("design:type", Boolean)
-], Account.prototype, "isVerify", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        defaultValue: types_1.CredentialTypeEnum.NONE,
-        type: sequelize_typescript_1.DataType.STRING,
-    }),
-    tslib_1.__metadata("design:type", typeof (_a = typeof types_1.CredentialTypeEnum !== "undefined" && types_1.CredentialTypeEnum) === "function" ? _a : Object)
-], Account.prototype, "credentialType", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasOne)(() => profile_model_1.Profile),
-    tslib_1.__metadata("design:type", typeof (_b = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _b : Object)
-], Account.prototype, "profile", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
-], Account.prototype, "createdAt", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
-], Account.prototype, "updatedAt", void 0);
-tslib_1.__decorate([
-    sequelize_typescript_1.AfterCreate,
-    tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [Account]),
-    tslib_1.__metadata("design:returntype", Promise)
-], Account, "createProfile", null);
-exports.Account = Account = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'account' })
-], Account);
+exports.AchievementPattern = void 0;
+const module_1 = __webpack_require__(58);
+exports.AchievementPattern = Object.freeze({
+    Create: `${module_1.CoreModule.Achievement}/Create`,
+    Update: `${module_1.CoreModule.Achievement}/Update`,
+    Delete: `${module_1.CoreModule.Achievement}/Delete`,
+    FindOne: `${module_1.CoreModule.Achievement}/FindOne`,
+    FindAll: `${module_1.CoreModule.Achievement}/FindAll`,
+});
 
 
 /***/ }),
@@ -2361,594 +2281,38 @@ exports.Account = Account = tslib_1.__decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(62), exports);
-tslib_1.__exportStar(__webpack_require__(63), exports);
+exports.MaterialArtPattern = void 0;
+const module_1 = __webpack_require__(58);
+exports.MaterialArtPattern = Object.freeze({
+    Create: `${module_1.CoreModule.MaterialArt}/Create`,
+    Update: `${module_1.CoreModule.MaterialArt}/Update`,
+    Delete: `${module_1.CoreModule.MaterialArt}/Delete`,
+    FindOne: `${module_1.CoreModule.MaterialArt}/FindOne`,
+    FindAll: `${module_1.CoreModule.MaterialArt}/FindAll`,
+});
 
 
 /***/ }),
 /* 62 */
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(5);
+tslib_1.__exportStar(__webpack_require__(63), exports);
+tslib_1.__exportStar(__webpack_require__(64), exports);
+tslib_1.__exportStar(__webpack_require__(66), exports);
+tslib_1.__exportStar(__webpack_require__(67), exports);
+tslib_1.__exportStar(__webpack_require__(68), exports);
+tslib_1.__exportStar(__webpack_require__(69), exports);
+tslib_1.__exportStar(__webpack_require__(70), exports);
+tslib_1.__exportStar(__webpack_require__(71), exports);
+tslib_1.__exportStar(__webpack_require__(72), exports);
+tslib_1.__exportStar(__webpack_require__(73), exports);
 
 
 /***/ }),
 /* 63 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AccountVerifyStatusEnum = exports.CredentialTypeEnum = void 0;
-var CredentialTypeEnum;
-(function (CredentialTypeEnum) {
-    CredentialTypeEnum["NONE"] = "NONE";
-    CredentialTypeEnum["GITHUB"] = "GITHUB";
-    CredentialTypeEnum["GOOLGE"] = "GOOGLE";
-})(CredentialTypeEnum || (exports.CredentialTypeEnum = CredentialTypeEnum = {}));
-var AccountVerifyStatusEnum;
-(function (AccountVerifyStatusEnum) {
-    AccountVerifyStatusEnum["UNVERIFY"] = "UNVERIFY";
-})(AccountVerifyStatusEnum || (exports.AccountVerifyStatusEnum = AccountVerifyStatusEnum = {}));
-
-
-/***/ }),
-/* 64 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProfileAchievement = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const profile_model_1 = __webpack_require__(59);
-const achievement_model_1 = __webpack_require__(65);
-let ProfileAchievement = class ProfileAchievement extends sequelize_typescript_1.Model {
-};
-exports.ProfileAchievement = ProfileAchievement;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileAchievement.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => profile_model_1.Profile),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileAchievement.prototype, "profileId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => profile_model_1.Profile),
-    tslib_1.__metadata("design:type", typeof (_a = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _a : Object)
-], ProfileAchievement.prototype, "profile", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => achievement_model_1.Achievement),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileAchievement.prototype, "achievementId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => achievement_model_1.Achievement),
-    tslib_1.__metadata("design:type", typeof (_b = typeof achievement_model_1.Achievement !== "undefined" && achievement_model_1.Achievement) === "function" ? _b : Object)
-], ProfileAchievement.prototype, "achievement", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        allowNull: false,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
-], ProfileAchievement.prototype, "createdAt", void 0);
-exports.ProfileAchievement = ProfileAchievement = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'profile_achievements' })
-], ProfileAchievement);
-
-
-/***/ }),
-/* 65 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Achievement = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const profile_achievement_model_1 = __webpack_require__(64);
-let Achievement = class Achievement extends sequelize_typescript_1.Model {
-};
-exports.Achievement = Achievement;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Achievement.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-        unique: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Achievement.prototype, "name", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Achievement.prototype, "logo", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => profile_achievement_model_1.ProfileAchievement),
-    tslib_1.__metadata("design:type", Array)
-], Achievement.prototype, "profileAchievements", void 0);
-exports.Achievement = Achievement = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'achievements' })
-], Achievement);
-
-
-/***/ }),
-/* 66 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProfileMaterialArt = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const profile_model_1 = __webpack_require__(59);
-const material_art_model_1 = __webpack_require__(67);
-let ProfileMaterialArt = class ProfileMaterialArt extends sequelize_typescript_1.Model {
-};
-exports.ProfileMaterialArt = ProfileMaterialArt;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileMaterialArt.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => profile_model_1.Profile),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileMaterialArt.prototype, "profileId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => profile_model_1.Profile),
-    tslib_1.__metadata("design:type", typeof (_a = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _a : Object)
-], ProfileMaterialArt.prototype, "profile", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => material_art_model_1.MaterialArt),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileMaterialArt.prototype, "materialArtId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => material_art_model_1.MaterialArt),
-    tslib_1.__metadata("design:type", typeof (_b = typeof material_art_model_1.MaterialArt !== "undefined" && material_art_model_1.MaterialArt) === "function" ? _b : Object)
-], ProfileMaterialArt.prototype, "materialArt", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-        defaultValue: '0',
-    }),
-    tslib_1.__metadata("design:type", String)
-], ProfileMaterialArt.prototype, "masteryLevel", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.DATE,
-        allowNull: false,
-        defaultValue: sequelize_typescript_1.DataType.NOW,
-    }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
-], ProfileMaterialArt.prototype, "createdAt", void 0);
-exports.ProfileMaterialArt = ProfileMaterialArt = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'profile_material_arts' })
-], ProfileMaterialArt);
-
-
-/***/ }),
-/* 67 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MaterialArt = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const sect_model_1 = __webpack_require__(68);
-const profile_material_art_model_1 = __webpack_require__(66);
-let MaterialArt = class MaterialArt extends sequelize_typescript_1.Model {
-};
-exports.MaterialArt = MaterialArt;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], MaterialArt.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.ForeignKey)(() => sect_model_1.Sect),
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], MaterialArt.prototype, "sectId", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.BelongsTo)(() => sect_model_1.Sect),
-    tslib_1.__metadata("design:type", typeof (_a = typeof sect_model_1.Sect !== "undefined" && sect_model_1.Sect) === "function" ? _a : Object)
-], MaterialArt.prototype, "sect", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-        unique: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], MaterialArt.prototype, "name", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], MaterialArt.prototype, "logo", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], MaterialArt.prototype, "description", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => profile_material_art_model_1.ProfileMaterialArt),
-    tslib_1.__metadata("design:type", Array)
-], MaterialArt.prototype, "profileMaterialArts", void 0);
-exports.MaterialArt = MaterialArt = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'material_arts' })
-], MaterialArt);
-
-
-/***/ }),
-/* 68 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Sect = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_typescript_1 = __webpack_require__(58);
-const material_art_model_1 = __webpack_require__(67);
-let Sect = class Sect extends sequelize_typescript_1.Model {
-};
-exports.Sect = Sect;
-tslib_1.__decorate([
-    sequelize_typescript_1.PrimaryKey,
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.UUID,
-        defaultValue: sequelize_typescript_1.DataType.UUIDV4,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Sect.prototype, "id", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-        unique: true
-    }),
-    tslib_1.__metadata("design:type", String)
-], Sect.prototype, "name", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: false,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Sect.prototype, "logo", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.Column)({
-        type: sequelize_typescript_1.DataType.STRING,
-        allowNull: true,
-    }),
-    tslib_1.__metadata("design:type", String)
-], Sect.prototype, "description", void 0);
-tslib_1.__decorate([
-    (0, sequelize_typescript_1.HasMany)(() => material_art_model_1.MaterialArt),
-    tslib_1.__metadata("design:type", Array)
-], Sect.prototype, "materialArts", void 0);
-exports.Sect = Sect = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'sects' })
-], Sect);
-
-
-/***/ }),
-/* 69 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/sequelize");
-
-/***/ }),
-/* 70 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(71), exports);
-tslib_1.__exportStar(__webpack_require__(72), exports);
-tslib_1.__exportStar(__webpack_require__(73), exports);
-tslib_1.__exportStar(__webpack_require__(75), exports);
-tslib_1.__exportStar(__webpack_require__(76), exports);
-
-
-/***/ }),
-/* 71 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileUploader = void 0;
-class FileUploader {
-}
-exports.FileUploader = FileUploader;
-
-
-/***/ }),
-/* 72 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var FileUploaderModule_1;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileUploaderModule = void 0;
-const tslib_1 = __webpack_require__(5);
-const common_1 = __webpack_require__(1);
-const file_uploader_service_1 = __webpack_require__(73);
-const file_uploader_constants_1 = __webpack_require__(76);
-let FileUploaderModule = FileUploaderModule_1 = class FileUploaderModule {
-    static forRoot(options) {
-        const provider = {
-            provide: file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN,
-            useValue: options,
-        };
-        const fileUploader = {
-            provide: file_uploader_constants_1.FILE_UPLOADER_TOKEN,
-            useClass: file_uploader_service_1.FileUploaderService,
-        };
-        return {
-            exports: [provider, fileUploader],
-            module: FileUploaderModule_1,
-            providers: [provider, fileUploader],
-        };
-    }
-    static forRootAsync(options) {
-        const fileUploaderProvider = {
-            inject: [file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN],
-            provide: file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN,
-            useFactory: (_options) => options.useFactory,
-        };
-        const asyncProviders = FileUploaderModule_1.createAsyncProviders(options);
-        return {
-            module: FileUploaderModule_1,
-            imports: [...(options.imports || [])],
-            providers: [...asyncProviders, fileUploaderProvider],
-            exports: [fileUploaderProvider],
-        };
-    }
-    static createAsyncProviders(options) {
-        if (options.useFactory || options.useExisting) {
-            return [FileUploaderModule_1.createAsyncOptionsProvider(options)];
-        }
-        return [
-            FileUploaderModule_1.createAsyncOptionsProvider(options),
-            {
-                provide: options.useClass,
-                useClass: options.useClass,
-                inject: options.inject,
-            },
-        ];
-    }
-    static createAsyncOptionsProvider(options) {
-        if (options.useFactory) {
-            return {
-                provide: file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN,
-                useFactory: options.useFactory,
-                inject: options.inject || [],
-            };
-        }
-        return {
-            provide: file_uploader_constants_1.FILE_UPLOADER_MODULE_TOKEN,
-            useFactory: async (optionsFactory) => await optionsFactory.createFileUploaderModuleOptions(),
-            inject: options.useClass ? [options.useClass] : [],
-        };
-    }
-};
-exports.FileUploaderModule = FileUploaderModule;
-exports.FileUploaderModule = FileUploaderModule = FileUploaderModule_1 = tslib_1.__decorate([
-    (0, common_1.Global)(),
-    (0, common_1.Module)({})
-], FileUploaderModule);
-
-
-/***/ }),
-/* 73 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-var FileUploaderService_1;
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FileUploaderService = void 0;
-const tslib_1 = __webpack_require__(5);
-const common_1 = __webpack_require__(1);
-const ImageKit = __webpack_require__(74);
-const file_uploader_decorator_1 = __webpack_require__(75);
-const file_uploader_type_1 = __webpack_require__(71);
-const rxjs_1 = __webpack_require__(52);
-let FileUploaderService = FileUploaderService_1 = class FileUploaderService {
-    constructor(options) {
-        this.logger = new common_1.Logger(FileUploaderService_1.name);
-        this.initizeUploader(options);
-    }
-    initizeUploader(options) {
-        this.instance = new ImageKit(options);
-        this.logger.log('Init uploader instance....');
-        console.log('initizeUploader: ', this.instance);
-    }
-    upload(payload) {
-        this.logger.log('Start upload file to image kit....', payload.fileName);
-        console.log('initizeUploader payload: ', payload);
-        return (0, rxjs_1.from)(this.instance.upload(payload));
-    }
-};
-exports.FileUploaderService = FileUploaderService;
-exports.FileUploaderService = FileUploaderService = FileUploaderService_1 = tslib_1.__decorate([
-    (0, common_1.Injectable)(),
-    tslib_1.__param(0, (0, file_uploader_decorator_1.InjectFileUploaderOptions)()),
-    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof file_uploader_type_1.FileUploaderOptions !== "undefined" && file_uploader_type_1.FileUploaderOptions) === "function" ? _a : Object])
-], FileUploaderService);
-
-
-/***/ }),
-/* 74 */
-/***/ ((module) => {
-
-module.exports = require("imagekit");
-
-/***/ }),
-/* 75 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.InjectFileUploaderOptions = InjectFileUploaderOptions;
-exports.InjectFileUploader = InjectFileUploader;
-const common_1 = __webpack_require__(1);
-const file_uploader_constants_1 = __webpack_require__(76);
-function InjectFileUploaderOptions() {
-    return (0, common_1.Inject)(file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN);
-}
-function InjectFileUploader() {
-    return (0, common_1.Inject)(file_uploader_constants_1.FILE_UPLOADER_TOKEN);
-}
-
-
-/***/ }),
-/* 76 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FILE_UPLOADER_OPTIONS_TOKEN = exports.FILE_UPLOADER_MODULE_TOKEN = exports.FILE_UPLOADER_TOKEN = void 0;
-exports.FILE_UPLOADER_TOKEN = 'FILE_UPLOADER_TOKEN';
-exports.FILE_UPLOADER_MODULE_TOKEN = 'FILE_UPLOADER_MODULE_TOKEN';
-exports.FILE_UPLOADER_OPTIONS_TOKEN = 'FILE_UPLOADER_OPTIONS_TOKEN';
-
-
-/***/ }),
-/* 77 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(78), exports);
-tslib_1.__exportStar(__webpack_require__(79), exports);
-
-
-/***/ }),
-/* 78 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GlobalRpcExceptionFilter = exports.CustomRpcException = void 0;
-const tslib_1 = __webpack_require__(5);
-const microservices_1 = __webpack_require__(8);
-const common_1 = __webpack_require__(1);
-const rxjs_1 = __webpack_require__(52);
-class CustomRpcException extends microservices_1.RpcException {
-    constructor(statusCode, message) {
-        super({ statusCode, message });
-        this.statusCode = statusCode;
-        this.message = message;
-    }
-}
-exports.CustomRpcException = CustomRpcException;
-let GlobalRpcExceptionFilter = class GlobalRpcExceptionFilter {
-    catch(exception, host) {
-        return (0, rxjs_1.throwError)(() => ({
-            statusCode: exception.statusCode,
-            message: exception.message,
-        }));
-    }
-};
-exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter;
-exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter = tslib_1.__decorate([
-    (0, common_1.Catch)(CustomRpcException)
-], GlobalRpcExceptionFilter);
-
-
-/***/ }),
-/* 79 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.throwException = void 0;
-const rxjs_1 = __webpack_require__(52);
-const rcp_exception_1 = __webpack_require__(78);
-const throwException = (code, message) => (0, rxjs_1.throwError)(() => {
-    return new rcp_exception_1.CustomRpcException(code, message);
-});
-exports.throwException = throwException;
-
-
-/***/ }),
-/* 80 */
-/***/ ((module) => {
-
-module.exports = require("axios");
-
-/***/ }),
-/* 81 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(82), exports);
-tslib_1.__exportStar(__webpack_require__(83), exports);
-tslib_1.__exportStar(__webpack_require__(84), exports);
-tslib_1.__exportStar(__webpack_require__(85), exports);
-tslib_1.__exportStar(__webpack_require__(86), exports);
-
-
-/***/ }),
-/* 82 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2970,7 +2334,96 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 83 */
+/* 64 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MetadataPaginationDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const class_transformer_1 = __webpack_require__(65);
+const class_validator_1 = __webpack_require__(16);
+const swagger_1 = __webpack_require__(3);
+class MetadataPaginationDto {
+    constructor() {
+        this.page = 1;
+        this.limit = 10;
+        this.sortBy = 'createdAt';
+        this.sortOrder = 'DESC';
+    }
+}
+exports.MetadataPaginationDto = MetadataPaginationDto;
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Search term to filter results',
+        required: false,
+        example: 'search text'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    tslib_1.__metadata("design:type", String)
+], MetadataPaginationDto.prototype, "search", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Page number (starts from 1)',
+        required: false,
+        minimum: 1,
+        default: 1,
+        example: 1
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    tslib_1.__metadata("design:type", Number)
+], MetadataPaginationDto.prototype, "page", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Number of items per page',
+        required: false,
+        minimum: 1,
+        default: 10,
+        example: 10
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(1),
+    tslib_1.__metadata("design:type", Number)
+], MetadataPaginationDto.prototype, "limit", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Field to sort by',
+        required: false,
+        default: 'createdAt',
+        example: 'createdAt'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    tslib_1.__metadata("design:type", String)
+], MetadataPaginationDto.prototype, "sortBy", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Sort order direction',
+        required: false,
+        enum: ['ASC', 'DESC'],
+        default: 'DESC',
+        example: 'DESC'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    tslib_1.__metadata("design:type", String)
+], MetadataPaginationDto.prototype, "sortOrder", void 0);
+
+
+/***/ }),
+/* 65 */
+/***/ ((module) => {
+
+module.exports = require("class-transformer");
+
+/***/ }),
+/* 66 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3006,7 +2459,47 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 84 */
+/* 67 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateSectDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+const class_validator_1 = __webpack_require__(16);
+class UpdateSectDto {
+}
+exports.UpdateSectDto = UpdateSectDto;
+tslib_1.__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxx',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateSectDto.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Frontend',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateSectDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô môn phái hiện tại.',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateSectDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả hình ảnh của môn phái',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateSectDto.prototype, "logo", void 0);
+
+
+/***/ }),
+/* 68 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3042,7 +2535,45 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 85 */
+/* 69 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateRealmDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+class UpdateRealmDto {
+}
+exports.UpdateRealmDto = UpdateRealmDto;
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxx',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateRealmDto.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Luyện khí cảnh',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateRealmDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả cảnh giới hiện tại',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateRealmDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả cấp bậc cảnh giới hiện tại',
+    }),
+    tslib_1.__metadata("design:type", Number)
+], UpdateRealmDto.prototype, "level", void 0);
+
+
+/***/ }),
+/* 70 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3071,7 +2602,39 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 86 */
+/* 71 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateAchievementDto = void 0;
+const tslib_1 = __webpack_require__(5);
+const swagger_1 = __webpack_require__(3);
+class UpdateAchievementDto {
+}
+exports.UpdateAchievementDto = UpdateAchievementDto;
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxx',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateAchievementDto.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Sơ cấp thuật đạo',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateAchievementDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Hình ảnh mô tả cấp bậc cảnh giới hiện tại',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateAchievementDto.prototype, "logo", void 0);
+
+
+/***/ }),
+/* 72 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3107,106 +2670,41 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 87 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/platform-express");
-
-/***/ }),
-/* 88 */
+/* 73 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateMaterialArtDto = void 0;
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(89), exports);
-tslib_1.__exportStar(__webpack_require__(91), exports);
-tslib_1.__exportStar(__webpack_require__(90), exports);
-
-
-/***/ }),
-/* 89 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sequelizeModuleOptions = void 0;
-const config_1 = __webpack_require__(31);
-const configs_1 = __webpack_require__(40);
-const database_models_1 = __webpack_require__(90);
-exports.sequelizeModuleOptions = {
-    imports: [
-        config_1.ConfigModule.forRoot({
-            load: [configs_1.Configurations],
-        }),
-    ],
-    inject: [config_1.ConfigService],
-    useFactory(configService) {
-        const configs = configService.get('database');
-        return {
-            host: configs?.host,
-            port: configs?.port,
-            dialect: configs?.dialect,
-            username: configs?.username,
-            password: configs?.password,
-            database: configs?.database,
-            autoLoadModels: true,
-            synchronize: true,
-            models: database_models_1.DatabaseModels,
-        };
-    },
-};
-
-
-/***/ }),
-/* 90 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DatabaseModels = void 0;
-const account_1 = __webpack_require__(60);
-const achievement_1 = __webpack_require__(65);
-const material_art_1 = __webpack_require__(67);
-const profile_1 = __webpack_require__(59);
-const profile_achievement_1 = __webpack_require__(64);
-const profile_material_art_1 = __webpack_require__(66);
-const realm_1 = __webpack_require__(57);
-const sect_1 = __webpack_require__(68);
-exports.DatabaseModels = [
-    account_1.Account,
-    profile_1.Profile,
-    realm_1.Realm,
-    material_art_1.MaterialArt,
-    achievement_1.Achievement,
-    sect_1.Sect,
-    profile_achievement_1.ProfileAchievement,
-    profile_material_art_1.ProfileMaterialArt,
-];
-
-
-/***/ }),
-/* 91 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DatabaseConfigModule = exports.DatabaseConfigFeature = void 0;
-const tslib_1 = __webpack_require__(5);
-const sequelize_1 = __webpack_require__(69);
-const database_config_1 = __webpack_require__(89);
-const common_1 = __webpack_require__(1);
-const database_models_1 = __webpack_require__(90);
-exports.DatabaseConfigFeature = Object.freeze(sequelize_1.SequelizeModule.forFeature(database_models_1.DatabaseModels));
-let DatabaseConfigModule = class DatabaseConfigModule {
-};
-exports.DatabaseConfigModule = DatabaseConfigModule;
-exports.DatabaseConfigModule = DatabaseConfigModule = tslib_1.__decorate([
-    (0, common_1.Module)({
-        imports: [sequelize_1.SequelizeModule.forRootAsync(database_config_1.sequelizeModuleOptions)],
-        exports: [sequelize_1.SequelizeModule.forRootAsync(database_config_1.sequelizeModuleOptions)],
-    })
-], DatabaseConfigModule);
+const swagger_1 = __webpack_require__(3);
+class UpdateMaterialArtDto {
+}
+exports.UpdateMaterialArtDto = UpdateMaterialArtDto;
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxx',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateMaterialArtDto.prototype, "id", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Angular Thần Công',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateMaterialArtDto.prototype, "name", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Mô tả môn võ học',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateMaterialArtDto.prototype, "description", void 0);
+tslib_1.__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Thông tin Id của môn phái tạo ra môn võ học này.',
+    }),
+    tslib_1.__metadata("design:type", String)
+], UpdateMaterialArtDto.prototype, "sectId", void 0);
 
 
 /***/ })

@@ -23,11 +23,15 @@
       "@shared/dtos/metadata": ["shared/dtos/src/metadata/index.ts"],
       "@shared/event-emitter": ["shared/event-emitter/src/index.ts"],
       "@shared/exception": ["shared/exception/src/index.ts"],
+      "@shared/file-uploader": ["shared/file-uploader/src/index.ts"],
       "@shared/guard": ["shared/guard/src/index.ts"],
       "@shared/jwt": ["shared/jwt/src/index.ts"],
       "@shared/mailer": ["shared/mailer/src/index.ts"],
       "@shared/message-pattern/account": [
         "shared/message-pattern/src/lib/account/index.ts"
+      ],
+      "@shared/message-pattern/metadata": [
+        "shared/message-pattern/src/lib/metadata/index.ts"
       ],
       "@shared/models/account": ["shared/models/src/account.model.ts"],
       "@shared/models/achievement": ["shared/models/src/achievement.model.ts"],
@@ -50,9 +54,7 @@
       ],
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
-      ],
-      "@tangkinhcode-api/file-storage": ["shared/file-storage/src/index.ts"],
-      "@shared/file-uploader": ["shared/file-uploader/src/index.ts"]
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

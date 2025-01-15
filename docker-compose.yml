@@ -65,9 +65,7 @@ services:
       JWT_ACCESS_TOKEN_EXPIRY: ${JWT_ACCESS_TOKEN_EXPIRY}
       JWT_REFRESH_TOKEN_EXPIRY: ${JWT_REFRESH_TOKEN_EXPIRY}
       REDIS_URL: ${REDIS_URL}
-      IMAGE_KIT_ENDPOINT: ${IMAGE_KIT_ENDPOINT}
-      IMAGE_KIT_PUBLIC_KEY: ${IMAGE_KIT_PUBLIC_KEY}
-      IMAGE_KIT_PRIVATE_KEY: ${IMAGE_KIT_PRIVATE_KEY}
+
     depends_on:
       - nats
       - postgres
@@ -113,6 +111,33 @@ services:
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
       MAIL_FROM: ${MAIL_FROM}
+    depends_on:
+      - nats
+      - postgres
+      - redis
+
+  core:
+    container_name: core
+    build:
+      context: .
+      dockerfile: ./apps/core/Dockerfile
+    image: core:latest
+    networks:
+      - microservice-network
+      - database-network
+    environment:
+      NATS_URL: ${NATS_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      IMAGE_KIT_ENDPOINT: ${IMAGE_KIT_ENDPOINT}
+      IMAGE_KIT_PUBLIC_KEY: ${IMAGE_KIT_PUBLIC_KEY}
+      IMAGE_KIT_PRIVATE_KEY: ${IMAGE_KIT_PRIVATE_KEY}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       - nats
       - postgres

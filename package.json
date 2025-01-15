@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build-service": "nx build api-gateway && nx build account",
-    "build-service:none-cache": "nx build api-gateway --skip-nx-cache && nx build account --skip-nx-cache",
+    "build-service": "nx build api-gateway && nx build account && nx build core",
+    "build-service:none-cache": "nx build api-gateway --skip-nx-cache && nx build account --skip-nx-cache && nx build core --skip-nx-cache",
     "start": "yarn run build-service && docker-compose --env-file .env up --build -d",
     "serve:none-cache": "yarn run build-service:none-cache && docker-compose --env-file .env up --build -d",
     "build:image": "docker-compose --env-file .env up --build"
@@ -57,7 +57,7 @@
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
     "@types/bcrypt": "^5.0.2",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/node": "~18.16.9",
     "@types/nodemailer": "^6.4.17",
     "@types/sequelize": "^4.28.20",
