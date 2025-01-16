@@ -14,7 +14,6 @@
     ],
     "sharedGlobals": []
   },
-  "nxCloudId": "676d7326d56afe22e594cd1b",
   "plugins": [
     {
       "plugin": "@nx/webpack/plugin",
@@ -64,6 +63,5 @@
     "@nx/nest:interceptor": {
       "unitTestRunner": "none"
     }
-  },
-  "neverConnectToCloud": true
+  }
 }

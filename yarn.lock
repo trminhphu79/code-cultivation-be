@@ -1007,10 +1007,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@css-inline/css-inline-win32-x64-msvc@0.14.1":
+"@css-inline/css-inline-darwin-arm64@0.14.1":
   version "0.14.1"
-  resolved "https://registry.npmjs.org/@css-inline/css-inline-win32-x64-msvc/-/css-inline-win32-x64-msvc-0.14.1.tgz"
-  integrity sha512-nzotGiaiuiQW78EzsiwsHZXbxEt6DiMUFcDJ6dhiliomXxnlaPyBfZb6/FMBgRJOf6sknDt/5695OttNmbMYzg==
+  resolved "https://registry.npmjs.org/@css-inline/css-inline-darwin-arm64/-/css-inline-darwin-arm64-0.14.1.tgz"
+  integrity sha512-QE5W1YRIfRayFrtrcK/wqEaxNaqLULPI0gZB4ArbFRd3d56IycvgBasDTHPre5qL2cXCO3VyPx+80XyHOaVkag==
 
 "@css-inline/css-inline@0.14.1":
   version "0.14.1"
@@ -1803,10 +1803,15 @@
     "@nx/js" "20.3.0"
     tslib "^2.3.0"
 
-"@nx/nx-win32-x64-msvc@20.3.0":
+"@nx/nx-darwin-arm64@20.3.0":
   version "20.3.0"
-  resolved "https://registry.npmjs.org/@nx/nx-win32-x64-msvc/-/nx-win32-x64-msvc-20.3.0.tgz"
-  integrity sha512-8FOejZ4emtLSVn3pYWs4PIc3n4//qMbwMDPVxmPE8us3ir91Qh0bzr5zRj7Q8sEdSgvneXRXqtBp2grY2KMJsw==
+  resolved "https://registry.npmjs.org/@nx/nx-darwin-arm64/-/nx-darwin-arm64-20.3.0.tgz"
+  integrity sha512-9PqSe1Sh7qNqA4GL0cZH0t3S0EZzb2Xn14XY9au7yf0+eoxyag1oETjjULrxLeUmSoXW2hDxzNtoqKFE9zF07Q==
+
+"@nx/nx-darwin-arm64@20.3.1":
+  version "20.3.1"
+  resolved "https://registry.npmjs.org/@nx/nx-darwin-arm64/-/nx-darwin-arm64-20.3.1.tgz"
+  integrity sha512-bx++T9/8l4PK1yDTxPnROT7RG8CkWGkxKC0D7xlS/YQzE7CelDfgNYu0Bd7upZF4gafW2Uz3dd3j6WhvZLxbbg==
 
 "@nx/web@20.3.0":
   version "20.3.0"
@@ -1879,11 +1884,6 @@
   version "0.1.1"
   resolved "https://registry.npmjs.org/@one-ini/wasm/-/wasm-0.1.1.tgz"
   integrity sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==
-
-"@parcel/watcher-win32-x64@2.5.0":
-  version "2.5.0"
-  resolved "https://registry.npmjs.org/@parcel/watcher-win32-x64/-/watcher-win32-x64-2.5.0.tgz"
-  integrity sha512-lPrxve92zEHdgeff3aiu4gDOIt4u7sJYha6wbdEZDCDUhtjTsOMiaJzG5lMY4GkWH8p0fMmO2Ppq5G5XXG+DQw==
 
 "@parcel/watcher@^2.4.1":
   version "2.5.0"
@@ -2030,11 +2030,6 @@
   dependencies:
     source-map-support "^0.5.21"
     tslib "^2.6.3"
-
-"@swc/core-win32-x64-msvc@1.5.29":
-  version "1.5.29"
-  resolved "https://registry.npmjs.org/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.5.29.tgz"
-  integrity sha512-eD/gnxqKyZQQR0hR7TMkIlJ+nCF9dzYmVVNbYZWuA1Xy94aBPUsEk3Uw3oG7q6R3ErrEUPP0FNf2ztEnv+I+dw==
 
 "@swc/core@^1.3.85", "@swc/core@>= 1.4.13", "@swc/core@>=1.2.50", "@swc/core@~1.5.7":
   version "1.5.29"
@@ -7586,7 +7581,58 @@ nth-check@^2.0.1:
   dependencies:
     boolbase "^1.0.0"
 
-"nx@>= 19 <= 21", nx@20.3.0:
+nx@^20.3.1, "nx@>= 19 <= 21":
+  version "20.3.1"
+  resolved "https://registry.npmjs.org/nx/-/nx-20.3.1.tgz"
+  integrity sha512-pO48DoQAwVKBEF7/od3bc1tHBYfafgiuS/hHX3yGmhpWW58baIlxMWFp6QY9+A9Q0R+26pd6AEGnE7d1f7+i/g==
+  dependencies:
+    "@napi-rs/wasm-runtime" "0.2.4"
+    "@yarnpkg/lockfile" "^1.1.0"
+    "@yarnpkg/parsers" "3.0.2"
+    "@zkochan/js-yaml" "0.0.7"
+    axios "^1.7.4"
+    chalk "^4.1.0"
+    cli-cursor "3.1.0"
+    cli-spinners "2.6.1"
+    cliui "^8.0.1"
+    dotenv "~16.4.5"
+    dotenv-expand "~11.0.6"
+    enquirer "~2.3.6"
+    figures "3.2.0"
+    flat "^5.0.2"
+    front-matter "^4.0.2"
+    ignore "^5.0.4"
+    jest-diff "^29.4.1"
+    jsonc-parser "3.2.0"
+    lines-and-columns "2.0.3"
+    minimatch "9.0.3"
+    node-machine-id "1.1.12"
+    npm-run-path "^4.0.1"
+    open "^8.4.0"
+    ora "5.3.0"
+    resolve.exports "2.0.3"
+    semver "^7.5.3"
+    string-width "^4.2.3"
+    tar-stream "~2.2.0"
+    tmp "~0.2.1"
+    tsconfig-paths "^4.1.2"
+    tslib "^2.3.0"
+    yaml "^2.6.0"
+    yargs "^17.6.2"
+    yargs-parser "21.1.1"
+  optionalDependencies:
+    "@nx/nx-darwin-arm64" "20.3.1"
+    "@nx/nx-darwin-x64" "20.3.1"
+    "@nx/nx-freebsd-x64" "20.3.1"
+    "@nx/nx-linux-arm-gnueabihf" "20.3.1"
+    "@nx/nx-linux-arm64-gnu" "20.3.1"
+    "@nx/nx-linux-arm64-musl" "20.3.1"
+    "@nx/nx-linux-x64-gnu" "20.3.1"
+    "@nx/nx-linux-x64-musl" "20.3.1"
+    "@nx/nx-win32-arm64-msvc" "20.3.1"
+    "@nx/nx-win32-x64-msvc" "20.3.1"
+
+nx@20.3.0:
   version "20.3.0"
   resolved "https://registry.npmjs.org/nx/-/nx-20.3.0.tgz"
   integrity sha512-Nzi4k7tV22zwO2iBLk+pHxorLEWPJpPrVCACtz0SQ63j/LiAgfhoqruJO+VU+V+E9qdyPsvmqIL/Iaf/GRQlqA==
@@ -10272,9 +10318,9 @@ yaml@^1.10.0, yaml@^1.7.2:
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
 
 yaml@^2.6.0:
-  version "2.6.1"
-  resolved "https://registry.npmjs.org/yaml/-/yaml-2.6.1.tgz"
-  integrity sha512-7r0XPzioN/Q9kXBro/XPnA6kznR73DHq+GXh5ON7ZozRO6aMjbmiBuKste2wslTFkC5d1dw0GooOCepZXJ2SAg==
+  version "2.7.0"
+  resolved "https://registry.npmjs.org/yaml/-/yaml-2.7.0.tgz"
+  integrity sha512-+hSoy/QHluxmC9kCIJyL/uyFmLmc+e5CFR5Wa+bpIhIj85LVb9ZH2nVnqrHoSvKogwODv0ClqZkmiSSaIH5LTA==
 
 yargs-parser@^20.2.2:
   version "20.2.9"
