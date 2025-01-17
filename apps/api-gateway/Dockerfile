@@ -4,9 +4,6 @@ FROM node:20.18.1-alpine
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++ 
-
 # A wildcard is used to ensure both package.json is copied
 COPY ./dist/apps/api-gateway/package.json ./
 

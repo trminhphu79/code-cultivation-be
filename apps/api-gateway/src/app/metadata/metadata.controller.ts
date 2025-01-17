@@ -14,6 +14,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import {
   CreateAchievementDto,
@@ -26,7 +27,7 @@ import {
   UpdateSectDto,
   UpdateMaterialArtDto,
 } from '@shared/dtos/metadata';
-import { Public } from '@shared/guard';
+import { Roles, RoleGuard, Role } from '@shared/guard';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
@@ -48,6 +49,8 @@ export const ApiFile =
     })(target, propertyKey, descriptor);
   };
 
+@Roles(Role.ADMIN)
+@UseGuards(RoleGuard)
 @Controller('metadata')
 export class MetadataController {
   constructor(
@@ -55,7 +58,6 @@ export class MetadataController {
     private natsClient: ClientProxy
   ) {}
 
-  @Public()
   @Post('realm/create')
   @ApiOperation({ summary: 'Tạo mới một cảnh giới tu luyện' })
   @ApiOkResponse({
@@ -87,7 +89,6 @@ export class MetadataController {
     return this.natsClient.send(RealmPattern.Create, dto);
   }
 
-  @Public()
   @Patch('realm/update')
   @ApiOperation({ summary: 'Cập nhật thông tin cảnh giới' })
   @ApiOkResponse({
@@ -113,7 +114,6 @@ export class MetadataController {
     return this.natsClient.send(RealmPattern.Update, dto);
   }
 
-  @Public()
   @Get('realm/findOne/:id')
   @ApiOperation({ summary: 'Tìm kiếm một cảnh giới theo ID' })
   @ApiOkResponse({
@@ -139,7 +139,6 @@ export class MetadataController {
     return this.natsClient.send(RealmPattern.FindOne, id);
   }
 
-  @Public()
   @Post('realm/findAll')
   @ApiOperation({ summary: 'Lấy danh sách tất cả cảnh giới với phân trang' })
   @ApiOkResponse({
@@ -179,7 +178,6 @@ export class MetadataController {
     return this.natsClient.send(RealmPattern.FindAll, dto);
   }
 
-  @Public()
   @Delete('realm/delete/:id')
   @ApiOperation({
     summary:
@@ -198,7 +196,6 @@ export class MetadataController {
     return this.natsClient.send(RealmPattern.Delete, id);
   }
 
-  @Public()
   @Post('materialArt/create')
   @ApiOperation({ summary: 'Tạo mới một võ học' })
   @ApiOkResponse({
@@ -231,7 +228,6 @@ export class MetadataController {
     return this.natsClient.send(MaterialArtPattern.Create, dto);
   }
 
-  @Public()
   @Get('materialArt/findOne/:id')
   @ApiOperation({ summary: 'Tìm kiếm một võ học theo ID' })
   @ApiOkResponse({
@@ -258,7 +254,6 @@ export class MetadataController {
     return this.natsClient.send(MaterialArtPattern.FindOne, id);
   }
 
-  @Public()
   @Post('materialArt/findAll')
   @ApiOperation({ summary: 'Lấy danh sách tất cả võ học với phân trang' })
   @ApiOkResponse({
@@ -296,7 +291,6 @@ export class MetadataController {
     return this.natsClient.send(MaterialArtPattern.FindAll, dto);
   }
 
-  @Public()
   @Patch('materialArt/update')
   @ApiOperation({ summary: 'Cập nhật thông tin võ học' })
   @ApiOkResponse({
@@ -323,7 +317,6 @@ export class MetadataController {
     return this.natsClient.send(MaterialArtPattern.Update, dto);
   }
 
-  @Public()
   @Delete('materialArt/delete/:id')
   @ApiOperation({
     summary:
@@ -342,7 +335,6 @@ export class MetadataController {
     return this.natsClient.send(MaterialArtPattern.Delete, id);
   }
 
-  @Public()
   @Post('achievement/create')
   @ApiOperation({ summary: 'Tạo mới một thành tựu' })
   @ApiOkResponse({
@@ -373,7 +365,6 @@ export class MetadataController {
     return this.natsClient.send(AchievementPattern.Create, dto);
   }
 
-  @Public()
   @Get('achievement/findOne/:id')
   @ApiOperation({ summary: 'Tìm kiếm một thành tựu theo ID' })
   @ApiOkResponse({
@@ -398,7 +389,6 @@ export class MetadataController {
     return this.natsClient.send(AchievementPattern.FindOne, id);
   }
 
-  @Public()
   @Post('achievement/findAll')
   @ApiOperation({ summary: 'Lấy danh sách tất cả thành tựu với phân trang' })
   @ApiOkResponse({
@@ -434,12 +424,11 @@ export class MetadataController {
     },
   })
   findAllAchievement(@Body() dto: MetadataPaginationDto) {
-    return this.natsClient.send(AchievementPattern.FindAll, dto).pipe(
-      tap(()=> Logger.log('findAllAchievement success'))
-    );
+    return this.natsClient
+      .send(AchievementPattern.FindAll, dto)
+      .pipe(tap(() => Logger.log('findAllAchievement success')));
   }
 
-  @Public()
   @Patch('achievement/update')
   @ApiOperation({ summary: 'Cập nhật thông tin thành tựu' })
   @ApiOkResponse({
@@ -464,7 +453,6 @@ export class MetadataController {
     return this.natsClient.send(AchievementPattern.Update, dto);
   }
 
-  @Public()
   @Delete('achievement/delete/:id')
   @ApiOperation({
     summary:
@@ -483,7 +471,6 @@ export class MetadataController {
     return this.natsClient.send(AchievementPattern.Delete, id);
   }
 
-  @Public()
   @Post('sect/create')
   @ApiOperation({ summary: 'Tạo mới một môn phái' })
   @ApiOkResponse({
@@ -512,7 +499,6 @@ export class MetadataController {
     return this.natsClient.send(SectPattern.Create, dto);
   }
 
-  @Public()
   @Get('sect/findOne/:id')
   @ApiOperation({ summary: 'Tìm kiếm một môn phái theo ID' })
   @ApiOkResponse({
@@ -538,7 +524,6 @@ export class MetadataController {
     return this.natsClient.send(SectPattern.FindOne, id);
   }
 
-  @Public()
   @Post('sect/findAll')
   @ApiOperation({ summary: 'Lấy danh sách tất cả môn phái với phân trang' })
   @ApiOkResponse({
@@ -575,12 +560,11 @@ export class MetadataController {
     },
   })
   findAllSect(@Body() dto: MetadataPaginationDto) {
-    return this.natsClient.send(SectPattern.FindAll, dto).pipe(
-      tap(()=> Logger.log('findAllSect success'))
-    );
+    return this.natsClient
+      .send(SectPattern.FindAll, dto)
+      .pipe(tap(() => Logger.log('findAllSect success')));
   }
 
-  @Public()
   @Patch('sect/update')
   @ApiOperation({ summary: 'Cập nhật thông tin môn phái' })
   @ApiOkResponse({
@@ -606,7 +590,6 @@ export class MetadataController {
     return this.natsClient.send(SectPattern.Update, dto);
   }
 
-  @Public()
   @Delete('sect/delete/:id')
   @ApiOperation({
     summary:
