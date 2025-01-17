@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="25.0.3">
   <diagram name="Page-1" id="mlCuKUzUeTsnEgZcga1v">
-    <mxGraphModel dx="2399" dy="2002" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2731" dy="2196" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,22 +10,22 @@
         <mxCell id="qrbPPl4nxlBriCZGtWMf-1" value="Client" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="365" y="-250" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-2" value="Account" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-2" value="Account" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="100" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="Guild" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="Guild" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="350" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-5" value="SCRIPTURE" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-5" value="SCRIPTURE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="560" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-12" value="ACTIVITY" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-12" value="ACTIVITY" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="750" y="390" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-14" value="DB POSTGRES" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="358" y="850" width="135" height="120" as="geometry" />
+          <mxGeometry x="365" y="850" width="135" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-15" value="REDIS" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-15" value="REDIS CACHE" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
           <mxGeometry x="370" y="560" width="125" height="150" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=75;entryPerimeter=0;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-2" target="qrbPPl4nxlBriCZGtWMf-15">
@@ -70,7 +70,7 @@
         <mxCell id="qrbPPl4nxlBriCZGtWMf-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-27" target="qrbPPl4nxlBriCZGtWMf-12">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-27" value="API GATEWAY B" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-27" value="API GATEWAY B" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="940" y="120" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-28" target="qrbPPl4nxlBriCZGtWMf-2">
@@ -96,7 +96,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-28" value="API GATEWAY A" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-28" value="API GATEWAY A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="-210" y="120" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-29" target="qrbPPl4nxlBriCZGtWMf-28">
