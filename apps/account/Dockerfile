@@ -11,7 +11,7 @@ RUN apk add --no-cache python3 make g++
 COPY ./dist/apps/account/package.json ./
 
 # Install app dependencies
-RUN npm install
+RUN npm install pg
 
 # Bundle app source
 COPY ./dist/apps/account ./dist
