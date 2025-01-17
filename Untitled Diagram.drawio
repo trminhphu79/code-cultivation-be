@@ -10,16 +10,16 @@
         <mxCell id="qrbPPl4nxlBriCZGtWMf-1" value="Client" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="365" y="-250" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-2" value="Account" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-2" value="AccountService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="100" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="Guild" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="GuildService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="350" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-5" value="SCRIPTURE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-5" value="ScriptureService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="560" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-12" value="ACTIVITY" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-12" value="ActivityService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="750" y="390" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-14" value="DB POSTGRES" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
@@ -115,6 +115,9 @@
               <mxPoint x="395" y="270" />
             </Array>
           </mxGeometry>
+        </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-46" value="FileService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="-160" y="390" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
