@@ -70,6 +70,14 @@
         <mxCell id="qrbPPl4nxlBriCZGtWMf-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-27" target="qrbPPl4nxlBriCZGtWMf-12">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-27" target="qrbPPl4nxlBriCZGtWMf-46">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="320" />
+              <mxPoint x="-220" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-27" value="API GATEWAY B" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="940" y="120" width="120" height="60" as="geometry" />
         </mxCell>
@@ -96,6 +104,9 @@
             </Array>
           </mxGeometry>
         </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-28" target="qrbPPl4nxlBriCZGtWMf-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-28" value="API GATEWAY A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="-210" y="120" width="120" height="60" as="geometry" />
         </mxCell>
@@ -117,7 +128,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-46" value="FileService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
-          <mxGeometry x="-160" y="390" width="120" height="60" as="geometry" />
+          <mxGeometry x="-280" y="390" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-50" value="PROVIDER&amp;nbsp;&lt;div&gt;IMAGEKIT&lt;/div&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;gradientColor=#7ea6e0;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="-275" y="550" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-46" target="qrbPPl4nxlBriCZGtWMf-50">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
