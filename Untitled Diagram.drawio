@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="25.0.3">
   <diagram name="Page-1" id="mlCuKUzUeTsnEgZcga1v">
-    <mxGraphModel dx="2606" dy="2123" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="3777" dy="2804" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -13,7 +13,7 @@
         <mxCell id="qrbPPl4nxlBriCZGtWMf-2" value="AccountService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="100" y="390" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="GuildService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-3" value="CoreService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="350" y="390" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-5" value="ScriptureService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
@@ -78,6 +78,9 @@
             </Array>
           </mxGeometry>
         </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-27" target="qrbPPl4nxlBriCZGtWMf-63">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-27" value="API GATEWAY B" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="940" y="120" width="120" height="60" as="geometry" />
         </mxCell>
@@ -105,6 +108,9 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-28" target="qrbPPl4nxlBriCZGtWMf-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="qrbPPl4nxlBriCZGtWMf-28" target="qrbPPl4nxlBriCZGtWMf-63">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-28" value="API GATEWAY A" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
@@ -150,6 +156,9 @@
         </mxCell>
         <mxCell id="qrbPPl4nxlBriCZGtWMf-61" value="&lt;b&gt;&lt;font color=&quot;#0000cc&quot; style=&quot;font-size: 18px;&quot;&gt;SOCKET CONNECTION&lt;/font&gt;&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="890" y="405" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="qrbPPl4nxlBriCZGtWMf-63" value="GuildService" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="-70" y="390" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
