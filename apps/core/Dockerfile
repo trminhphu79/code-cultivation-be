@@ -1,20 +1,20 @@
 # Base image
-FROM node:18-alpine 
+FROM node:20.18.1-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# A wildcard is used to ensure both package.json is copied
-COPY ./dist/apps/core/package.json ./package.json
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ 
 
-# Install app dependencies - need instal pg(postgres db) because it doesnt including package.sjon
-RUN npm install pg
+# A wildcard is used to ensure both package.json is copied
+COPY ./dist/apps/core/package.json ./
+
+# Install app dependencies
+RUN npm install
 
 # Bundle app source
 COPY ./dist/apps/core ./dist
-
-# Creates a "dist" folder with the production build
-# RUN npm run build:core
 
 # Start the server using the production build
 CMD [ "node", "dist/main.js" ]
