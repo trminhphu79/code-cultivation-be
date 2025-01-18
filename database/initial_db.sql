@@ -4,6 +4,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create enum for credential type
 CREATE TYPE "credentialType" AS ENUM ('NONE', 'GITHUB', 'GOOGLE');
 
+-- Create enum for role
+CREATE TYPE "role" AS ENUM ('ADMIN', 'USER', 'GUILD_OWNER', 'GUILD_MEMBER');
+
 -- Create Realms table
 CREATE TABLE "realm" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -29,6 +32,7 @@ CREATE TABLE "account" (
     "password" VARCHAR(255) NOT NULL,
     "isVerify" BOOLEAN DEFAULT FALSE,
     "credentialType" "credentialType" DEFAULT 'NONE',
+    "role" "role" DEFAULT 'USER',
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

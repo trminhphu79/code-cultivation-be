@@ -1,3 +1,4 @@
+import { Role } from '@shared/guard';
 import {
   Column,
   Model,
@@ -161,6 +162,11 @@ export class Account extends Model {
 
   @Column
   password!: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  role!: Role;
 
   @Column({
     type: DataType.BOOLEAN,

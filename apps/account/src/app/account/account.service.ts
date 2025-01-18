@@ -26,6 +26,12 @@ import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import { HttpStatusCode } from 'axios';
 import { JwtConfig } from '@shared/configs';
 import { AccountAlert } from '@shared/alert/account';
+import { Role } from '@shared/guard';
+
+interface UpdateRoleDto {
+  accountId: string;
+  role: Role;
+}
 
 @Injectable()
 export class AccountService {
@@ -244,7 +250,7 @@ export class AccountService {
             delete accountData?.password;
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
-              value: { ...accountData, email, profile },
+              value: { ...accountData, profile },
               ttl: this.TTL_CACHE_TIME,
             });
           }),
@@ -335,6 +341,7 @@ export class AccountService {
               password: string;
               credentialType: CredentialTypeEnum;
               profile: Profile;
+              role: Role;
             }
           );
         }
@@ -349,6 +356,21 @@ export class AccountService {
             ],
           })
         ).pipe(
+          map((response) => {
+            const jsonData = response?.toJSON?.();
+            delete jsonData?.password;
+            return jsonData as {
+              id: string;
+              email: string;
+              createdAt: string;
+              updatedAt: string;
+              isVerify: boolean;
+              password: string;
+              credentialType: CredentialTypeEnum;
+              profile: Profile;
+              role: Role;
+            };
+          }),
           tap((fullyData) => {
             const key = this.getCacheKey(email);
             this.eventEmitter.emit(CacheMessageAction.Create, {
@@ -356,27 +378,14 @@ export class AccountService {
               value: fullyData,
               ttl: this.TTL_CACHE_TIME,
             });
-          }),
-          map(
-            (response) =>
-              (response?.toJSON?.() as {
-                id: string;
-                email: string;
-                createdAt: string;
-                updatedAt: string;
-                isVerify: boolean;
-                password: string;
-                credentialType: CredentialTypeEnum;
-                profile: Profile;
-              }) || null
-          )
+          })
         );
       })
     );
   }
 
   /**
-   * @description Get the existing profile by profileId or accountId, check in cache before get from database
+   * @description Get the existing profile by profileId, check in cache before get from database
    */
   getExistingProfileByProfileId(profileId: string) {
     const cacheKey = this.getProfileCacheKey(profileId);

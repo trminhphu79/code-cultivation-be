@@ -10,6 +10,7 @@ import { Achievement } from '@shared/models/achievement';
 import { Op } from 'sequelize';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MetadataAlert } from '@shared/alert/metadata';
 
 interface ServiceResponse<T> {
   data: T;
@@ -26,7 +27,7 @@ export class AchievementService {
     return from(this.achievementModel.create(dto as any)).pipe(
       map((achievement) => ({
         data: achievement,
-        message: 'Thành tích đã được tạo thành công',
+        message: MetadataAlert.AchievementCreated,
       }))
     );
   }
@@ -73,7 +74,7 @@ export class AchievementService {
           page,
           limit,
         },
-        message: 'Lấy danh sách thành tích thành công',
+        message: MetadataAlert.AchievementListed,
       }))
     );
   }
@@ -86,7 +87,7 @@ export class AchievementService {
     ).pipe(
       map((achievement) => ({
         data: achievement,
-        message: 'Tìm thấy thành tích',
+        message: MetadataAlert.AchievementFound,
       }))
     );
   }
@@ -104,7 +105,7 @@ export class AchievementService {
         await achievement.update(dto);
         return {
           data: achievement,
-          message: 'Cập nhật thành tích thành công',
+          message: MetadataAlert.AchievementUpdated,
         };
       }),
       from
@@ -121,7 +122,7 @@ export class AchievementService {
         await achievement.destroy();
         return {
           data: undefined,
-          message: 'Đã xóa thành tích thành công',
+          message: MetadataAlert.AchievementDeleted,
         };
       }),
       from

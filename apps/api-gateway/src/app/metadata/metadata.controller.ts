@@ -49,8 +49,8 @@ export const ApiFile =
     })(target, propertyKey, descriptor);
   };
 
-// @Roles(Role.ADMIN)
-// @UseGuards(RoleGuard)
+@Roles(Role.ADMIN)
+@UseGuards(RoleGuard)
 @Controller('metadata')
 export class MetadataController {
   constructor(

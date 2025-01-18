@@ -9,6 +9,7 @@ import { Realm } from '@shared/models/realm';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Op } from 'sequelize';
+import { MetadataAlert } from '@shared/alert/metadata';
 
 interface ServiceResponse<T> {
   data: T;
@@ -26,7 +27,7 @@ export class RealmService {
     return from(this.realmModel.create(dto as any)).pipe(
       map((realm) => ({
         data: realm,
-        message: 'Realm đã được tạo thành công',
+        message: MetadataAlert.RealmCreated,
       }))
     );
   }
@@ -78,7 +79,7 @@ export class RealmService {
           page,
           limit,
         },
-        message: 'Lấy danh sách realm thành công',
+        message: MetadataAlert.RealmListed,
       }))
     );
   }
@@ -91,7 +92,7 @@ export class RealmService {
     ).pipe(
       map((realm) => ({
         data: realm,
-        message: 'Tìm thấy realm',
+        message: MetadataAlert.RealmFound,
       }))
     );
   }
@@ -106,7 +107,7 @@ export class RealmService {
         await realm.update(dto);
         return {
           data: realm,
-          message: 'Cập nhật realm thành công',
+          message: MetadataAlert.RealmUpdated,
         };
       }),
       from
@@ -123,7 +124,7 @@ export class RealmService {
         await realm.destroy();
         return {
           data: undefined,
-          message: 'Đã xóa realm thành công',
+          message: MetadataAlert.RealmDeleted,
         };
       }),
       from

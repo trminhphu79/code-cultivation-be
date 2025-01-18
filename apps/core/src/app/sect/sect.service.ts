@@ -9,6 +9,7 @@ import {
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Op } from 'sequelize';
+import { MetadataAlert } from '@shared/alert/metadata';
 
 interface ServiceResponse<T> {
   data: T;
@@ -26,7 +27,7 @@ export class SectService {
     return from(this.sectModel.create(dto as any)).pipe(
       map((sect) => ({
         data: sect,
-        message: 'Môn phái đã được tạo thành công',
+        message: MetadataAlert.SectCreated,
       }))
     );
   }
@@ -73,7 +74,7 @@ export class SectService {
           page,
           limit,
         },
-        message: 'Lấy danh sách môn phái thành công',
+        message: MetadataAlert.SectListed,
       }))
     );
   }
@@ -86,7 +87,7 @@ export class SectService {
     ).pipe(
       map((sect) => ({
         data: sect,
-        message: 'Tìm thấy môn phái',
+        message: MetadataAlert.SectFound,
       }))
     );
   }
@@ -101,7 +102,7 @@ export class SectService {
         await sect.update(dto);
         return {
           data: sect,
-          message: 'Cập nhật môn phái thành công',
+          message: MetadataAlert.SectUpdated,
         };
       }),
       from
@@ -118,7 +119,7 @@ export class SectService {
         await sect.destroy();
         return {
           data: undefined,
-          message: 'Đã xóa môn phái thành công',
+          message: MetadataAlert.SectDeleted,
         };
       }),
       from

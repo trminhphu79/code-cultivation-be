@@ -25,7 +25,7 @@ export const AccountAlert = Object.freeze({
 
   // Authentication
   LoginSuccess: 'Đăng nhập thành công',
-  LoginFailed: 'Mật khẩu không chính xác',
+  LoginFailed: 'Tài khoản hoặc mật khẩu không chính xác',
   TokenError: 'Token không hợp lệ hoặc đã hết hạn',
   TokenExpired: 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại',
 
@@ -51,4 +51,9 @@ export const AccountAlert = Object.freeze({
 
   // Cache Operations
   CacheLockError: 'Failed to acquire lock after retries',
+
+  // Role Management
+  RoleUpdated: 'Cập nhật quyền người dùng thành công',
+  RoleUpdateError: 'Có lỗi xảy ra khi cập nhật quyền người dùng',
+  RoleInvalid: 'Quyền người dùng không hợp lệ',
 });

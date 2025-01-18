@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Put, Param, Body } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import {
   ChangePasswordDto,

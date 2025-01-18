@@ -1816,18 +1816,22 @@ let AccountService = AccountService_1 = class AccountService {
                         required: false, // Set to true if the profile must exist
                     },
                 ],
-            })).pipe((0, rxjs_1.tap)((fullyData) => {
+            })).pipe((0, rxjs_1.map)((response) => {
+                const jsonData = response?.toJSON?.();
+                delete jsonData?.password;
+                return jsonData;
+            }), (0, rxjs_1.tap)((fullyData) => {
                 const key = this.getCacheKey(email);
                 this.eventEmitter.emit(cache_manager_1.CacheMessageAction.Create, {
                     key,
                     value: fullyData,
                     ttl: this.TTL_CACHE_TIME,
                 });
-            }), (0, rxjs_1.map)((response) => response?.toJSON?.() || null));
+            }));
         }));
     }
     /**
-     * @description Get the existing profile by profileId or accountId, check in cache before get from database
+     * @description Get the existing profile by profileId, check in cache before get from database
      */
     getExistingProfileByProfileId(profileId) {
         const cacheKey = this.getProfileCacheKey(profileId);
@@ -2356,7 +2360,7 @@ exports.AccountAlert = Object.freeze({
     VerificationEmailSuccess: 'Gửi otp verify email thành công',
     // Authentication
     LoginSuccess: 'Đăng nhập thành công',
-    LoginFailed: 'Mật khẩu không chính xác',
+    LoginFailed: 'Tài khoản hoặc mật khẩu không chính xác',
     TokenError: 'Token không hợp lệ hoặc đã hết hạn',
     TokenExpired: 'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại',
     TokenRefreshSuccess: 'Tạo mới token thành công',
@@ -2685,12 +2689,7 @@ let AuthService = AuthService_1 = class AuthService {
     handleSignIn({ email, password }) {
         return (0, rxjs_1.from)(this.accountModel.findOne({
             where: { email, credentialType: types_1.CredentialTypeEnum.NONE },
-            include: [
-                {
-                    association: 'profile',
-                    required: false, // Set to true if the profile must exist
-                },
-            ],
+            attributes: ['email', 'password', 'isVerify'],
         })).pipe((0, operators_1.switchMap)((userData) => {
             if (userData) {
                 userData = userData.toJSON();
@@ -2700,34 +2699,37 @@ let AuthService = AuthService_1 = class AuthService {
                     if (!isMatch) {
                         return (0, exception_1.throwException)(common_1.HttpStatus.BAD_REQUEST, account_2.AccountAlert.LoginFailed);
                     }
-                    delete userData.password;
-                    const payload = {
-                        email: userData?.email,
-                        credentialType: userData?.credentialType,
-                        fullName: userData?.profile?.fullName,
-                    };
-                    return (0, rxjs_1.from)(this.generateFullTokens(payload)).pipe((0, operators_1.map)((tokens) => ({
-                        message: account_2.AccountAlert.LoginSuccess,
-                        data: {
-                            ...userData,
-                            tokens,
-                        },
-                    })));
+                    return this.accountService
+                        .getExistingAccountByEmail(email, types_1.CredentialTypeEnum.NONE)
+                        .pipe((0, operators_1.switchMap)((response) => {
+                        const payload = {
+                            email: response?.email,
+                            credentialType: response?.credentialType,
+                            fullName: response?.profile?.fullName,
+                        };
+                        return (0, rxjs_1.from)(this.generateFullTokens(payload)).pipe((0, operators_1.map)((tokens) => ({
+                            message: account_2.AccountAlert.LoginSuccess,
+                            data: {
+                                ...response,
+                                tokens,
+                            },
+                        })));
+                    }));
                 }));
             }
-            return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, account_2.AccountAlert.AccountNotFound);
+            return (0, exception_1.throwException)(axios_2.HttpStatusCode.BadRequest, account_2.AccountAlert.LoginFailed);
         }));
     }
     handleSignInWithToken({ token }) {
         return this.verifyToken(token).pipe((0, operators_1.switchMap)(() => {
             const source = this.jwtService.decode(token);
             if (!source?.email) {
-                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, account_2.AccountAlert.UserNotFound);
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.Unauthorized, account_2.AccountAlert.TokenExpired);
             }
             return this.accountService.getExistingAccountByEmail(source.email, source.credentialType);
         }), (0, operators_1.switchMap)((response) => {
             if (!response) {
-                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, account_2.AccountAlert.UserNotFound);
+                return (0, exception_1.throwException)(axios_2.HttpStatusCode.NotFound, account_2.AccountAlert.AccountNotFound);
             }
             delete response.password;
             return (0, rxjs_1.of)({

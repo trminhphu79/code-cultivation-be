@@ -9,6 +9,7 @@ import {
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Op } from 'sequelize';
+import { MetadataAlert } from '@shared/alert/metadata';
 
 interface ServiceResponse<T> {
   data: T;
@@ -26,7 +27,7 @@ export class MaterialArtService {
     return from(this.materialArtModel.create(dto as any)).pipe(
       map((materialArt) => ({
         data: materialArt,
-        message: 'Võ học đã được tạo thành công',
+        message: MetadataAlert.MaterialArtCreated,
       }))
     );
   }
@@ -73,7 +74,7 @@ export class MaterialArtService {
           page,
           limit,
         },
-        message: 'Lấy danh sách võ học thành công',
+        message: MetadataAlert.MaterialArtListed,
       }))
     );
   }
@@ -86,7 +87,7 @@ export class MaterialArtService {
     ).pipe(
       map((materialArt) => ({
         data: materialArt,
-        message: 'Tìm thấy võ học',
+        message: MetadataAlert.MaterialArtFound,
       }))
     );
   }
@@ -104,7 +105,7 @@ export class MaterialArtService {
         await materialArt.update(dto);
         return {
           data: materialArt,
-          message: 'Cập nhật võ học thành công',
+          message: MetadataAlert.MaterialArtUpdated,
         };
       }),
       from
@@ -121,7 +122,7 @@ export class MaterialArtService {
         await materialArt.destroy();
         return {
           data: undefined,
-          message: 'Đã xóa võ học thành công',
+          message: MetadataAlert.MaterialArtDeleted,
         };
       }),
       from

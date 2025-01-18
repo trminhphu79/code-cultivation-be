@@ -55,7 +55,8 @@
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
       ],
-      "@shared/alert/account": ["shared/alert/src/account/index.ts"]
+      "@shared/alert/account": ["shared/alert/src/account/index.ts"],
+      "@shared/alert/metadata": ["shared/alert/src/metadata/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

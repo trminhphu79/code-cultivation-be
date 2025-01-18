@@ -42,8 +42,6 @@ export class AuthService {
     private readonly accountModel: typeof Account,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
-    private readonly cacheService: CacheManagerService,
-    private readonly eventEmitter: EventEmitter2,
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
     private readonly accountService: AccountService
@@ -129,6 +127,7 @@ export class AuthService {
           email: jsonData?.email,
           credentialType: jsonData?.credentialType,
           fullName: jsonData?.profile?.fullName,
+          role: jsonData?.role,
         };
         return this.generateFullTokens(payload).pipe(
           map((tokens) => ({
@@ -216,12 +215,7 @@ export class AuthService {
     return from(
       this.accountModel.findOne({
         where: { email, credentialType: CredentialTypeEnum.NONE },
-        include: [
-          {
-            association: 'profile',
-            required: false, // Set to true if the profile must exist
-          },
-        ],
+        attributes: ['email', 'password'],
       })
     ).pipe(
       switchMap((userData) => {
@@ -237,28 +231,35 @@ export class AuthService {
                     AccountAlert.LoginFailed
                   );
                 }
-                delete userData.password;
-                const payload = {
-                  email: userData?.email,
-                  credentialType: userData?.credentialType,
-                  fullName: userData?.profile?.fullName,
-                };
-                return from(this.generateFullTokens(payload)).pipe(
-                  map((tokens) => ({
-                    message: AccountAlert.LoginSuccess,
-                    data: {
-                      ...userData,
-                      tokens,
-                    },
-                  }))
-                );
+
+                return this.accountService
+                  .getExistingAccountByEmail(email, CredentialTypeEnum.NONE)
+                  .pipe(
+                    switchMap((response) => {
+                      const payload = {
+                        email: response?.email,
+                        credentialType: response?.credentialType,
+                        fullName: response?.profile?.fullName,
+                        role: response?.role,
+                      };
+                      return from(this.generateFullTokens(payload)).pipe(
+                        map((tokens) => ({
+                          message: AccountAlert.LoginSuccess,
+                          data: {
+                            ...response,
+                            tokens,
+                          },
+                        }))
+                      );
+                    })
+                  );
               })
             );
         }
 
         return throwException(
-          HttpStatusCode.NotFound,
-          AccountAlert.AccountNotFound
+          HttpStatusCode.BadRequest,
+          AccountAlert.LoginFailed
         );
       })
     );
@@ -274,8 +275,8 @@ export class AuthService {
 
         if (!source?.email) {
           return throwException(
-            HttpStatusCode.NotFound,
-            AccountAlert.UserNotFound
+            HttpStatusCode.Unauthorized,
+            AccountAlert.TokenExpired
           );
         }
         return this.accountService.getExistingAccountByEmail(
@@ -287,7 +288,7 @@ export class AuthService {
         if (!response) {
           return throwException(
             HttpStatusCode.NotFound,
-            AccountAlert.UserNotFound
+            AccountAlert.AccountNotFound
           );
         }
 
@@ -338,7 +339,12 @@ export class AuthService {
             switchMap((cacheData) => {
               if (cacheData) {
                 delete cacheData?.password;
-                return this.generateAccessToken(cacheData).pipe(
+                const payload = {
+                  email: cacheData?.email,
+                  credentialType: cacheData?.credentialType,
+                  fullName: cacheData?.profile?.fullName,
+                };
+                return this.generateAccessToken(payload).pipe(
                   map((token) => ({
                     data: token,
                     message: AccountAlert.TokenRefreshSuccess,
@@ -378,6 +384,7 @@ export class AuthService {
                   email: existingAccount?.email,
                   credentialType: existingAccount?.credentialType,
                   fullName: existingAccount?.profile?.fullName,
+                  role: existingAccount?.role,
                 };
                 return this.generateFullTokens(payload).pipe(
                   map((tokens) => ({
@@ -411,6 +418,7 @@ export class AuthService {
                       email: existingAccount?.email,
                       credentialType: existingAccount?.credentialType,
                       fullName: existingAccount?.profile?.fullName,
+                      role: existingAccount?.role,
                     };
                     return this.generateFullTokens(payload).pipe(
                       map((tokens) => ({
@@ -501,6 +509,7 @@ export class AuthService {
               email: existingAccount?.email,
               credentialType: existingAccount?.credentialType,
               fullName: existingAccount?.profile?.fullName,
+              role: existingAccount?.role,
             };
             return this.generateFullTokens(payload).pipe(
               map((tokens) => ({
@@ -532,6 +541,7 @@ export class AuthService {
                 email: data?.email,
                 credentialType: data?.credentialType,
                 fullName: data?.profile?.fullName,
+                role: data?.role,
               };
               return this.generateFullTokens(payload).pipe(
                 map((tokens) => ({
