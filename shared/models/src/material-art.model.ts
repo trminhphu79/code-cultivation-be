@@ -11,7 +11,7 @@ import {
 import { Sect } from './sect.model';
 import { ProfileMaterialArt } from './profile-material-art.model';
 
-@Table({ tableName: 'material_arts' })
+@Table({ tableName: 'materialArts' })
 export class MaterialArt extends Model {
   @PrimaryKey
   @Column({

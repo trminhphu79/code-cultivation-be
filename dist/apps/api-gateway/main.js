@@ -29,15 +29,15 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const auth_module_1 = __webpack_require__(6);
-const profile_module_1 = __webpack_require__(36);
-const nats_client_1 = __webpack_require__(38);
-const configs_1 = __webpack_require__(40);
+const profile_module_1 = __webpack_require__(40);
+const nats_client_1 = __webpack_require__(42);
+const configs_1 = __webpack_require__(44);
 const config_1 = __webpack_require__(31);
 const core_1 = __webpack_require__(2);
 const guard_1 = __webpack_require__(29);
-const cache_health_module_1 = __webpack_require__(43);
+const cache_health_module_1 = __webpack_require__(47);
 const jwt_1 = __webpack_require__(32);
-const metadata_module_1 = __webpack_require__(54);
+const metadata_module_1 = __webpack_require__(58);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -828,6 +828,10 @@ const tslib_1 = __webpack_require__(5);
 tslib_1.__exportStar(__webpack_require__(30), exports);
 tslib_1.__exportStar(__webpack_require__(33), exports);
 tslib_1.__exportStar(__webpack_require__(34), exports);
+tslib_1.__exportStar(__webpack_require__(36), exports);
+tslib_1.__exportStar(__webpack_require__(37), exports);
+tslib_1.__exportStar(__webpack_require__(39), exports);
+tslib_1.__exportStar(__webpack_require__(38), exports);
 
 
 /***/ }),
@@ -945,6 +949,158 @@ module.exports = require("@nestjs/throttler");
 
 /***/ }),
 /* 36 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Role = void 0;
+var Role;
+(function (Role) {
+    Role["ADMIN"] = "ADMIN";
+    Role["USER"] = "USER";
+    Role["GUILD_OWNER"] = "GUILD_OWNER";
+    Role["GUILD_MEMBER"] = "GUILD_MEMBER";
+})(Role || (exports.Role = Role = {}));
+
+
+/***/ }),
+/* 37 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RoleGuard = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const core_1 = __webpack_require__(2);
+const role_decorator_1 = __webpack_require__(38);
+const access_control_service_1 = __webpack_require__(39);
+let RoleGuard = class RoleGuard {
+    constructor(reflector, accessControlService) {
+        this.reflector = reflector;
+        this.accessControlService = accessControlService;
+    }
+    canActivate(context) {
+        const requiredRoles = this.reflector.getAllAndOverride(role_decorator_1.ROLE_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        const request = context.switchToHttp().getRequest();
+        const { user } = request;
+        const guildId = request.params?.guildId || request.body?.guildId;
+        for (const role of requiredRoles) {
+            const result = this.accessControlService.isAuthorized({
+                requiredRole: role,
+                currentRole: user?.role,
+                guildId,
+                userGuildRoles: user?.guildRoles,
+            });
+            if (result) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+exports.RoleGuard = RoleGuard;
+exports.RoleGuard = RoleGuard = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof access_control_service_1.AccessControlService !== "undefined" && access_control_service_1.AccessControlService) === "function" ? _b : Object])
+], RoleGuard);
+
+
+/***/ }),
+/* 38 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Roles = exports.ROLE_KEY = void 0;
+const common_1 = __webpack_require__(1);
+exports.ROLE_KEY = 'role';
+const Roles = (...role) => (0, common_1.SetMetadata)(exports.ROLE_KEY, role);
+exports.Roles = Roles;
+
+
+/***/ }),
+/* 39 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccessControlService = void 0;
+const tslib_1 = __webpack_require__(5);
+const common_1 = __webpack_require__(1);
+const role_enum_1 = __webpack_require__(36);
+let AccessControlService = class AccessControlService {
+    constructor() {
+        this.hierarchies = [];
+        this.priority = 1;
+        // Define user-related role hierarchy
+        this.buildRoles([
+            role_enum_1.Role.USER, // Base user
+            role_enum_1.Role.GUILD_MEMBER, // Member of a guild
+            role_enum_1.Role.GUILD_OWNER, // Owner of a guild
+        ]);
+        // Define admin role hierarchy (separate track)
+        this.buildRoles([role_enum_1.Role.ADMIN]); // Administrative role
+    }
+    /**
+     * Builds a role hierarchy with increasing privileges
+     * @param roles Array of roles from least to most privileged
+     */
+    buildRoles(roles) {
+        const hierarchy = new Map();
+        roles.forEach((role) => {
+            hierarchy.set(role, this.priority);
+            this.priority++;
+        });
+        this.hierarchies.push(hierarchy);
+    }
+    /**
+     * Checks if the user has sufficient privileges
+     * @param params Object containing roles and guild context
+     * @returns boolean indicating if access is authorized
+     */
+    isAuthorized({ currentRole, requiredRole, guildId, userGuildRoles, }) {
+        // If it's a guild-specific check
+        if (guildId && userGuildRoles) {
+            const userGuildRole = userGuildRoles[guildId];
+            // If user has a specific role in this guild, use that
+            if (userGuildRole) {
+                return this.checkRoleHierarchy(userGuildRole, requiredRole);
+            }
+        }
+        // Fallback to global role check
+        return this.checkRoleHierarchy(currentRole, requiredRole);
+    }
+    /**
+     * Checks if the role has sufficient privileges in the hierarchy
+     */
+    checkRoleHierarchy(currentRole, requiredRole) {
+        // Admin always has access
+        if (currentRole === role_enum_1.Role.ADMIN)
+            return true;
+        for (const hierarchy of this.hierarchies) {
+            const currentPriority = hierarchy.get(currentRole);
+            const requiredPriority = hierarchy.get(requiredRole);
+            if (currentPriority && requiredPriority && currentPriority >= requiredPriority) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+exports.AccessControlService = AccessControlService;
+exports.AccessControlService = AccessControlService = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [])
+], AccessControlService);
+
+
+/***/ }),
+/* 40 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -952,7 +1108,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const profile_controller_1 = __webpack_require__(37);
+const profile_controller_1 = __webpack_require__(41);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
@@ -964,7 +1120,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 37 */
+/* 41 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1055,17 +1211,17 @@ exports.ProfileController = ProfileController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 38 */
+/* 42 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(39), exports);
+tslib_1.__exportStar(__webpack_require__(43), exports);
 
 
 /***/ }),
-/* 39 */
+/* 43 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1107,18 +1263,18 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 40 */
+/* 44 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(41), exports);
-tslib_1.__exportStar(__webpack_require__(42), exports);
+tslib_1.__exportStar(__webpack_require__(45), exports);
+tslib_1.__exportStar(__webpack_require__(46), exports);
 
 
 /***/ }),
-/* 41 */
+/* 45 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1126,7 +1282,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1178,16 +1334,16 @@ exports.Configurations = Configurations;
 
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheHealthModule = void 0;
 const tslib_1 = __webpack_require__(5);
-const cache_manager_1 = __webpack_require__(44);
+const cache_manager_1 = __webpack_require__(48);
 const common_1 = __webpack_require__(1);
-const cache_health_controller_1 = __webpack_require__(53);
+const cache_health_controller_1 = __webpack_require__(57);
 let CacheHealthModule = class CacheHealthModule {
 };
 exports.CacheHealthModule = CacheHealthModule;
@@ -1200,19 +1356,19 @@ exports.CacheHealthModule = CacheHealthModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(45), exports);
-tslib_1.__exportStar(__webpack_require__(48), exports);
-tslib_1.__exportStar(__webpack_require__(51), exports);
+tslib_1.__exportStar(__webpack_require__(49), exports);
+tslib_1.__exportStar(__webpack_require__(52), exports);
+tslib_1.__exportStar(__webpack_require__(55), exports);
 
 
 /***/ }),
-/* 45 */
+/* 49 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1220,9 +1376,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const cache_listener_service_1 = __webpack_require__(46);
-const ioredis_1 = __webpack_require__(49);
-const cache_manager_service_1 = __webpack_require__(51);
+const cache_listener_service_1 = __webpack_require__(50);
+const ioredis_1 = __webpack_require__(53);
+const cache_manager_service_1 = __webpack_require__(55);
 let CacheManagerModule = class CacheManagerModule {
 };
 exports.CacheManagerModule = CacheManagerModule;
@@ -1242,7 +1398,7 @@ exports.CacheManagerModule = CacheManagerModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 46 */
+/* 50 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1252,10 +1408,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheListener = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(47);
-const cache_message_1 = __webpack_require__(48);
-const ioredis_1 = __webpack_require__(49);
-const ioredis_2 = tslib_1.__importDefault(__webpack_require__(50));
+const event_emitter_1 = __webpack_require__(51);
+const cache_message_1 = __webpack_require__(52);
+const ioredis_1 = __webpack_require__(53);
+const ioredis_2 = tslib_1.__importDefault(__webpack_require__(54));
 let CacheListener = CacheListener_1 = class CacheListener {
     constructor(redis) {
         this.redis = redis;
@@ -1338,13 +1494,13 @@ exports.CacheListener = CacheListener = CacheListener_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 47 */
+/* 51 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 48 */
+/* 52 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1360,19 +1516,19 @@ var CacheMessageAction;
 
 
 /***/ }),
-/* 49 */
+/* 53 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs-modules/ioredis");
 
 /***/ }),
-/* 50 */
+/* 54 */
 /***/ ((module) => {
 
 module.exports = require("ioredis");
 
 /***/ }),
-/* 51 */
+/* 55 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1382,9 +1538,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerService = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const ioredis_1 = tslib_1.__importDefault(__webpack_require__(50));
-const ioredis_2 = __webpack_require__(49);
-const rxjs_1 = __webpack_require__(52);
+const ioredis_1 = tslib_1.__importDefault(__webpack_require__(54));
+const ioredis_2 = __webpack_require__(53);
+const rxjs_1 = __webpack_require__(56);
 let CacheManagerService = CacheManagerService_1 = class CacheManagerService {
     constructor(cache) {
         this.cache = cache;
@@ -1413,13 +1569,13 @@ exports.CacheManagerService = CacheManagerService = CacheManagerService_1 = tsli
 
 
 /***/ }),
-/* 52 */
+/* 56 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 53 */
+/* 57 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1428,7 +1584,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheHealthController = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const cache_manager_1 = __webpack_require__(44);
+const cache_manager_1 = __webpack_require__(48);
 const guard_1 = __webpack_require__(29);
 let CacheHealthController = class CacheHealthController {
     constructor(cache) {
@@ -1454,7 +1610,7 @@ exports.CacheHealthController = CacheHealthController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 54 */
+/* 58 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1462,19 +1618,25 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
-const metadata_controller_1 = __webpack_require__(55);
+const metadata_controller_1 = __webpack_require__(59);
 let MetadataModule = class MetadataModule {
 };
 exports.MetadataModule = MetadataModule;
 exports.MetadataModule = MetadataModule = tslib_1.__decorate([
     (0, common_1.Module)({
         controllers: [metadata_controller_1.MetadataController],
+        // providers:[
+        //   {
+        //     provide: APP_GUARD,
+        //     useClass: AuthGuard,
+        //   },
+        // ]
     })
 ], MetadataModule);
 
 
 /***/ }),
-/* 55 */
+/* 59 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1482,14 +1644,13 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataController = exports.ApiFile = void 0;
 const tslib_1 = __webpack_require__(5);
-const metadata_1 = __webpack_require__(56);
+const metadata_1 = __webpack_require__(60);
 const common_1 = __webpack_require__(1);
-const metadata_2 = __webpack_require__(62);
-const guard_1 = __webpack_require__(29);
+const metadata_2 = __webpack_require__(66);
 const swagger_1 = __webpack_require__(3);
 const swagger_2 = __webpack_require__(3);
 const microservices_1 = __webpack_require__(8);
-const rxjs_1 = __webpack_require__(52);
+const rxjs_1 = __webpack_require__(56);
 const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
     (0, swagger_2.ApiBody)({
         schema: {
@@ -1504,6 +1665,8 @@ const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
     })(target, propertyKey, descriptor);
 };
 exports.ApiFile = ApiFile;
+// @Roles(Role.ADMIN)
+// @UseGuards(RoleGuard)
 let MetadataController = class MetadataController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -1545,7 +1708,9 @@ let MetadataController = class MetadataController {
         return this.natsClient.send(metadata_1.AchievementPattern.FindOne, id);
     }
     findAllAchievement(dto) {
-        return this.natsClient.send(metadata_1.AchievementPattern.FindAll, dto).pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllAchievement success')));
+        return this.natsClient
+            .send(metadata_1.AchievementPattern.FindAll, dto)
+            .pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllAchievement success')));
     }
     updateAchievement(dto) {
         return this.natsClient.send(metadata_1.AchievementPattern.Update, dto);
@@ -1560,7 +1725,9 @@ let MetadataController = class MetadataController {
         return this.natsClient.send(metadata_1.SectPattern.FindOne, id);
     }
     findAllSect(dto) {
-        return this.natsClient.send(metadata_1.SectPattern.FindAll, dto).pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllSect success')));
+        return this.natsClient
+            .send(metadata_1.SectPattern.FindAll, dto)
+            .pipe((0, rxjs_1.tap)(() => common_1.Logger.log('findAllSect success')));
     }
     updateSect(dto) {
         return this.natsClient.send(metadata_1.SectPattern.Update, dto);
@@ -1571,7 +1738,6 @@ let MetadataController = class MetadataController {
 };
 exports.MetadataController = MetadataController;
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('realm/create'),
     (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một cảnh giới tu luyện' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1605,7 +1771,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createRealm", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Patch)('realm/update'),
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin cảnh giới' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1633,7 +1798,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateRealm", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Get)('realm/findOne/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một cảnh giới theo ID' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1661,7 +1825,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findOneRealm", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('realm/findAll'),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả cảnh giới với phân trang' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1703,7 +1866,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findAllRealm", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Delete)('realm/delete/:id'),
     (0, swagger_1.ApiOperation)({
         summary: 'Khai trừ vĩnh viễn cảnh giới này khỏi tam thập tam thiên đại thế giới',
@@ -1723,7 +1885,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteRealm", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('materialArt/create'),
     (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một võ học' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1758,7 +1919,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createMaterialArt", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Get)('materialArt/findOne/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một võ học theo ID' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1787,7 +1947,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findOneMaterialArt", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('materialArt/findAll'),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả võ học với phân trang' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1827,7 +1986,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findAllMaterialArt", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Patch)('materialArt/update'),
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin võ học' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1856,7 +2014,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateMaterialArt", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Delete)('materialArt/delete/:id'),
     (0, swagger_1.ApiOperation)({
         summary: 'Khai trừ vĩnh viễn võ học này khỏi tam thập tam thiên đại thế giới',
@@ -1876,7 +2033,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteMaterialArt", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('achievement/create'),
     (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một thành tựu' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1909,7 +2065,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createAchievement", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Get)('achievement/findOne/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một thành tựu theo ID' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1936,7 +2091,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findOneAchievement", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('achievement/findAll'),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả thành tựu với phân trang' }),
     (0, swagger_1.ApiOkResponse)({
@@ -1977,7 +2131,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findAllAchievement", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Patch)('achievement/update'),
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin thành tựu' }),
     (0, swagger_1.ApiOkResponse)({
@@ -2004,7 +2157,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateAchievement", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Delete)('achievement/delete/:id'),
     (0, swagger_1.ApiOperation)({
         summary: 'Khai trừ vĩnh viễn thành tựu này khỏi tam thập tam thiên đại thế giới',
@@ -2024,7 +2176,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteAchievement", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('sect/create'),
     (0, swagger_1.ApiOperation)({ summary: 'Tạo mới một môn phái' }),
     (0, swagger_1.ApiOkResponse)({
@@ -2055,7 +2206,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "createSect", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Get)('sect/findOne/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Tìm kiếm một môn phái theo ID' }),
     (0, swagger_1.ApiOkResponse)({
@@ -2083,7 +2233,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findOneSect", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Post)('sect/findAll'),
     (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách tất cả môn phái với phân trang' }),
     (0, swagger_1.ApiOkResponse)({
@@ -2125,7 +2274,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "findAllSect", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Patch)('sect/update'),
     (0, swagger_1.ApiOperation)({ summary: 'Cập nhật thông tin môn phái' }),
     (0, swagger_1.ApiOkResponse)({
@@ -2153,7 +2301,6 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "updateSect", null);
 tslib_1.__decorate([
-    (0, guard_1.Public)(),
     (0, common_1.Delete)('sect/delete/:id'),
     (0, swagger_1.ApiOperation)({
         summary: 'Khai trừ vĩnh viễn môn phái này khỏi tam thập tam thiên đại thế giới',
@@ -2180,26 +2327,26 @@ exports.MetadataController = MetadataController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 56 */
+/* 60 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(57), exports);
-tslib_1.__exportStar(__webpack_require__(59), exports);
-tslib_1.__exportStar(__webpack_require__(60), exports);
 tslib_1.__exportStar(__webpack_require__(61), exports);
+tslib_1.__exportStar(__webpack_require__(63), exports);
+tslib_1.__exportStar(__webpack_require__(64), exports);
+tslib_1.__exportStar(__webpack_require__(65), exports);
 
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SectPattern = void 0;
-const module_1 = __webpack_require__(58);
+const module_1 = __webpack_require__(62);
 exports.SectPattern = Object.freeze({
     Create: `${module_1.CoreModule.Sect}/Create`,
     Update: `${module_1.CoreModule.Sect}/Update`,
@@ -2210,7 +2357,7 @@ exports.SectPattern = Object.freeze({
 
 
 /***/ }),
-/* 58 */
+/* 62 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2226,13 +2373,13 @@ exports.CoreModule = Object.freeze({
 
 
 /***/ }),
-/* 59 */
+/* 63 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RealmPattern = void 0;
-const module_1 = __webpack_require__(58);
+const module_1 = __webpack_require__(62);
 exports.RealmPattern = Object.freeze({
     Create: `${module_1.CoreModule.Realm}/Create`,
     Update: `${module_1.CoreModule.Realm}/Update`,
@@ -2243,13 +2390,13 @@ exports.RealmPattern = Object.freeze({
 
 
 /***/ }),
-/* 60 */
+/* 64 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AchievementPattern = void 0;
-const module_1 = __webpack_require__(58);
+const module_1 = __webpack_require__(62);
 exports.AchievementPattern = Object.freeze({
     Create: `${module_1.CoreModule.Achievement}/Create`,
     Update: `${module_1.CoreModule.Achievement}/Update`,
@@ -2260,13 +2407,13 @@ exports.AchievementPattern = Object.freeze({
 
 
 /***/ }),
-/* 61 */
+/* 65 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArtPattern = void 0;
-const module_1 = __webpack_require__(58);
+const module_1 = __webpack_require__(62);
 exports.MaterialArtPattern = Object.freeze({
     Create: `${module_1.CoreModule.MaterialArt}/Create`,
     Update: `${module_1.CoreModule.MaterialArt}/Update`,
@@ -2277,26 +2424,26 @@ exports.MaterialArtPattern = Object.freeze({
 
 
 /***/ }),
-/* 62 */
+/* 66 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5);
-tslib_1.__exportStar(__webpack_require__(63), exports);
-tslib_1.__exportStar(__webpack_require__(64), exports);
-tslib_1.__exportStar(__webpack_require__(66), exports);
 tslib_1.__exportStar(__webpack_require__(67), exports);
 tslib_1.__exportStar(__webpack_require__(68), exports);
-tslib_1.__exportStar(__webpack_require__(69), exports);
 tslib_1.__exportStar(__webpack_require__(70), exports);
 tslib_1.__exportStar(__webpack_require__(71), exports);
 tslib_1.__exportStar(__webpack_require__(72), exports);
 tslib_1.__exportStar(__webpack_require__(73), exports);
+tslib_1.__exportStar(__webpack_require__(74), exports);
+tslib_1.__exportStar(__webpack_require__(75), exports);
+tslib_1.__exportStar(__webpack_require__(76), exports);
+tslib_1.__exportStar(__webpack_require__(77), exports);
 
 
 /***/ }),
-/* 63 */
+/* 67 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2318,14 +2465,14 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 64 */
+/* 68 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataPaginationDto = void 0;
 const tslib_1 = __webpack_require__(5);
-const class_transformer_1 = __webpack_require__(65);
+const class_transformer_1 = __webpack_require__(69);
 const class_validator_1 = __webpack_require__(16);
 const swagger_1 = __webpack_require__(3);
 class MetadataPaginationDto {
@@ -2401,13 +2548,13 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 65 */
+/* 69 */
 /***/ ((module) => {
 
 module.exports = require("class-transformer");
 
 /***/ }),
-/* 66 */
+/* 70 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2443,7 +2590,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 67 */
+/* 71 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2483,7 +2630,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 68 */
+/* 72 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2519,7 +2666,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 69 */
+/* 73 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2557,7 +2704,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 70 */
+/* 74 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2586,7 +2733,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 71 */
+/* 75 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2618,7 +2765,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 72 */
+/* 76 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2654,7 +2801,7 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 73 */
+/* 77 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 

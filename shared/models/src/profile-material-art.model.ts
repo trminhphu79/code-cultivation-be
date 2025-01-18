@@ -10,7 +10,7 @@ import {
 import { Profile } from './profile.model';
 import { MaterialArt } from './material-art.model';
 
-@Table({ tableName: 'profile_material_arts' })
+@Table({ tableName: 'profileMaterialArts' })
 export class ProfileMaterialArt extends Model {
   @PrimaryKey
   @Column({

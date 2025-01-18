@@ -707,7 +707,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], ProfileAchievement.prototype, "createdAt", void 0);
 exports.ProfileAchievement = ProfileAchievement = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'profile_achievements' })
+    (0, sequelize_typescript_1.Table)({ tableName: 'profileAchievements' })
 ], ProfileAchievement);
 
 
@@ -820,7 +820,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
 ], ProfileMaterialArt.prototype, "createdAt", void 0);
 exports.ProfileMaterialArt = ProfileMaterialArt = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'profile_material_arts' })
+    (0, sequelize_typescript_1.Table)({ tableName: 'profileMaterialArts' })
 ], ProfileMaterialArt);
 
 
@@ -886,7 +886,7 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:type", Array)
 ], MaterialArt.prototype, "profileMaterialArts", void 0);
 exports.MaterialArt = MaterialArt = tslib_1.__decorate([
-    (0, sequelize_typescript_1.Table)({ tableName: 'material_arts' })
+    (0, sequelize_typescript_1.Table)({ tableName: 'materialArts' })
 ], MaterialArt);
 
 

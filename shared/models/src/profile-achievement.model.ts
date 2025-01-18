@@ -10,7 +10,7 @@ import {
 import { Profile } from './profile.model';
 import { Achievement } from './achievement.model';
 
-@Table({ tableName: 'profile_achievements' })
+@Table({ tableName: 'profileAchievements' })
 export class ProfileAchievement extends Model {
   @PrimaryKey
   @Column({

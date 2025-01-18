@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/sequelize';
@@ -15,17 +15,25 @@ import {
 import { throwException } from '@shared/exception';
 import { EmailService } from '@shared/mailer';
 import { Account } from '@shared/models/account';
-import { DefaultProfileValue, Profile } from '@shared/models/profile';
-import { AccountVerifyStatusEnum, CredentialTypeEnum } from '@shared/types';
+import { Profile } from '@shared/models/profile';
+import {
+  AccountVerifyStatusEnum,
+  CreateAccountAndProfile,
+  CredentialTypeEnum,
+} from '@shared/types';
 import { catchError, from, map, of, switchMap, tap, timer } from 'rxjs';
 import { BcryptService } from 'shared/bcrypt/src/bcrypt.service';
 import { HttpStatusCode } from 'axios';
 import { JwtConfig } from '@shared/configs';
+import { AccountAlert } from '@shared/alert/account';
 
 @Injectable()
 export class AccountService {
   private readonly logger = new Logger(AccountService.name);
   private jwtConfig: JwtConfig;
+  private readonly TTL_CACHE_TIME = 7 * 24 * 60 * 60;
+  private readonly TTL_CACHE_VERIFY_EMAIL = 180;
+
   constructor(
     @InjectModel(Profile)
     private readonly profileModel: typeof Profile,
@@ -42,11 +50,11 @@ export class AccountService {
   }
 
   handleChangePassword(body: ChangePasswordDto) {
-    return of({ message: 'Not impelemnted!!' });
+    return of({ message: AccountAlert.NotImplemented });
   }
 
   handleDeactivate(body: DeactivateDto) {
-    return of({ message: 'Not impelemnted!!' });
+    return of({ message: AccountAlert.NotImplemented });
   }
 
   handleVerifyEmail(payload: VerifyEmailOtp) {
@@ -61,7 +69,7 @@ export class AccountService {
       catchError(() => {
         return throwException(
           HttpStatusCode.BadRequest,
-          'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
+          AccountAlert.VerificationTokenExpired
         );
       }),
       switchMap((source) => {
@@ -77,14 +85,14 @@ export class AccountService {
               if (!response) {
                 return throwException(
                   HttpStatusCode.BadRequest,
-                  'Token xác thực tài khoản đã hết hạn, xin vui lòng thử lại.'
+                  AccountAlert.VerificationTokenExpired
                 );
               }
 
               if (payload?.token !== response?.token) {
                 return throwException(
                   HttpStatusCode.BadRequest,
-                  'Có lỗi xảy ra trong quá trình xác thực, xin vui lòng thử lại.'
+                  AccountAlert.VerificationError
                 );
               }
 
@@ -126,6 +134,7 @@ export class AccountService {
         ).pipe(
           map((response) => response.toJSON()),
           switchMap((accountResponse) => {
+            this.logger.log('accountResponse: ', accountResponse?.id);
             delete accountResponse?.password;
             return from(
               this.profileModel.findOne({
@@ -142,11 +151,10 @@ export class AccountService {
           }),
           tap((fullyData) => {
             const key = this.getCacheKey(email);
-            const ttlInSeconds = 7 * 24 * 60 * 60;
             this.eventEmitter.emit(CacheMessageAction.Create, {
               key,
               value: fullyData,
-              ttl: ttlInSeconds,
+              ttl: this.TTL_CACHE_TIME,
             });
           })
         )
@@ -168,7 +176,7 @@ export class AccountService {
       .sendOtpVerifyEmail(email, verificationLink)
       .pipe(
         catchError((e) => {
-          this.logger.error('Có lỗi sãy ra khi gửi otp verify email');
+          this.logger.error(AccountAlert.VerificationEmailError);
           return e;
         }),
         tap(() => {
@@ -180,7 +188,7 @@ export class AccountService {
               email,
               credentialType,
             },
-            ttl: 180, // 3 phut
+            ttl: this.TTL_CACHE_VERIFY_EMAIL,
           });
         })
       )
@@ -193,6 +201,59 @@ export class AccountService {
         ...body,
         accountId,
       })
+    ).pipe();
+  }
+
+  handleUpdateProfile(body: any, profileId: string) {
+    return from(
+      this.profileModel.update(body, {
+        where: { id: profileId },
+      })
+    ).pipe();
+  }
+
+  createAccountForSoicalLogin({
+    email,
+    name,
+    bio,
+    avatarUrl,
+    credentialType,
+    githubLink,
+  }: CreateAccountAndProfile) {
+    let accountData: any;
+    this.logger.log('CREATE new account and profile');
+    return from(
+      this.accountModel.create({ email, credentialType, isVerify: true })
+    ).pipe(
+      map((account) => {
+        accountData = account.toJSON();
+        return accountData;
+      }),
+      switchMap((account) =>
+        this.handleUpdateProfile(
+          {
+            fullName: name,
+            avatarUrl,
+            bio,
+            githubLink,
+          },
+          account.id
+        ).pipe(
+          tap((profile) => {
+            const key = this.getCacheKey(email, credentialType);
+            delete accountData?.password;
+            this.eventEmitter.emit(CacheMessageAction.Create, {
+              key,
+              value: { ...accountData, email, profile },
+              ttl: this.TTL_CACHE_TIME,
+            });
+          }),
+          map((profile) => ({
+            ...accountData,
+            profile,
+          }))
+        )
+      )
     );
   }
 
@@ -201,24 +262,21 @@ export class AccountService {
       catchError(() =>
         throwException(
           HttpStatusCode.InternalServerError,
-          'Có lỗi xảy ra khi xoá tài khoản.'
+          AccountAlert.ProfileDeleteError
         )
       ),
       switchMap((user) => {
         if (user) {
           return from(user.destroy()).pipe(
-            tap(() => {
-              this.eventEmitter.emit(
-                CacheMessageAction.Delete,
-                this.getCacheKey(user.email, user.credentialType)
-              );
-            }),
-            map(() => ({ message: 'Xoá tài khoản thành công.', data: body.id }))
+            map(() => ({
+              message: AccountAlert.ProfileDeleteSuccess,
+              data: body.id,
+            }))
           );
         }
         return throwException(
           HttpStatusCode.NotFound,
-          'Tài khoản không tồn tại.'
+          AccountAlert.AccountNotFound
         );
       })
     );
@@ -229,6 +287,10 @@ export class AccountService {
     credentialType: CredentialTypeEnum = CredentialTypeEnum.NONE
   ) {
     return `ACCOUNT#${email}#${credentialType}`;
+  }
+
+  private getProfileCacheKey(profileId: string) {
+    return `PROFILE#${profileId}`;
   }
 
   private generateTokenVerify(email: string) {
@@ -255,7 +317,7 @@ export class AccountService {
    * @param credentialType
    * @returns Return the current cached user if it exists; otherwise, fetch it from the database.
    */
-  getExistingAccount(
+  getExistingAccountByEmail(
     email: string,
     credentialType: CredentialTypeEnum = CredentialTypeEnum.NONE
   ) {
@@ -272,6 +334,7 @@ export class AccountService {
               isVerify: boolean;
               password: string;
               credentialType: CredentialTypeEnum;
+              profile: Profile;
             }
           );
         }
@@ -286,6 +349,14 @@ export class AccountService {
             ],
           })
         ).pipe(
+          tap((fullyData) => {
+            const key = this.getCacheKey(email);
+            this.eventEmitter.emit(CacheMessageAction.Create, {
+              key,
+              value: fullyData,
+              ttl: this.TTL_CACHE_TIME,
+            });
+          }),
           map(
             (response) =>
               (response?.toJSON?.() as {
@@ -296,8 +367,39 @@ export class AccountService {
                 isVerify: boolean;
                 password: string;
                 credentialType: CredentialTypeEnum;
+                profile: Profile;
               }) || null
           )
+        );
+      })
+    );
+  }
+
+  /**
+   * @description Get the existing profile by profileId or accountId, check in cache before get from database
+   */
+  getExistingProfileByProfileId(profileId: string) {
+    const cacheKey = this.getProfileCacheKey(profileId);
+    return this.cacheService.get(cacheKey).pipe(
+      switchMap((cacheData) => {
+        if (cacheData) {
+          return of(cacheData);
+        }
+
+        return from(
+          this.profileModel.findOne({
+            where: { id: profileId },
+          })
+        ).pipe(
+          map((response) => response?.toJSON()),
+          tap((fullyData) => {
+            const key = this.getProfileCacheKey(profileId);
+            this.eventEmitter.emit(CacheMessageAction.Create, {
+              key,
+              value: fullyData,
+              ttl: this.TTL_CACHE_TIME,
+            });
+          })
         );
       })
     );

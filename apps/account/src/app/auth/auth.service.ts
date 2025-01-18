@@ -27,8 +27,8 @@ import {
   CredentialTypeEnum,
   GitHubUser,
 } from '@shared/types';
+import { AccountAlert } from '@shared/alert/account';
 import { AccountService } from '../account/account.service';
-
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -58,11 +58,11 @@ export class AuthService {
 
   // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
   generateFullTokens<T>(payload: T & Object) {
-    console.log(this.jwtService);
     return of(payload).pipe(
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
           expiresIn: this.jwtConfig.accessExpiry,
+          secret: this.jwtConfig.secret,
         }),
       })),
       tap((token) => this.logger.log('accessToken: ', token?.accessToken)),
@@ -70,11 +70,12 @@ export class AuthService {
         accessToken,
         refreshToken: this.jwtService.sign(payload, {
           expiresIn: this.jwtConfig.refreshExpiry,
+          secret: this.jwtConfig.secret,
         }),
       })),
       tap((token) => this.logger.log('refreshToken: ', token.refreshToken)),
       catchError((error) =>
-        throwException(500, `Lỗi tạo token ${error.message}`)
+        throwException(500, AccountAlert.TokenGenerationError)
       )
     );
   }
@@ -85,13 +86,14 @@ export class AuthService {
       map((payload) => ({
         accessToken: this.jwtService.sign(payload, {
           expiresIn: this.jwtConfig.accessExpiry,
+          secret: this.jwtConfig.secret,
         }),
       })),
       tap((token) =>
         this.logger.log('generateAccessTokens: ', token.accessToken)
       ),
       catchError((error) =>
-        throwException(500, `Lỗi tạo token ${error.message}`)
+        throwException(500, AccountAlert.TokenGenerationError)
       )
     );
   }
@@ -99,11 +101,7 @@ export class AuthService {
   private verifyToken(token: string) {
     return from(
       this.jwtService.verifyAsync(token, { secret: this.jwtConfig?.secret })
-    ).pipe(
-      catchError(() =>
-        throwException(401, `Token không hợp lệ hoặc đã hết hạn!`)
-      )
-    );
+    ).pipe(catchError(() => throwException(401, AccountAlert.TokenError)));
   }
 
   handleVerifyEmail(body: VerifyEmailOtp) {
@@ -127,13 +125,18 @@ export class AuthService {
       switchMap((userData) => {
         const jsonData = userData?.toJSON?.();
         delete jsonData?.password;
-        return this.generateFullTokens(jsonData).pipe(
+        const payload = {
+          email: jsonData?.email,
+          credentialType: jsonData?.credentialType,
+          fullName: jsonData?.profile?.fullName,
+        };
+        return this.generateFullTokens(payload).pipe(
           map((tokens) => ({
             data: {
               ...jsonData,
               tokens,
             },
-            message: 'Xác thực tài khoản thành công.',
+            message: AccountAlert.AccountVerified,
           }))
         );
       })
@@ -141,20 +144,21 @@ export class AuthService {
   }
 
   handleSendTokenVerifyEmail(body: ResendVerifyEmail) {
-    return this.accountService.getExistingAccount(body.email).pipe(
+    return this.accountService.getExistingAccountByEmail(body.email).pipe(
       switchMap((existingUser) => {
         if (!existingUser) {
           return throwException(
             HttpStatus.NOT_FOUND,
-            'Tài khoản không tồn tại, vui lòng thử lại với email khác.'
+            AccountAlert.AccountNotFound
           );
         }
 
-        console.log('existingUser: ', existingUser);
-
         if (existingUser && !existingUser.isVerify) {
           return of({
-            message: `Đường dẫn xác thực tài khoản đã được gửi đến email: ${body.email}. Vui lòng kiểm tra hộp thư để hoàn tất quá trình xác thực tài khoản.`,
+            message: AccountAlert.VerificationEmailSent.replace(
+              '{email}',
+              body.email
+            ),
           }).pipe(
             tap(() => {
               this.accountService.handleSendTokenVerifyEmail({
@@ -167,26 +171,26 @@ export class AuthService {
 
         return throwException(
           HttpStatus.BAD_REQUEST,
-          'Tài khoản này đã được xác thực, vui lòng thử lại với email khác. '
+          AccountAlert.AccountAlreadyVerified
         );
       })
     );
   }
 
   handleSignUp({ email, password, confirmPassword }: CreateAccountDto) {
-    return this.accountService.getExistingAccount(email).pipe(
+    return this.accountService.getExistingAccountByEmail(email).pipe(
       switchMap((existingUser) => {
         if (existingUser && existingUser?.isVerify) {
           return throwException(
             HttpStatus.BAD_REQUEST,
-            'Tài khoản đã tồn tại, vui lòng thử lại với email khác.'
+            AccountAlert.AccountAlreadyExists
           );
         }
 
         if (existingUser && !existingUser?.isVerify) {
           return throwException(
             HttpStatus.BAD_REQUEST,
-            'Tài khoản đã tồn tại nhưng chưa xác thực, xin vui lòng xác thực để đăng nhập.'
+            AccountAlert.AccountNotVerified
           );
         }
         return this.accountService.handleCreateAccount({
@@ -197,7 +201,7 @@ export class AuthService {
       }),
       map((response) => ({
         data: response,
-        message: 'Tạo tài khoản thành công',
+        message: AccountAlert.AccountCreated,
       })),
       tap(() => {
         this.accountService.handleSendTokenVerifyEmail({
@@ -230,13 +234,18 @@ export class AuthService {
                 if (!isMatch) {
                   return throwException(
                     HttpStatus.BAD_REQUEST,
-                    'Mật khẩu không chính xác.'
+                    AccountAlert.LoginFailed
                   );
                 }
                 delete userData.password;
-                return from(this.generateFullTokens(userData)).pipe(
+                const payload = {
+                  email: userData?.email,
+                  credentialType: userData?.credentialType,
+                  fullName: userData?.profile?.fullName,
+                };
+                return from(this.generateFullTokens(payload)).pipe(
                   map((tokens) => ({
-                    message: 'Đăng nhập thành công.',
+                    message: AccountAlert.LoginSuccess,
                     data: {
                       ...userData,
                       tokens,
@@ -249,7 +258,7 @@ export class AuthService {
 
         return throwException(
           HttpStatusCode.NotFound,
-          'Không tìm thấy người dùng.'
+          AccountAlert.AccountNotFound
         );
       })
     );
@@ -266,10 +275,10 @@ export class AuthService {
         if (!source?.email) {
           return throwException(
             HttpStatusCode.NotFound,
-            'Không tìm thấy người dùng.'
+            AccountAlert.UserNotFound
           );
         }
-        return this.accountService.getExistingAccount(
+        return this.accountService.getExistingAccountByEmail(
           source.email,
           source.credentialType
         );
@@ -278,14 +287,14 @@ export class AuthService {
         if (!response) {
           return throwException(
             HttpStatusCode.NotFound,
-            'Không tìm thấy người dùng.'
+            AccountAlert.UserNotFound
           );
         }
 
         delete response.password;
         return of({
           data: response,
-          message: 'Đăng nhập thành công.',
+          message: AccountAlert.LoginSuccess,
         });
       })
     );
@@ -310,21 +319,21 @@ export class AuthService {
       })
     ).pipe(
       catchError(() =>
-        throwException(
-          HttpStatusCode.Forbidden,
-          'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
-        )
+        throwException(HttpStatusCode.Forbidden, AccountAlert.TokenExpired)
       ),
       switchMap((decodedData) => {
         if (!decodedData || !decodedData?.email) {
           return throwException(
             HttpStatusCode.Forbidden,
-            'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
+            AccountAlert.TokenExpired
           );
         }
 
         return this.accountService
-          .getExistingAccount(decodedData.email, decodedData.credentialType)
+          .getExistingAccountByEmail(
+            decodedData.email,
+            decodedData.credentialType
+          )
           .pipe(
             switchMap((cacheData) => {
               if (cacheData) {
@@ -332,13 +341,13 @@ export class AuthService {
                 return this.generateAccessToken(cacheData).pipe(
                   map((token) => ({
                     data: token,
-                    message: 'Tạo mới token thành công.',
+                    message: AccountAlert.TokenRefreshSuccess,
                   }))
                 );
               }
               return throwException(
                 HttpStatusCode.Forbidden,
-                'Token đã hết hạn hoặc không hợp lệ vui lòng thử lại.'
+                AccountAlert.TokenExpired
               );
             })
           );
@@ -355,22 +364,24 @@ export class AuthService {
       })
     ).pipe(
       catchError(() =>
-        throwException(
-          HttpStatusCode.BadRequest,
-          'Có lỗi xảy ra trong quá trình xác thực người dùng từ gmail.'
-        )
+        throwException(HttpStatusCode.BadRequest, AccountAlert.GoogleAuthError)
       ),
       map((googlResponse) => googlResponse.getPayload()),
       switchMap((response) => {
         return this.accountService
-          .getExistingAccount(response.email, CredentialTypeEnum.GOOLGE)
+          .getExistingAccountByEmail(response.email, CredentialTypeEnum.GOOLGE)
           .pipe(
             switchMap((existingAccount) => {
               if (existingAccount) {
                 delete existingAccount.password;
-                return this.generateFullTokens(existingAccount).pipe(
+                const payload = {
+                  email: existingAccount?.email,
+                  credentialType: existingAccount?.credentialType,
+                  fullName: existingAccount?.profile?.fullName,
+                };
+                return this.generateFullTokens(payload).pipe(
                   map((tokens) => ({
-                    message: 'Đăng nhập thành công.',
+                    message: AccountAlert.OAuthLoginSuccess,
                     data: { ...existingAccount, tokens },
                   }))
                 );
@@ -385,7 +396,30 @@ export class AuthService {
                 bio: '',
                 githubLink: '',
               };
-              return this.createNewAccountAndProfile(payload);
+              return this.accountService
+                .createAccountForSoicalLogin(payload)
+                .pipe(
+                  catchError((error) => {
+                    this.logger.error('Error creating profile:', error);
+                    return throwException(
+                      HttpStatus.INTERNAL_SERVER_ERROR,
+                      AccountAlert.ProfileCreateError
+                    );
+                  }),
+                  switchMap((data) => {
+                    const payload = {
+                      email: existingAccount?.email,
+                      credentialType: existingAccount?.credentialType,
+                      fullName: existingAccount?.profile?.fullName,
+                    };
+                    return this.generateFullTokens(payload).pipe(
+                      map((tokens) => ({
+                        message: AccountAlert.LoginSuccess,
+                        data: { ...data, tokens },
+                      }))
+                    );
+                  })
+                );
             })
           );
       })
@@ -411,7 +445,7 @@ export class AuthService {
         if (!tokenMatch) {
           return throwException(
             HttpStatus.BAD_REQUEST,
-            'Lỗi xác thực người dùng github, vui lòng thử lại.'
+            AccountAlert.GithubAuthError
           );
         }
         return tokenMatch;
@@ -427,7 +461,7 @@ export class AuthService {
         this.logger.error('Error during OAuth sign-in:', error);
         return throwException(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Có lỗi xảy ra trong quá trình xác thực người dùng từ github.'
+          AccountAlert.OAuthError
         );
       })
     );
@@ -445,7 +479,7 @@ export class AuthService {
           this.logger.error('Error fetching GitHub user info:', error);
           return throwException(
             HttpStatus.BAD_REQUEST,
-            'Lấy thông tin người dùng từ github thất bại'
+            AccountAlert.GithubUserInfoError
           );
         })
       );
@@ -458,14 +492,19 @@ export class AuthService {
     const _email = email || login + '@github.com';
 
     return this.accountService
-      .getExistingAccount(_email, CredentialTypeEnum.GITHUB)
+      .getExistingAccountByEmail(_email, CredentialTypeEnum.GITHUB)
       .pipe(
         switchMap((existingAccount) => {
           if (existingAccount) {
             delete existingAccount.password;
-            return this.generateFullTokens(existingAccount).pipe(
+            const payload = {
+              email: existingAccount?.email,
+              credentialType: existingAccount?.credentialType,
+              fullName: existingAccount?.profile?.fullName,
+            };
+            return this.generateFullTokens(payload).pipe(
               map((tokens) => ({
-                message: 'Đăng nhập thành công.',
+                message: AccountAlert.OAuthLoginSuccess,
                 data: { ...existingAccount, tokens },
               }))
             );
@@ -480,102 +519,29 @@ export class AuthService {
             githubLink: html_url,
             nickName: _email?.split('@')?.[0] || '',
           };
-          return this.createNewAccountAndProfile(payload);
+          return this.accountService.createAccountForSoicalLogin(payload).pipe(
+            catchError((error) => {
+              this.logger.error('Error creating profile:', error);
+              return throwException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                AccountAlert.ProfileCreateError
+              );
+            }),
+            switchMap((data) => {
+              const payload = {
+                email: data?.email,
+                credentialType: data?.credentialType,
+                fullName: data?.profile?.fullName,
+              };
+              return this.generateFullTokens(payload).pipe(
+                map((tokens) => ({
+                  message: AccountAlert.LoginSuccess,
+                  data: { ...data, tokens },
+                }))
+              );
+            })
+          );
         })
       );
-  }
-
-  private createNewAccountAndProfile({
-    email,
-    name,
-    bio,
-    avatarUrl,
-    credentialType,
-    githubLink,
-  }: CreateAccountAndProfile) {
-    let accountData: any;
-    this.logger.log('CREATE new account and profile');
-    return from(
-      this.accountModel.create({ email, credentialType, isVerify: true })
-    ).pipe(
-      map((account) => {
-        accountData = account.toJSON();
-        return accountData;
-      }),
-      switchMap((account) =>
-        this.createProfile({
-          accountId: account.id,
-          fullName: name,
-          avatarUrl,
-          bio,
-          githubLink,
-        }).pipe(
-          tap((profile) => {
-            const key = this.getCacheKey(email, credentialType);
-            const ttlInSeconds = 7 * 24 * 60 * 60;
-            this.eventEmitter.emit(CacheMessageAction.Create, {
-              key,
-              value: { ...accountData, email, profile },
-              ttl: ttlInSeconds,
-            });
-          }),
-          switchMap((profile) =>
-            this.generateFullTokens({
-              ...accountData,
-              fullName: profile.fullName,
-            }).pipe(
-              tap(() => {
-                delete accountData?.password;
-              }),
-              map((tokens) => ({
-                message: 'Đăng nhập thành công.',
-                data: { ...accountData, tokens, profile },
-              }))
-            )
-          )
-        )
-      )
-    );
-  }
-
-  private createProfile({
-    accountId,
-    fullName,
-    avatarUrl,
-    bio,
-    githubLink,
-  }: {
-    accountId: string;
-    fullName: string;
-    avatarUrl: string;
-    bio: string;
-    githubLink: string;
-  }) {
-    return from(
-      this.accountService.handleCreateProfile(
-        {
-          fullName,
-          avatarUrl,
-          bio,
-          githubLink,
-        },
-        accountId
-      )
-    ).pipe(
-      catchError((error) => {
-        this.logger.error('Error creating profile:', error);
-        return throwException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'Tạo thông tin người dùng thất bại.'
-        );
-      })
-    );
-  }
-
-  private getCacheKey(
-    email: string,
-    credentialType: CredentialTypeEnum = CredentialTypeEnum.NONE
-  ) {
-    return `ACCOUNT#${email}#${credentialType}`;
   }
 }
