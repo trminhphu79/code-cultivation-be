@@ -427,7 +427,7 @@ export class AccountService {
     );
   }
 
-  handleListAccount(body: PagingDto) {
+  handlePagingAccount(body: PagingDto) {
     const { offset, limit, sortBy, sortOrder, filter } = body;
     const whereClause = this.queryBuilder.build({
       filters: filter,

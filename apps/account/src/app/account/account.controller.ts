@@ -28,7 +28,7 @@ export class AccountController {
   }
 
   @MessagePattern(ProfileMsgPattern.ListAccount)
-  handleListAccount(@Payload() body: PagingDto) {
-    return this.accountService.handleListAccount(body);
+  handlePagingAccount(@Payload() body: PagingDto) {
+    return this.accountService.handlePagingAccount(body);
   }
 }
