@@ -1619,18 +1619,20 @@ exports.MetadataModule = void 0;
 const tslib_1 = __webpack_require__(5);
 const common_1 = __webpack_require__(1);
 const metadata_controller_1 = __webpack_require__(59);
+const guard_1 = __webpack_require__(29);
+const core_1 = __webpack_require__(2);
 let MetadataModule = class MetadataModule {
 };
 exports.MetadataModule = MetadataModule;
 exports.MetadataModule = MetadataModule = tslib_1.__decorate([
     (0, common_1.Module)({
         controllers: [metadata_controller_1.MetadataController],
-        // providers:[
-        //   {
-        //     provide: APP_GUARD,
-        //     useClass: AuthGuard,
-        //   },
-        // ]
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: guard_1.RoleGuard,
+            },
+        ],
     })
 ], MetadataModule);
 
@@ -1647,6 +1649,7 @@ const tslib_1 = __webpack_require__(5);
 const metadata_1 = __webpack_require__(60);
 const common_1 = __webpack_require__(1);
 const metadata_2 = __webpack_require__(66);
+const guard_1 = __webpack_require__(29);
 const swagger_1 = __webpack_require__(3);
 const swagger_2 = __webpack_require__(3);
 const microservices_1 = __webpack_require__(8);
@@ -1665,8 +1668,6 @@ const ApiFile = (fileName) => (target, propertyKey, descriptor) => {
     })(target, propertyKey, descriptor);
 };
 exports.ApiFile = ApiFile;
-// @Roles(Role.ADMIN)
-// @UseGuards(RoleGuard)
 let MetadataController = class MetadataController {
     constructor(natsClient) {
         this.natsClient = natsClient;
@@ -2320,6 +2321,8 @@ tslib_1.__decorate([
     tslib_1.__metadata("design:returntype", void 0)
 ], MetadataController.prototype, "deleteSect", null);
 exports.MetadataController = MetadataController = tslib_1.__decorate([
+    (0, guard_1.Roles)(guard_1.Role.ADMIN),
+    (0, common_1.UseGuards)(guard_1.RoleGuard),
     (0, common_1.Controller)('metadata'),
     tslib_1.__param(0, (0, common_1.Inject)('NATS_SERVICE')),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof microservices_1.ClientProxy !== "undefined" && microservices_1.ClientProxy) === "function" ? _a : Object])

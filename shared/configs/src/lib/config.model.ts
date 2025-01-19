@@ -7,6 +7,10 @@ export type DatabaseConfig = {
   password: string | undefined;
   database: string | undefined;
   dialect: Dialect;
+  maxPool: number | undefined;
+  minPool: number | undefined;
+  idleTimeout: number | undefined;
+  acquireTimeout: number | undefined;
 };
 
 export type NatsMicroserviceConfig = {

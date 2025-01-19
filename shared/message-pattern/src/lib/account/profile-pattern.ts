@@ -8,6 +8,7 @@ export const ProfileMsgPattern = Object.freeze({
   Deactivate: `${AccountModule.Profile}/Deactivate`,
   Delete: `${AccountModule.Profile}/Delete`,
   ChangePassword: `${AccountModule.Profile}/ChangePassword`,
+  ListAccount: `${AccountModule.Profile}/ListAccount`,
 
   AddAchivement: `${AccountModule.Profile}/AddAchivement`,
   RemoveAchivement: `${AccountModule.Profile}/RemoveAchivement`,

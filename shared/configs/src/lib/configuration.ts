@@ -28,6 +28,10 @@ export const Configurations = (): Configuration => ({
     password: process.env['POSTGRES_PASSWORD'],
     database: process.env['POSTGRES_DB'],
     dialect: 'postgres',
+    maxPool: parseInt(process.env['POSTGRES_MAX_POOL'] as string) || 10,
+    minPool: parseInt(process.env['POSTGRES_MIN_POOL'] as string) || 1,
+    idleTimeout: parseInt(process.env['POSTGRES_IDLE_TIMEOUT'] as string) || 60000,
+    acquireTimeout: parseInt(process.env['POSTGRES_ACQUIRE_TIMEOUT'] as string) || 30000,
   },
   microservice: {
     natsUrl: process.env['NATS_URL'],

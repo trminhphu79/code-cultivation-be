@@ -23,11 +23,11 @@ exports.AppModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const realm_module_1 = __webpack_require__(5);
-const achievement_module_1 = __webpack_require__(61);
-const sect_module_1 = __webpack_require__(64);
-const nats_client_1 = __webpack_require__(67);
-const cache_manager_1 = __webpack_require__(69);
-const material_art_module_1 = __webpack_require__(77);
+const achievement_module_1 = __webpack_require__(72);
+const sect_module_1 = __webpack_require__(75);
+const nats_client_1 = __webpack_require__(78);
+const cache_manager_1 = __webpack_require__(80);
+const material_art_module_1 = __webpack_require__(88);
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -61,9 +61,9 @@ exports.RealmModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const realm_service_1 = __webpack_require__(6);
-const realm_controller_1 = __webpack_require__(23);
-const file_uploader_1 = __webpack_require__(46);
-const database_1 = __webpack_require__(53);
+const realm_controller_1 = __webpack_require__(35);
+const file_uploader_1 = __webpack_require__(58);
+const database_1 = __webpack_require__(65);
 let RealmModule = class RealmModule {
 };
 exports.RealmModule = RealmModule;
@@ -95,9 +95,10 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const sequelize_1 = __webpack_require__(7);
 const realm_1 = __webpack_require__(8);
-const rxjs_1 = __webpack_require__(20);
-const operators_1 = __webpack_require__(21);
-const sequelize_2 = __webpack_require__(22);
+const rxjs_1 = __webpack_require__(31);
+const operators_1 = __webpack_require__(32);
+const sequelize_2 = __webpack_require__(33);
+const metadata_1 = __webpack_require__(34);
 let RealmService = class RealmService {
     constructor(realmModel) {
         this.realmModel = realmModel;
@@ -105,7 +106,7 @@ let RealmService = class RealmService {
     create(dto) {
         return (0, rxjs_1.from)(this.realmModel.create(dto)).pipe((0, operators_1.map)((realm) => ({
             data: realm,
-            message: 'Realm đã được tạo thành công',
+            message: metadata_1.MetadataAlert.RealmCreated,
         })));
     }
     findAll(dto) {
@@ -139,7 +140,7 @@ let RealmService = class RealmService {
                 page,
                 limit,
             },
-            message: 'Lấy danh sách realm thành công',
+            message: metadata_1.MetadataAlert.RealmListed,
         })));
     }
     findOne(id) {
@@ -147,7 +148,7 @@ let RealmService = class RealmService {
             rejectOnEmpty: true,
         })).pipe((0, operators_1.map)((realm) => ({
             data: realm,
-            message: 'Tìm thấy realm',
+            message: metadata_1.MetadataAlert.RealmFound,
         })));
     }
     update(id, dto) {
@@ -157,7 +158,7 @@ let RealmService = class RealmService {
             await realm.update(dto);
             return {
                 data: realm,
-                message: 'Cập nhật realm thành công',
+                message: metadata_1.MetadataAlert.RealmUpdated,
             };
         }), rxjs_1.from);
     }
@@ -168,7 +169,7 @@ let RealmService = class RealmService {
             await realm.destroy();
             return {
                 data: undefined,
-                message: 'Đã xóa realm thành công',
+                message: metadata_1.MetadataAlert.RealmDeleted,
             };
         }), rxjs_1.from);
     }
@@ -272,8 +273,8 @@ const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
 const account_model_1 = __webpack_require__(11);
 const realm_model_1 = __webpack_require__(8);
-const profile_achievement_model_1 = __webpack_require__(15);
-const profile_material_art_model_1 = __webpack_require__(17);
+const profile_achievement_model_1 = __webpack_require__(26);
+const profile_material_art_model_1 = __webpack_require__(28);
 exports.DefaultProfileValue = {
     bio: '',
     avatarUrl: '',
@@ -409,13 +410,14 @@ exports.Profile = Profile = tslib_1.__decorate([
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Account = void 0;
 const tslib_1 = __webpack_require__(4);
+const guard_1 = __webpack_require__(12);
 const sequelize_typescript_1 = __webpack_require__(9);
 const profile_model_1 = __webpack_require__(10);
-const types_1 = __webpack_require__(12);
+const types_1 = __webpack_require__(23);
 function generateRandomNickName() {
     const prefixes = [
         'Dao',
@@ -572,6 +574,12 @@ tslib_1.__decorate([
 ], Account.prototype, "password", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
+        type: sequelize_typescript_1.DataType.STRING,
+    }),
+    tslib_1.__metadata("design:type", typeof (_a = typeof guard_1.Role !== "undefined" && guard_1.Role) === "function" ? _a : Object)
+], Account.prototype, "role", void 0);
+tslib_1.__decorate([
+    (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.BOOLEAN,
         defaultValue: false,
     }),
@@ -582,25 +590,25 @@ tslib_1.__decorate([
         defaultValue: types_1.CredentialTypeEnum.NONE,
         type: sequelize_typescript_1.DataType.STRING,
     }),
-    tslib_1.__metadata("design:type", typeof (_a = typeof types_1.CredentialTypeEnum !== "undefined" && types_1.CredentialTypeEnum) === "function" ? _a : Object)
+    tslib_1.__metadata("design:type", typeof (_b = typeof types_1.CredentialTypeEnum !== "undefined" && types_1.CredentialTypeEnum) === "function" ? _b : Object)
 ], Account.prototype, "credentialType", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.HasOne)(() => profile_model_1.Profile),
-    tslib_1.__metadata("design:type", typeof (_b = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _b : Object)
+    tslib_1.__metadata("design:type", typeof (_c = typeof profile_model_1.Profile !== "undefined" && profile_model_1.Profile) === "function" ? _c : Object)
 ], Account.prototype, "profile", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.DATE,
         defaultValue: sequelize_typescript_1.DataType.NOW,
     }),
-    tslib_1.__metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
 ], Account.prototype, "createdAt", void 0);
 tslib_1.__decorate([
     (0, sequelize_typescript_1.Column)({
         type: sequelize_typescript_1.DataType.DATE,
         defaultValue: sequelize_typescript_1.DataType.NOW,
     }),
-    tslib_1.__metadata("design:type", typeof (_d = typeof Date !== "undefined" && Date) === "function" ? _d : Object)
+    tslib_1.__metadata("design:type", typeof (_e = typeof Date !== "undefined" && Date) === "function" ? _e : Object)
 ], Account.prototype, "updatedAt", void 0);
 tslib_1.__decorate([
     sequelize_typescript_1.AfterCreate,
@@ -621,11 +629,292 @@ exports.Account = Account = tslib_1.__decorate([
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
 tslib_1.__exportStar(__webpack_require__(13), exports);
-tslib_1.__exportStar(__webpack_require__(14), exports);
+tslib_1.__exportStar(__webpack_require__(16), exports);
+tslib_1.__exportStar(__webpack_require__(17), exports);
+tslib_1.__exportStar(__webpack_require__(19), exports);
+tslib_1.__exportStar(__webpack_require__(20), exports);
+tslib_1.__exportStar(__webpack_require__(22), exports);
+tslib_1.__exportStar(__webpack_require__(21), exports);
 
 
 /***/ }),
 /* 13 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var AuthGuard_1;
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthGuard = void 0;
+const tslib_1 = __webpack_require__(4);
+const common_1 = __webpack_require__(1);
+const config_1 = __webpack_require__(14);
+const core_1 = __webpack_require__(2);
+const jwt_1 = __webpack_require__(15);
+let AuthGuard = AuthGuard_1 = class AuthGuard {
+    constructor(reflector, jwtService, configService) {
+        this.reflector = reflector;
+        this.jwtService = jwtService;
+        this.configService = configService;
+        this.logger = new common_1.Logger(AuthGuard_1.name);
+        this.jwtConfig = this.configService.get('jwt');
+    }
+    canActivate(context) {
+        const isPublic = this.reflector.get('isPublic', context.getHandler());
+        if (isPublic) {
+            this.logger.log('Public route accessed.');
+            return true;
+        }
+        const request = context.switchToHttp().getRequest();
+        const authHeader = request.headers['authorization'];
+        if (!authHeader) {
+            this.logger.warn('No Authorization header provided.');
+            throw new common_1.UnauthorizedException('Authorization header missing');
+        }
+        const token = authHeader.split(' ')[1];
+        if (!token) {
+            this.logger.warn('No token found in Authorization header.');
+            throw new common_1.UnauthorizedException('Token missing');
+        }
+        try {
+            const decoded = this.jwtService.verify(token, {
+                secret: this.jwtConfig?.secret,
+            });
+            request.user = decoded; // Attach user info to the request
+            this.logger.log('Token verified successfully');
+            return true;
+        }
+        catch (error) {
+            this.logger.error('Token verification failed:', error.message);
+            throw new common_1.UnauthorizedException('Invalid or expired token');
+        }
+    }
+};
+exports.AuthGuard = AuthGuard;
+exports.AuthGuard = AuthGuard = AuthGuard_1 = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object, typeof (_c = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _c : Object])
+], AuthGuard);
+
+
+/***/ }),
+/* 14 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/config");
+
+/***/ }),
+/* 15 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/jwt");
+
+/***/ }),
+/* 16 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Public = exports.IS_PUBLIC_KEY = void 0;
+const common_1 = __webpack_require__(1);
+exports.IS_PUBLIC_KEY = 'isPublic';
+const Public = () => (0, common_1.SetMetadata)(exports.IS_PUBLIC_KEY, true);
+exports.Public = Public;
+
+
+/***/ }),
+/* 17 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CustomThrottleGuard = void 0;
+const tslib_1 = __webpack_require__(4);
+const common_1 = __webpack_require__(1);
+const throttler_1 = __webpack_require__(18);
+let CustomThrottleGuard = class CustomThrottleGuard extends throttler_1.ThrottlerGuard {
+    getErrorMessage(context) {
+        const message = 'Quá nhiều yêu cầu, vui lòng thử lại sau.';
+        return Promise.resolve(message);
+    }
+};
+exports.CustomThrottleGuard = CustomThrottleGuard;
+exports.CustomThrottleGuard = CustomThrottleGuard = tslib_1.__decorate([
+    (0, common_1.Injectable)()
+], CustomThrottleGuard);
+
+
+/***/ }),
+/* 18 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/throttler");
+
+/***/ }),
+/* 19 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Role = void 0;
+var Role;
+(function (Role) {
+    Role["ADMIN"] = "ADMIN";
+    Role["USER"] = "USER";
+    Role["GUILD_OWNER"] = "GUILD_OWNER";
+    Role["GUILD_MEMBER"] = "GUILD_MEMBER";
+})(Role || (exports.Role = Role = {}));
+
+
+/***/ }),
+/* 20 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RoleGuard = void 0;
+const tslib_1 = __webpack_require__(4);
+const common_1 = __webpack_require__(1);
+const core_1 = __webpack_require__(2);
+const role_decorator_1 = __webpack_require__(21);
+const access_control_service_1 = __webpack_require__(22);
+let RoleGuard = class RoleGuard {
+    constructor(reflector, accessControlService) {
+        this.reflector = reflector;
+        this.accessControlService = accessControlService;
+    }
+    canActivate(context) {
+        const requiredRoles = this.reflector.getAllAndOverride(role_decorator_1.ROLE_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        const request = context.switchToHttp().getRequest();
+        const { user } = request;
+        const guildId = request.params?.guildId || request.body?.guildId;
+        for (const role of requiredRoles) {
+            const result = this.accessControlService.isAuthorized({
+                requiredRole: role,
+                currentRole: user?.role,
+                guildId,
+                userGuildRoles: user?.guildRoles,
+            });
+            if (result) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+exports.RoleGuard = RoleGuard;
+exports.RoleGuard = RoleGuard = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object, typeof (_b = typeof access_control_service_1.AccessControlService !== "undefined" && access_control_service_1.AccessControlService) === "function" ? _b : Object])
+], RoleGuard);
+
+
+/***/ }),
+/* 21 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Roles = exports.ROLE_KEY = void 0;
+const common_1 = __webpack_require__(1);
+exports.ROLE_KEY = 'role';
+const Roles = (...role) => (0, common_1.SetMetadata)(exports.ROLE_KEY, role);
+exports.Roles = Roles;
+
+
+/***/ }),
+/* 22 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AccessControlService = void 0;
+const tslib_1 = __webpack_require__(4);
+const common_1 = __webpack_require__(1);
+const role_enum_1 = __webpack_require__(19);
+let AccessControlService = class AccessControlService {
+    constructor() {
+        this.hierarchies = [];
+        this.priority = 1;
+        // Define user-related role hierarchy
+        this.buildRoles([
+            role_enum_1.Role.USER, // Base user
+            role_enum_1.Role.GUILD_MEMBER, // Member of a guild
+            role_enum_1.Role.GUILD_OWNER, // Owner of a guild
+        ]);
+        // Define admin role hierarchy (separate track)
+        this.buildRoles([role_enum_1.Role.ADMIN]); // Administrative role
+    }
+    /**
+     * Builds a role hierarchy with increasing privileges
+     * @param roles Array of roles from least to most privileged
+     */
+    buildRoles(roles) {
+        const hierarchy = new Map();
+        roles.forEach((role) => {
+            hierarchy.set(role, this.priority);
+            this.priority++;
+        });
+        this.hierarchies.push(hierarchy);
+    }
+    /**
+     * Checks if the user has sufficient privileges
+     * @param params Object containing roles and guild context
+     * @returns boolean indicating if access is authorized
+     */
+    isAuthorized({ currentRole, requiredRole, guildId, userGuildRoles, }) {
+        // If it's a guild-specific check
+        if (guildId && userGuildRoles) {
+            const userGuildRole = userGuildRoles[guildId];
+            // If user has a specific role in this guild, use that
+            if (userGuildRole) {
+                return this.checkRoleHierarchy(userGuildRole, requiredRole);
+            }
+        }
+        // Fallback to global role check
+        return this.checkRoleHierarchy(currentRole, requiredRole);
+    }
+    /**
+     * Checks if the role has sufficient privileges in the hierarchy
+     */
+    checkRoleHierarchy(currentRole, requiredRole) {
+        // Admin always has access
+        if (currentRole === role_enum_1.Role.ADMIN)
+            return true;
+        for (const hierarchy of this.hierarchies) {
+            const currentPriority = hierarchy.get(currentRole);
+            const requiredPriority = hierarchy.get(requiredRole);
+            if (currentPriority && requiredPriority && currentPriority >= requiredPriority) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+exports.AccessControlService = AccessControlService;
+exports.AccessControlService = AccessControlService = tslib_1.__decorate([
+    (0, common_1.Injectable)(),
+    tslib_1.__metadata("design:paramtypes", [])
+], AccessControlService);
+
+
+/***/ }),
+/* 23 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(4);
+tslib_1.__exportStar(__webpack_require__(24), exports);
+tslib_1.__exportStar(__webpack_require__(25), exports);
+
+
+/***/ }),
+/* 24 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -633,7 +922,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 14 */
+/* 25 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -652,7 +941,7 @@ var AccountVerifyStatusEnum;
 
 
 /***/ }),
-/* 15 */
+/* 26 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -662,7 +951,7 @@ exports.ProfileAchievement = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
 const profile_model_1 = __webpack_require__(10);
-const achievement_model_1 = __webpack_require__(16);
+const achievement_model_1 = __webpack_require__(27);
 let ProfileAchievement = class ProfileAchievement extends sequelize_typescript_1.Model {
 };
 exports.ProfileAchievement = ProfileAchievement;
@@ -712,7 +1001,7 @@ exports.ProfileAchievement = ProfileAchievement = tslib_1.__decorate([
 
 
 /***/ }),
-/* 16 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -720,7 +1009,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Achievement = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
-const profile_achievement_model_1 = __webpack_require__(15);
+const profile_achievement_model_1 = __webpack_require__(26);
 let Achievement = class Achievement extends sequelize_typescript_1.Model {
 };
 exports.Achievement = Achievement;
@@ -757,7 +1046,7 @@ exports.Achievement = Achievement = tslib_1.__decorate([
 
 
 /***/ }),
-/* 17 */
+/* 28 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -767,7 +1056,7 @@ exports.ProfileMaterialArt = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
 const profile_model_1 = __webpack_require__(10);
-const material_art_model_1 = __webpack_require__(18);
+const material_art_model_1 = __webpack_require__(29);
 let ProfileMaterialArt = class ProfileMaterialArt extends sequelize_typescript_1.Model {
 };
 exports.ProfileMaterialArt = ProfileMaterialArt;
@@ -825,7 +1114,7 @@ exports.ProfileMaterialArt = ProfileMaterialArt = tslib_1.__decorate([
 
 
 /***/ }),
-/* 18 */
+/* 29 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -834,8 +1123,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArt = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
-const sect_model_1 = __webpack_require__(19);
-const profile_material_art_model_1 = __webpack_require__(17);
+const sect_model_1 = __webpack_require__(30);
+const profile_material_art_model_1 = __webpack_require__(28);
 let MaterialArt = class MaterialArt extends sequelize_typescript_1.Model {
 };
 exports.MaterialArt = MaterialArt;
@@ -891,7 +1180,7 @@ exports.MaterialArt = MaterialArt = tslib_1.__decorate([
 
 
 /***/ }),
-/* 19 */
+/* 30 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -899,7 +1188,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Sect = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_typescript_1 = __webpack_require__(9);
-const material_art_model_1 = __webpack_require__(18);
+const material_art_model_1 = __webpack_require__(29);
 let Sect = class Sect extends sequelize_typescript_1.Model {
 };
 exports.Sect = Sect;
@@ -943,25 +1232,66 @@ exports.Sect = Sect = tslib_1.__decorate([
 
 
 /***/ }),
-/* 20 */
+/* 31 */
 /***/ ((module) => {
 
 module.exports = require("rxjs");
 
 /***/ }),
-/* 21 */
+/* 32 */
 /***/ ((module) => {
 
 module.exports = require("rxjs/operators");
 
 /***/ }),
-/* 22 */
+/* 33 */
 /***/ ((module) => {
 
 module.exports = require("sequelize");
 
 /***/ }),
-/* 23 */
+/* 34 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MetadataAlert = void 0;
+exports.MetadataAlert = Object.freeze({
+    // Achievement Messages
+    AchievementCreated: 'Thành tích đã được tạo thành công',
+    AchievementUpdated: 'Cập nhật thành tích thành công',
+    AchievementDeleted: 'Đã xóa thành tích thành công',
+    AchievementFound: 'Tìm thấy thành tích',
+    AchievementListed: 'Lấy danh sách thành tích thành công',
+    // Material Art Messages
+    MaterialArtCreated: 'Võ học đã được tạo thành công',
+    MaterialArtUpdated: 'Cập nhật võ học thành công',
+    MaterialArtDeleted: 'Đã xóa võ học thành công',
+    MaterialArtFound: 'Tìm thấy võ học',
+    MaterialArtListed: 'Lấy danh sách võ học thành công',
+    // Realm Messages
+    RealmCreated: 'Cảnh giới đã được tạo thành công',
+    RealmUpdated: 'Cập nhật cấnh giới thành công',
+    RealmDeleted: 'Đã xóa cảnh giới thành công',
+    RealmFound: 'Tìm thấy cảnh giới',
+    RealmListed: 'Lấy danh sách cảnh giới thành công',
+    // Sect Messages
+    SectCreated: 'Môn phái đã được tạo thành công',
+    SectUpdated: 'Cập nhật môn phái thành công',
+    SectDeleted: 'Đã xóa môn phái thành công',
+    SectFound: 'Tìm thấy môn phái',
+    SectListed: 'Lấy danh sách môn phái thành công',
+    // Common Error Messages
+    NotFound: 'Không tìm thấy dữ liệu',
+    CreateError: 'Có lỗi xảy ra khi tạo mới',
+    UpdateError: 'Có lỗi xảy ra khi cập nhật',
+    DeleteError: 'Có lỗi xảy ra khi xóa',
+    ListError: 'Có lỗi xảy ra khi lấy danh sách',
+});
+
+
+/***/ }),
+/* 35 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -970,11 +1300,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RealmController = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const microservices_1 = __webpack_require__(24);
+const microservices_1 = __webpack_require__(36);
 const realm_service_1 = __webpack_require__(6);
-const metadata_1 = __webpack_require__(25);
-const metadata_2 = __webpack_require__(39);
-const swagger_1 = __webpack_require__(27);
+const metadata_1 = __webpack_require__(37);
+const metadata_2 = __webpack_require__(51);
+const swagger_1 = __webpack_require__(39);
 let RealmController = class RealmController {
     constructor(realmService) {
         this.realmService = realmService;
@@ -1039,40 +1369,40 @@ exports.RealmController = RealmController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 24 */
+/* 36 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/microservices");
 
 /***/ }),
-/* 25 */
+/* 37 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(26), exports);
-tslib_1.__exportStar(__webpack_require__(29), exports);
-tslib_1.__exportStar(__webpack_require__(31), exports);
-tslib_1.__exportStar(__webpack_require__(32), exports);
-tslib_1.__exportStar(__webpack_require__(33), exports);
-tslib_1.__exportStar(__webpack_require__(34), exports);
-tslib_1.__exportStar(__webpack_require__(35), exports);
-tslib_1.__exportStar(__webpack_require__(36), exports);
-tslib_1.__exportStar(__webpack_require__(37), exports);
 tslib_1.__exportStar(__webpack_require__(38), exports);
+tslib_1.__exportStar(__webpack_require__(41), exports);
+tslib_1.__exportStar(__webpack_require__(43), exports);
+tslib_1.__exportStar(__webpack_require__(44), exports);
+tslib_1.__exportStar(__webpack_require__(45), exports);
+tslib_1.__exportStar(__webpack_require__(46), exports);
+tslib_1.__exportStar(__webpack_require__(47), exports);
+tslib_1.__exportStar(__webpack_require__(48), exports);
+tslib_1.__exportStar(__webpack_require__(49), exports);
+tslib_1.__exportStar(__webpack_require__(50), exports);
 
 
 /***/ }),
-/* 26 */
+/* 38 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DeleteDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class DeleteDto {
 }
 exports.DeleteDto = DeleteDto;
@@ -1086,28 +1416,28 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 27 */
+/* 39 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/swagger");
 
 /***/ }),
-/* 28 */
+/* 40 */
 /***/ ((module) => {
 
 module.exports = require("class-validator");
 
 /***/ }),
-/* 29 */
+/* 41 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MetadataPaginationDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const class_transformer_1 = __webpack_require__(30);
-const class_validator_1 = __webpack_require__(28);
-const swagger_1 = __webpack_require__(27);
+const class_transformer_1 = __webpack_require__(42);
+const class_validator_1 = __webpack_require__(40);
+const swagger_1 = __webpack_require__(39);
 class MetadataPaginationDto {
     constructor() {
         this.page = 1;
@@ -1181,21 +1511,21 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 30 */
+/* 42 */
 /***/ ((module) => {
 
 module.exports = require("class-transformer");
 
 /***/ }),
-/* 31 */
+/* 43 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateSectDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class CreateSectDto {
 }
 exports.CreateSectDto = CreateSectDto;
@@ -1223,15 +1553,15 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 32 */
+/* 44 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateSectDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class UpdateSectDto {
 }
 exports.UpdateSectDto = UpdateSectDto;
@@ -1263,15 +1593,15 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 33 */
+/* 45 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateRealmDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class CreateRealmDto {
 }
 exports.CreateRealmDto = CreateRealmDto;
@@ -1299,14 +1629,14 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 34 */
+/* 46 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateRealmDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
+const swagger_1 = __webpack_require__(39);
 class UpdateRealmDto {
 }
 exports.UpdateRealmDto = UpdateRealmDto;
@@ -1337,15 +1667,15 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 35 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateAchievementDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class CreateAchievementDto {
 }
 exports.CreateAchievementDto = CreateAchievementDto;
@@ -1366,14 +1696,14 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 36 */
+/* 48 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateAchievementDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
+const swagger_1 = __webpack_require__(39);
 class UpdateAchievementDto {
 }
 exports.UpdateAchievementDto = UpdateAchievementDto;
@@ -1398,15 +1728,15 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 37 */
+/* 49 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CreateMaterialArtDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
-const class_validator_1 = __webpack_require__(28);
+const swagger_1 = __webpack_require__(39);
+const class_validator_1 = __webpack_require__(40);
 class CreateMaterialArtDto {
 }
 exports.CreateMaterialArtDto = CreateMaterialArtDto;
@@ -1434,14 +1764,14 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 38 */
+/* 50 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UpdateMaterialArtDto = void 0;
 const tslib_1 = __webpack_require__(4);
-const swagger_1 = __webpack_require__(27);
+const swagger_1 = __webpack_require__(39);
 class UpdateMaterialArtDto {
 }
 exports.UpdateMaterialArtDto = UpdateMaterialArtDto;
@@ -1472,26 +1802,26 @@ tslib_1.__decorate([
 
 
 /***/ }),
-/* 39 */
+/* 51 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(40), exports);
-tslib_1.__exportStar(__webpack_require__(43), exports);
-tslib_1.__exportStar(__webpack_require__(44), exports);
-tslib_1.__exportStar(__webpack_require__(45), exports);
+tslib_1.__exportStar(__webpack_require__(52), exports);
+tslib_1.__exportStar(__webpack_require__(55), exports);
+tslib_1.__exportStar(__webpack_require__(56), exports);
+tslib_1.__exportStar(__webpack_require__(57), exports);
 
 
 /***/ }),
-/* 40 */
+/* 52 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SectPattern = void 0;
-const module_1 = __webpack_require__(41);
+const module_1 = __webpack_require__(53);
 exports.SectPattern = Object.freeze({
     Create: `${module_1.CoreModule.Sect}/Create`,
     Update: `${module_1.CoreModule.Sect}/Update`,
@@ -1502,13 +1832,13 @@ exports.SectPattern = Object.freeze({
 
 
 /***/ }),
-/* 41 */
+/* 53 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CoreModule = void 0;
-const __1 = __webpack_require__(42);
+const __1 = __webpack_require__(54);
 exports.CoreModule = Object.freeze({
     Sect: `${__1.MicroServiceName.Core}/Sect`,
     Realm: `${__1.MicroServiceName.Core}/Realm`,
@@ -1518,7 +1848,7 @@ exports.CoreModule = Object.freeze({
 
 
 /***/ }),
-/* 42 */
+/* 54 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1533,13 +1863,13 @@ exports.MicroServiceName = Object.freeze({
 
 
 /***/ }),
-/* 43 */
+/* 55 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RealmPattern = void 0;
-const module_1 = __webpack_require__(41);
+const module_1 = __webpack_require__(53);
 exports.RealmPattern = Object.freeze({
     Create: `${module_1.CoreModule.Realm}/Create`,
     Update: `${module_1.CoreModule.Realm}/Update`,
@@ -1550,13 +1880,13 @@ exports.RealmPattern = Object.freeze({
 
 
 /***/ }),
-/* 44 */
+/* 56 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AchievementPattern = void 0;
-const module_1 = __webpack_require__(41);
+const module_1 = __webpack_require__(53);
 exports.AchievementPattern = Object.freeze({
     Create: `${module_1.CoreModule.Achievement}/Create`,
     Update: `${module_1.CoreModule.Achievement}/Update`,
@@ -1567,13 +1897,13 @@ exports.AchievementPattern = Object.freeze({
 
 
 /***/ }),
-/* 45 */
+/* 57 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArtPattern = void 0;
-const module_1 = __webpack_require__(41);
+const module_1 = __webpack_require__(53);
 exports.MaterialArtPattern = Object.freeze({
     Create: `${module_1.CoreModule.MaterialArt}/Create`,
     Update: `${module_1.CoreModule.MaterialArt}/Update`,
@@ -1584,21 +1914,21 @@ exports.MaterialArtPattern = Object.freeze({
 
 
 /***/ }),
-/* 46 */
+/* 58 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(47), exports);
-tslib_1.__exportStar(__webpack_require__(48), exports);
-tslib_1.__exportStar(__webpack_require__(49), exports);
-tslib_1.__exportStar(__webpack_require__(51), exports);
-tslib_1.__exportStar(__webpack_require__(52), exports);
+tslib_1.__exportStar(__webpack_require__(59), exports);
+tslib_1.__exportStar(__webpack_require__(60), exports);
+tslib_1.__exportStar(__webpack_require__(61), exports);
+tslib_1.__exportStar(__webpack_require__(63), exports);
+tslib_1.__exportStar(__webpack_require__(64), exports);
 
 
 /***/ }),
-/* 47 */
+/* 59 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1610,7 +1940,7 @@ exports.FileUploader = FileUploader;
 
 
 /***/ }),
-/* 48 */
+/* 60 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1619,8 +1949,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileUploaderModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const file_uploader_service_1 = __webpack_require__(49);
-const file_uploader_constants_1 = __webpack_require__(52);
+const file_uploader_service_1 = __webpack_require__(61);
+const file_uploader_constants_1 = __webpack_require__(64);
 let FileUploaderModule = FileUploaderModule_1 = class FileUploaderModule {
     static forRoot(options) {
         const provider = {
@@ -1687,7 +2017,7 @@ exports.FileUploaderModule = FileUploaderModule = FileUploaderModule_1 = tslib_1
 
 
 /***/ }),
-/* 49 */
+/* 61 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1697,10 +2027,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FileUploaderService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const ImageKit = __webpack_require__(50);
-const file_uploader_decorator_1 = __webpack_require__(51);
-const file_uploader_type_1 = __webpack_require__(47);
-const rxjs_1 = __webpack_require__(20);
+const ImageKit = __webpack_require__(62);
+const file_uploader_decorator_1 = __webpack_require__(63);
+const file_uploader_type_1 = __webpack_require__(59);
+const rxjs_1 = __webpack_require__(31);
 let FileUploaderService = FileUploaderService_1 = class FileUploaderService {
     constructor(options) {
         this.logger = new common_1.Logger(FileUploaderService_1.name);
@@ -1726,13 +2056,13 @@ exports.FileUploaderService = FileUploaderService = FileUploaderService_1 = tsli
 
 
 /***/ }),
-/* 50 */
+/* 62 */
 /***/ ((module) => {
 
 module.exports = require("imagekit");
 
 /***/ }),
-/* 51 */
+/* 63 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1740,7 +2070,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.InjectFileUploaderOptions = InjectFileUploaderOptions;
 exports.InjectFileUploader = InjectFileUploader;
 const common_1 = __webpack_require__(1);
-const file_uploader_constants_1 = __webpack_require__(52);
+const file_uploader_constants_1 = __webpack_require__(64);
 function InjectFileUploaderOptions() {
     return (0, common_1.Inject)(file_uploader_constants_1.FILE_UPLOADER_OPTIONS_TOKEN);
 }
@@ -1750,7 +2080,7 @@ function InjectFileUploader() {
 
 
 /***/ }),
-/* 52 */
+/* 64 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1762,27 +2092,27 @@ exports.FILE_UPLOADER_OPTIONS_TOKEN = 'FILE_UPLOADER_OPTIONS_TOKEN';
 
 
 /***/ }),
-/* 53 */
+/* 65 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(54), exports);
-tslib_1.__exportStar(__webpack_require__(60), exports);
-tslib_1.__exportStar(__webpack_require__(59), exports);
+tslib_1.__exportStar(__webpack_require__(66), exports);
+tslib_1.__exportStar(__webpack_require__(71), exports);
+tslib_1.__exportStar(__webpack_require__(70), exports);
 
 
 /***/ }),
-/* 54 */
+/* 66 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.sequelizeModuleOptions = void 0;
-const config_1 = __webpack_require__(55);
-const configs_1 = __webpack_require__(56);
-const database_models_1 = __webpack_require__(59);
+const config_1 = __webpack_require__(14);
+const configs_1 = __webpack_require__(67);
+const database_models_1 = __webpack_require__(70);
 exports.sequelizeModuleOptions = {
     imports: [
         config_1.ConfigModule.forRoot({
@@ -1808,24 +2138,18 @@ exports.sequelizeModuleOptions = {
 
 
 /***/ }),
-/* 55 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/config");
-
-/***/ }),
-/* 56 */
+/* 67 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(57), exports);
-tslib_1.__exportStar(__webpack_require__(58), exports);
+tslib_1.__exportStar(__webpack_require__(68), exports);
+tslib_1.__exportStar(__webpack_require__(69), exports);
 
 
 /***/ }),
-/* 57 */
+/* 68 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1833,7 +2157,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 
 /***/ }),
-/* 58 */
+/* 69 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1885,20 +2209,20 @@ exports.Configurations = Configurations;
 
 
 /***/ }),
-/* 59 */
+/* 70 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DatabaseModels = void 0;
 const account_1 = __webpack_require__(11);
-const achievement_1 = __webpack_require__(16);
-const material_art_1 = __webpack_require__(18);
+const achievement_1 = __webpack_require__(27);
+const material_art_1 = __webpack_require__(29);
 const profile_1 = __webpack_require__(10);
-const profile_achievement_1 = __webpack_require__(15);
-const profile_material_art_1 = __webpack_require__(17);
+const profile_achievement_1 = __webpack_require__(26);
+const profile_material_art_1 = __webpack_require__(28);
 const realm_1 = __webpack_require__(8);
-const sect_1 = __webpack_require__(19);
+const sect_1 = __webpack_require__(30);
 exports.DatabaseModels = [
     account_1.Account,
     profile_1.Profile,
@@ -1912,7 +2236,7 @@ exports.DatabaseModels = [
 
 
 /***/ }),
-/* 60 */
+/* 71 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1920,9 +2244,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DatabaseConfigModule = exports.DatabaseConfigFeature = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_1 = __webpack_require__(7);
-const database_config_1 = __webpack_require__(54);
+const database_config_1 = __webpack_require__(66);
 const common_1 = __webpack_require__(1);
-const database_models_1 = __webpack_require__(59);
+const database_models_1 = __webpack_require__(70);
 exports.DatabaseConfigFeature = Object.freeze(sequelize_1.SequelizeModule.forFeature(database_models_1.DatabaseModels));
 let DatabaseConfigModule = class DatabaseConfigModule {
 };
@@ -1936,7 +2260,7 @@ exports.DatabaseConfigModule = DatabaseConfigModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 61 */
+/* 72 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1944,10 +2268,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AchievementModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const achievement_service_1 = __webpack_require__(62);
-const achievement_controller_1 = __webpack_require__(63);
-const file_uploader_1 = __webpack_require__(46);
-const database_1 = __webpack_require__(53);
+const achievement_service_1 = __webpack_require__(73);
+const achievement_controller_1 = __webpack_require__(74);
+const file_uploader_1 = __webpack_require__(58);
+const database_1 = __webpack_require__(65);
 let AchievementModule = class AchievementModule {
 };
 exports.AchievementModule = AchievementModule;
@@ -1969,7 +2293,7 @@ exports.AchievementModule = AchievementModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 62 */
+/* 73 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -1978,10 +2302,11 @@ exports.AchievementService = void 0;
 const tslib_1 = __webpack_require__(4);
 const sequelize_1 = __webpack_require__(7);
 const common_1 = __webpack_require__(1);
-const achievement_1 = __webpack_require__(16);
-const sequelize_2 = __webpack_require__(22);
-const rxjs_1 = __webpack_require__(20);
-const operators_1 = __webpack_require__(21);
+const achievement_1 = __webpack_require__(27);
+const sequelize_2 = __webpack_require__(33);
+const rxjs_1 = __webpack_require__(31);
+const operators_1 = __webpack_require__(32);
+const metadata_1 = __webpack_require__(34);
 let AchievementService = class AchievementService {
     constructor(achievementModel) {
         this.achievementModel = achievementModel;
@@ -1989,7 +2314,7 @@ let AchievementService = class AchievementService {
     create(dto) {
         return (0, rxjs_1.from)(this.achievementModel.create(dto)).pipe((0, operators_1.map)((achievement) => ({
             data: achievement,
-            message: 'Thành tích đã được tạo thành công',
+            message: metadata_1.MetadataAlert.AchievementCreated,
         })));
     }
     findAll(dto) {
@@ -2018,7 +2343,7 @@ let AchievementService = class AchievementService {
                 page,
                 limit,
             },
-            message: 'Lấy danh sách thành tích thành công',
+            message: metadata_1.MetadataAlert.AchievementListed,
         })));
     }
     findOne(id) {
@@ -2026,7 +2351,7 @@ let AchievementService = class AchievementService {
             rejectOnEmpty: true,
         })).pipe((0, operators_1.map)((achievement) => ({
             data: achievement,
-            message: 'Tìm thấy thành tích',
+            message: metadata_1.MetadataAlert.AchievementFound,
         })));
     }
     update(id, dto) {
@@ -2036,7 +2361,7 @@ let AchievementService = class AchievementService {
             await achievement.update(dto);
             return {
                 data: achievement,
-                message: 'Cập nhật thành tích thành công',
+                message: metadata_1.MetadataAlert.AchievementUpdated,
             };
         }), rxjs_1.from);
     }
@@ -2047,7 +2372,7 @@ let AchievementService = class AchievementService {
             await achievement.destroy();
             return {
                 data: undefined,
-                message: 'Đã xóa thành tích thành công',
+                message: metadata_1.MetadataAlert.AchievementDeleted,
             };
         }), rxjs_1.from);
     }
@@ -2061,7 +2386,7 @@ exports.AchievementService = AchievementService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 63 */
+/* 74 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2070,11 +2395,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AchievementController = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const microservices_1 = __webpack_require__(24);
-const metadata_1 = __webpack_require__(25);
-const metadata_2 = __webpack_require__(39);
-const achievement_service_1 = __webpack_require__(62);
-const swagger_1 = __webpack_require__(27);
+const microservices_1 = __webpack_require__(36);
+const metadata_1 = __webpack_require__(37);
+const metadata_2 = __webpack_require__(51);
+const achievement_service_1 = __webpack_require__(73);
+const swagger_1 = __webpack_require__(39);
 let AchievementController = class AchievementController {
     constructor(achievementService) {
         this.achievementService = achievementService;
@@ -2139,7 +2464,7 @@ exports.AchievementController = AchievementController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 64 */
+/* 75 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2147,10 +2472,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SectModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const sect_service_1 = __webpack_require__(65);
-const sect_controller_1 = __webpack_require__(66);
-const database_1 = __webpack_require__(53);
-const file_uploader_1 = __webpack_require__(46);
+const sect_service_1 = __webpack_require__(76);
+const sect_controller_1 = __webpack_require__(77);
+const database_1 = __webpack_require__(65);
+const file_uploader_1 = __webpack_require__(58);
 let SectModule = class SectModule {
 };
 exports.SectModule = SectModule;
@@ -2172,7 +2497,7 @@ exports.SectModule = SectModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 65 */
+/* 76 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2180,11 +2505,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SectService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const sect_1 = __webpack_require__(19);
+const sect_1 = __webpack_require__(30);
 const sequelize_1 = __webpack_require__(7);
-const rxjs_1 = __webpack_require__(20);
-const operators_1 = __webpack_require__(21);
-const sequelize_2 = __webpack_require__(22);
+const rxjs_1 = __webpack_require__(31);
+const operators_1 = __webpack_require__(32);
+const sequelize_2 = __webpack_require__(33);
+const metadata_1 = __webpack_require__(34);
 let SectService = class SectService {
     constructor(sectModel) {
         this.sectModel = sectModel;
@@ -2192,7 +2518,7 @@ let SectService = class SectService {
     create(dto) {
         return (0, rxjs_1.from)(this.sectModel.create(dto)).pipe((0, operators_1.map)((sect) => ({
             data: sect,
-            message: 'Môn phái đã được tạo thành công',
+            message: metadata_1.MetadataAlert.SectCreated,
         })));
     }
     findAll(dto) {
@@ -2221,7 +2547,7 @@ let SectService = class SectService {
                 page,
                 limit,
             },
-            message: 'Lấy danh sách môn phái thành công',
+            message: metadata_1.MetadataAlert.SectListed,
         })));
     }
     findOne(id) {
@@ -2229,7 +2555,7 @@ let SectService = class SectService {
             rejectOnEmpty: true,
         })).pipe((0, operators_1.map)((sect) => ({
             data: sect,
-            message: 'Tìm thấy môn phái',
+            message: metadata_1.MetadataAlert.SectFound,
         })));
     }
     update(id, dto) {
@@ -2239,7 +2565,7 @@ let SectService = class SectService {
             await sect.update(dto);
             return {
                 data: sect,
-                message: 'Cập nhật môn phái thành công',
+                message: metadata_1.MetadataAlert.SectUpdated,
             };
         }), rxjs_1.from);
     }
@@ -2250,7 +2576,7 @@ let SectService = class SectService {
             await sect.destroy();
             return {
                 data: undefined,
-                message: 'Đã xóa môn phái thành công',
+                message: metadata_1.MetadataAlert.SectDeleted,
             };
         }), rxjs_1.from);
     }
@@ -2264,7 +2590,7 @@ exports.SectService = SectService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 66 */
+/* 77 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2273,11 +2599,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SectController = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const microservices_1 = __webpack_require__(24);
-const sect_service_1 = __webpack_require__(65);
-const metadata_1 = __webpack_require__(25);
-const metadata_2 = __webpack_require__(39);
-const swagger_1 = __webpack_require__(27);
+const microservices_1 = __webpack_require__(36);
+const sect_service_1 = __webpack_require__(76);
+const metadata_1 = __webpack_require__(37);
+const metadata_2 = __webpack_require__(51);
+const swagger_1 = __webpack_require__(39);
 let SectController = class SectController {
     constructor(sectService) {
         this.sectService = sectService;
@@ -2403,17 +2729,17 @@ exports.SectController = SectController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 67 */
+/* 78 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(68), exports);
+tslib_1.__exportStar(__webpack_require__(79), exports);
 
 
 /***/ }),
-/* 68 */
+/* 79 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2421,7 +2747,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NatsClientModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const microservices_1 = __webpack_require__(24);
+const microservices_1 = __webpack_require__(36);
 let NatsClientModule = class NatsClientModule {
 };
 exports.NatsClientModule = NatsClientModule;
@@ -2455,19 +2781,19 @@ exports.NatsClientModule = NatsClientModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 69 */
+/* 80 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(70), exports);
-tslib_1.__exportStar(__webpack_require__(73), exports);
-tslib_1.__exportStar(__webpack_require__(76), exports);
+tslib_1.__exportStar(__webpack_require__(81), exports);
+tslib_1.__exportStar(__webpack_require__(84), exports);
+tslib_1.__exportStar(__webpack_require__(87), exports);
 
 
 /***/ }),
-/* 70 */
+/* 81 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2475,9 +2801,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const cache_listener_service_1 = __webpack_require__(71);
-const ioredis_1 = __webpack_require__(74);
-const cache_manager_service_1 = __webpack_require__(76);
+const cache_listener_service_1 = __webpack_require__(82);
+const ioredis_1 = __webpack_require__(85);
+const cache_manager_service_1 = __webpack_require__(87);
 let CacheManagerModule = class CacheManagerModule {
 };
 exports.CacheManagerModule = CacheManagerModule;
@@ -2497,7 +2823,7 @@ exports.CacheManagerModule = CacheManagerModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 71 */
+/* 82 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2507,10 +2833,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheListener = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const event_emitter_1 = __webpack_require__(72);
-const cache_message_1 = __webpack_require__(73);
-const ioredis_1 = __webpack_require__(74);
-const ioredis_2 = tslib_1.__importDefault(__webpack_require__(75));
+const event_emitter_1 = __webpack_require__(83);
+const cache_message_1 = __webpack_require__(84);
+const ioredis_1 = __webpack_require__(85);
+const ioredis_2 = tslib_1.__importDefault(__webpack_require__(86));
 let CacheListener = CacheListener_1 = class CacheListener {
     constructor(redis) {
         this.redis = redis;
@@ -2593,13 +2919,13 @@ exports.CacheListener = CacheListener = CacheListener_1 = tslib_1.__decorate([
 
 
 /***/ }),
-/* 72 */
+/* 83 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 73 */
+/* 84 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -2615,19 +2941,19 @@ var CacheMessageAction;
 
 
 /***/ }),
-/* 74 */
+/* 85 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs-modules/ioredis");
 
 /***/ }),
-/* 75 */
+/* 86 */
 /***/ ((module) => {
 
 module.exports = require("ioredis");
 
 /***/ }),
-/* 76 */
+/* 87 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2637,9 +2963,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CacheManagerService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const ioredis_1 = tslib_1.__importDefault(__webpack_require__(75));
-const ioredis_2 = __webpack_require__(74);
-const rxjs_1 = __webpack_require__(20);
+const ioredis_1 = tslib_1.__importDefault(__webpack_require__(86));
+const ioredis_2 = __webpack_require__(85);
+const rxjs_1 = __webpack_require__(31);
 let CacheManagerService = CacheManagerService_1 = class CacheManagerService {
     constructor(cache) {
         this.cache = cache;
@@ -2668,7 +2994,7 @@ exports.CacheManagerService = CacheManagerService = CacheManagerService_1 = tsli
 
 
 /***/ }),
-/* 77 */
+/* 88 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2676,10 +3002,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArtModule = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const material_art_service_1 = __webpack_require__(78);
-const material_art_controller_1 = __webpack_require__(79);
-const database_1 = __webpack_require__(53);
-const file_uploader_1 = __webpack_require__(46);
+const material_art_service_1 = __webpack_require__(89);
+const material_art_controller_1 = __webpack_require__(90);
+const database_1 = __webpack_require__(65);
+const file_uploader_1 = __webpack_require__(58);
 let MaterialArtModule = class MaterialArtModule {
 };
 exports.MaterialArtModule = MaterialArtModule;
@@ -2701,7 +3027,7 @@ exports.MaterialArtModule = MaterialArtModule = tslib_1.__decorate([
 
 
 /***/ }),
-/* 78 */
+/* 89 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2709,11 +3035,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArtService = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const material_art_1 = __webpack_require__(18);
+const material_art_1 = __webpack_require__(29);
 const sequelize_1 = __webpack_require__(7);
-const rxjs_1 = __webpack_require__(20);
-const operators_1 = __webpack_require__(21);
-const sequelize_2 = __webpack_require__(22);
+const rxjs_1 = __webpack_require__(31);
+const operators_1 = __webpack_require__(32);
+const sequelize_2 = __webpack_require__(33);
+const metadata_1 = __webpack_require__(34);
 let MaterialArtService = class MaterialArtService {
     constructor(materialArtModel) {
         this.materialArtModel = materialArtModel;
@@ -2721,7 +3048,7 @@ let MaterialArtService = class MaterialArtService {
     create(dto) {
         return (0, rxjs_1.from)(this.materialArtModel.create(dto)).pipe((0, operators_1.map)((materialArt) => ({
             data: materialArt,
-            message: 'Võ học đã được tạo thành công',
+            message: metadata_1.MetadataAlert.MaterialArtCreated,
         })));
     }
     findAll(dto) {
@@ -2750,7 +3077,7 @@ let MaterialArtService = class MaterialArtService {
                 page,
                 limit,
             },
-            message: 'Lấy danh sách võ học thành công',
+            message: metadata_1.MetadataAlert.MaterialArtListed,
         })));
     }
     findOne(id) {
@@ -2758,7 +3085,7 @@ let MaterialArtService = class MaterialArtService {
             rejectOnEmpty: true,
         })).pipe((0, operators_1.map)((materialArt) => ({
             data: materialArt,
-            message: 'Tìm thấy võ học',
+            message: metadata_1.MetadataAlert.MaterialArtFound,
         })));
     }
     update(id, dto) {
@@ -2768,7 +3095,7 @@ let MaterialArtService = class MaterialArtService {
             await materialArt.update(dto);
             return {
                 data: materialArt,
-                message: 'Cập nhật võ học thành công',
+                message: metadata_1.MetadataAlert.MaterialArtUpdated,
             };
         }), rxjs_1.from);
     }
@@ -2779,7 +3106,7 @@ let MaterialArtService = class MaterialArtService {
             await materialArt.destroy();
             return {
                 data: undefined,
-                message: 'Đã xóa võ học thành công',
+                message: metadata_1.MetadataAlert.MaterialArtDeleted,
             };
         }), rxjs_1.from);
     }
@@ -2793,7 +3120,7 @@ exports.MaterialArtService = MaterialArtService = tslib_1.__decorate([
 
 
 /***/ }),
-/* 79 */
+/* 90 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2802,11 +3129,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MaterialArtController = void 0;
 const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
-const microservices_1 = __webpack_require__(24);
-const material_art_service_1 = __webpack_require__(78);
-const metadata_1 = __webpack_require__(25);
-const metadata_2 = __webpack_require__(39);
-const swagger_1 = __webpack_require__(27);
+const microservices_1 = __webpack_require__(36);
+const material_art_service_1 = __webpack_require__(89);
+const metadata_1 = __webpack_require__(37);
+const metadata_2 = __webpack_require__(51);
+const swagger_1 = __webpack_require__(39);
 let MaterialArtController = class MaterialArtController {
     constructor(materialArtService) {
         this.materialArtService = materialArtService;
@@ -2871,27 +3198,27 @@ exports.MaterialArtController = MaterialArtController = tslib_1.__decorate([
 
 
 /***/ }),
-/* 80 */
+/* 91 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(4);
-tslib_1.__exportStar(__webpack_require__(81), exports);
-tslib_1.__exportStar(__webpack_require__(82), exports);
+tslib_1.__exportStar(__webpack_require__(92), exports);
+tslib_1.__exportStar(__webpack_require__(93), exports);
 
 
 /***/ }),
-/* 81 */
+/* 92 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GlobalRpcExceptionFilter = exports.CustomRpcException = void 0;
 const tslib_1 = __webpack_require__(4);
-const microservices_1 = __webpack_require__(24);
+const microservices_1 = __webpack_require__(36);
 const common_1 = __webpack_require__(1);
-const rxjs_1 = __webpack_require__(20);
+const rxjs_1 = __webpack_require__(31);
 class CustomRpcException extends microservices_1.RpcException {
     constructor(statusCode, message) {
         super({ statusCode, message });
@@ -2915,14 +3242,14 @@ exports.GlobalRpcExceptionFilter = GlobalRpcExceptionFilter = tslib_1.__decorate
 
 
 /***/ }),
-/* 82 */
+/* 93 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.throwException = void 0;
-const rxjs_1 = __webpack_require__(20);
-const rcp_exception_1 = __webpack_require__(81);
+const rxjs_1 = __webpack_require__(31);
+const rcp_exception_1 = __webpack_require__(92);
 const throwException = (code, message) => (0, rxjs_1.throwError)(() => {
     return new rcp_exception_1.CustomRpcException(code, message);
 });
@@ -2970,8 +3297,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
 const app_module_1 = __webpack_require__(3);
-const microservices_1 = __webpack_require__(24);
-const exception_1 = __webpack_require__(80);
+const microservices_1 = __webpack_require__(36);
+const exception_1 = __webpack_require__(91);
 async function bootstrap() {
     const app = await core_1.NestFactory.createMicroservice(app_module_1.AppModule, {
         transport: microservices_1.Transport.NATS,

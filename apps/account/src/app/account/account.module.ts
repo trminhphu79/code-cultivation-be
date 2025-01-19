@@ -6,6 +6,7 @@ import { MailerModule } from '@shared/mailer';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Configurations, JwtConfig } from '@shared/configs';
+import { QueryBuilderModule } from '@shared/query-builder';
 @Global()
 @Module({
   controllers: [AccountController],
@@ -13,6 +14,7 @@ import { Configurations, JwtConfig } from '@shared/configs';
   imports: [
     DatabaseConfigFeature,
     MailerModule,
+    QueryBuilderModule,
     JwtModule.registerAsync({
       imports: [
         ConfigModule.forRoot({

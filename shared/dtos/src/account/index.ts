@@ -9,3 +9,4 @@ export * from './sign-in-oauth.dto';
 export * from './create-account.dto';
 export * from './create-profile.dto';
 export * from './change-password.dto';
+export * from './account-paging.dto';

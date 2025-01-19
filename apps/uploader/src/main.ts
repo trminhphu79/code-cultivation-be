@@ -21,7 +21,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new GlobalRpcExceptionFilter());
   await app.listen();
-  Logger.log('File Microservice is Running!');
+  Logger.log('UploaderService Microservice is Running!');
 }
 
 bootstrap();

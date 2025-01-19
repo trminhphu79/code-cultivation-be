@@ -27,11 +27,8 @@ import { HttpStatusCode } from 'axios';
 import { JwtConfig } from '@shared/configs';
 import { AccountAlert } from '@shared/alert/account';
 import { Role } from '@shared/guard';
-
-interface UpdateRoleDto {
-  accountId: string;
-  role: Role;
-}
+import { PagingDto, PagingMeta } from 'shared/dtos/src/common/paging.dto';
+import { InjectQueryBuilder, QueryBuilderService } from '@shared/query-builder';
 
 @Injectable()
 export class AccountService {
@@ -50,7 +47,9 @@ export class AccountService {
     private readonly mailerService: EmailService,
     private readonly bcryptService: BcryptService,
     private readonly configService: ConfigService,
-    private readonly cacheService: CacheManagerService
+    private readonly cacheService: CacheManagerService,
+    @InjectQueryBuilder()
+    private readonly queryBuilder: QueryBuilderService
   ) {
     this.jwtConfig = this.configService.get<JwtConfig>('jwt');
   }
@@ -352,6 +351,20 @@ export class AccountService {
               {
                 association: 'profile',
                 required: false, // Set to true if the profile must exist
+                include: [
+                  {
+                    association: 'profileSocials',
+                    required: false,
+                  },
+                  {
+                    association: 'profileAchievements',
+                    required: false,
+                  },
+                  {
+                    association: 'profileMaterialArts',
+                    required: false,
+                  },
+                ],
               },
             ],
           })
@@ -411,6 +424,29 @@ export class AccountService {
           })
         );
       })
+    );
+  }
+
+  handleListAccount(body: PagingDto) {
+    const { offset, limit, sortBy, sortOrder, filter } = body;
+    const whereClause = this.queryBuilder.build({
+      filters: filter,
+      offset,
+      limit,
+      sortBy,
+      sortOrder,
+      group: [],
+    });
+
+    return from(this.accountModel.findAndCountAll(whereClause)).pipe(
+      map(({ rows, count }) => ({
+        data: rows,
+        meta: {
+          total: count,
+          offset,
+          limit,
+        },
+      }))
     );
   }
 }

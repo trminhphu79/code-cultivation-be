@@ -13,6 +13,7 @@ import { Account } from './account.model';
 import { Realm } from './realm.model';
 import { ProfileAchievement } from './profile-achievement.model';
 import { ProfileMaterialArt } from './profile-material-art.model';
+import { ProfileSocial } from './profile-social.model';
 
 export const DefaultProfileValue = {
   bio: '',
@@ -120,4 +121,7 @@ export class Profile extends Model {
 
   @HasMany(() => ProfileMaterialArt)
   profileMaterialArts!: ProfileMaterialArt[];
+
+  @HasMany(() => ProfileSocial)
+  profileSocials!: ProfileSocial[];
 }

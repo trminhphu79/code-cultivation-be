@@ -22,6 +22,12 @@ export const sequelizeModuleOptions: SequelizeModuleAsyncOptions = {
       autoLoadModels: true,
       synchronize: true,
       models: DatabaseModels,
+      pool: {
+        max: 20,
+        min: 2,
+        idle: 10000,
+        acquire: 30000,
+      },
     };
   },
 };

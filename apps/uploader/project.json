@@ -1,7 +1,7 @@
 {
-  "name": "file",
+  "name": "uploader",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/file/src",
+  "sourceRoot": "apps/uploader/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -22,15 +22,15 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "file:build",
+        "buildTarget": "uploader:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "file:build:development"
+          "buildTarget": "uploader:build:development"
         },
         "production": {
-          "buildTarget": "file:build:production"
+          "buildTarget": "uploader:build:production"
         }
       }
     }

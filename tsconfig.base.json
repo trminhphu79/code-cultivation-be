@@ -15,6 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@shared/alert/account": ["shared/alert/src/account/index.ts"],
+      "@shared/alert/metadata": ["shared/alert/src/metadata/index.ts"],
       "@shared/bcrypt": ["shared/bcrypt/src/index.ts"],
       "@shared/cache-manager": ["shared/cache-manager/src/index.ts"],
       "@shared/configs": ["shared/configs/src/index.ts"],
@@ -55,8 +57,7 @@
       "@shared/validation/password-match": [
         "shared/validations/src/password-match.ts"
       ],
-      "@shared/alert/account": ["shared/alert/src/account/index.ts"],
-      "@shared/alert/metadata": ["shared/alert/src/metadata/index.ts"]
+      "@shared/query-builder": ["shared/query-builder/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

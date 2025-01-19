@@ -48,7 +48,7 @@ export class SectController {
           type: 'object',
           properties: {
             total: { type: 'number' },
-            page: { type: 'number' },
+            offset: { type: 'number' },
             limit: { type: 'number' },
           },
         },

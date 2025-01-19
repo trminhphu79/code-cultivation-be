@@ -34,18 +34,17 @@ export class AchievementService {
 
   findAll(dto: MetadataPaginationDto): Observable<{
     data: Achievement[];
-    meta: { total: number; page: number; limit: number };
+    meta: { total: number; offset: number; limit: number };
     message: string;
   }> {
     const {
-      page = 1,
+      offset = 1,
       limit = 10,
       search,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
     } = dto;
 
-    const offset = (page - 1) * limit;
 
     const whereClause = search
       ? {
@@ -71,7 +70,7 @@ export class AchievementService {
         data: rows,
         meta: {
           total: count,
-          page,
+          offset,
           limit,
         },
         message: MetadataAlert.AchievementListed,

@@ -54,6 +54,25 @@ CREATE TABLE "profile" (
     "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE "social" (
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "name" VARCHAR(255) UNIQUE NOT NULL,
+    "logo" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Social Profile junction table to link profiles with their social accounts
+CREATE TABLE "profileSocial" (
+    "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "profileId" UUID NOT NULL REFERENCES "profile"("id"),
+    "socialId" UUID NOT NULL REFERENCES "social"("id"),
+    "link" VARCHAR(255) NOT NULL,
+    "status" VARCHAR(255) NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create Achievements table
 CREATE TABLE "achievements" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -95,3 +114,5 @@ CREATE INDEX "idx_profileAchievements_profileId" ON "profileAchievements"("profi
 CREATE INDEX "idx_profileAchievements_achievementId" ON "profileAchievements"("achievementId");
 CREATE INDEX "idx_profileMaterialArts_profileId" ON "profileMaterialArts"("profileId");
 CREATE INDEX "idx_profileMaterialArts_materialArtId" ON "profileMaterialArts"("materialArtId");
+CREATE INDEX "idx_profileSocial_profileId" ON "profileSocial"("profileId");
+CREATE INDEX "idx_profileSocial_socialId" ON "profileSocial"("socialId");

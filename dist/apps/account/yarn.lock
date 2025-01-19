@@ -140,6 +140,11 @@
     boxen "5.1.2"
     check-disk-space "3.4.0"
 
+"@nestjs/throttler@6.3.0":
+  version "6.3.0"
+  resolved "https://registry.npmjs.org/@nestjs/throttler/-/throttler-6.3.0.tgz"
+  integrity sha512-IqTMbl5Iyxjts7NwbVriDND0Cnr8rwNqAPpF5HJE+UV+2VrVUBwCfDXKEiXu47vzzaQLlWPYegBsGO9OXxa+oQ==
+
 "@nuxtjs/opencollective@0.3.2":
   version "0.3.2"
   resolved "https://registry.npmjs.org/@nuxtjs/opencollective/-/opencollective-0.3.2.tgz"

@@ -163,7 +163,7 @@ export class MetadataController {
           type: 'object',
           properties: {
             total: { type: 'number' },
-            page: { type: 'number' },
+            offset: { type: 'number' },
             limit: { type: 'number' },
           },
         },
@@ -279,7 +279,7 @@ export class MetadataController {
           type: 'object',
           properties: {
             total: { type: 'number' },
-            page: { type: 'number' },
+            offset: { type: 'number' },
             limit: { type: 'number' },
           },
         },
@@ -412,7 +412,7 @@ export class MetadataController {
           type: 'object',
           properties: {
             total: { type: 'number' },
-            page: { type: 'number' },
+            offset: { type: 'number' },
             limit: { type: 'number' },
           },
         },
@@ -548,7 +548,7 @@ export class MetadataController {
           type: 'object',
           properties: {
             total: { type: 'number' },
-            page: { type: 'number' },
+            offset: { type: 'number' },
             limit: { type: 'number' },
           },
         },

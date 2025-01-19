@@ -1,5 +1,5 @@
 import { Controller, Put, Param, Body } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   ChangePasswordDto,
   DeactivateDto,
@@ -7,6 +7,7 @@ import {
 } from '@shared/dtos/account';
 import { ProfileMsgPattern } from '@shared/message-pattern/account';
 import { AccountService } from './account.service';
+import { PagingDto } from 'shared/dtos/src/common/paging.dto';
 @Controller()
 export class AccountController {
   constructor(private accountService: AccountService) {}
@@ -24,5 +25,10 @@ export class AccountController {
   @MessagePattern(ProfileMsgPattern.Delete)
   handleDeleteAccount(body: DeleteAccountDto) {
     return this.accountService.handleDeleteAccount(body);
+  }
+
+  @MessagePattern(ProfileMsgPattern.ListAccount)
+  handleListAccount(@Payload() body: PagingDto) {
+    return this.accountService.handleListAccount(body);
   }
 }
