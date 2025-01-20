@@ -37,7 +37,7 @@ services:
       - database-network
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    mem_limit: 1g 
+    mem_limit: 1g
     cpus: 0.5
 
   api-gateway:
@@ -155,6 +155,25 @@ services:
     depends_on:
       - nats
       - postgres
+      - redis
+
+  activity:
+    container_name: activity
+    build:
+      context: .
+      dockerfile: ./apps/activity/Dockerfile
+    image: core:latest
+    networks:
+      - microservice-network
+      - database-network
+    environment:
+      NATS_URL: ${NATS_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      WS_PORT: ${WS_PORT}
+      REDIS_URL: ${REDIS_URL}
+    depends_on:
+      - nats
       - redis
 
 networks:

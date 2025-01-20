@@ -6,6 +6,8 @@ import { ProfileAchievement } from '@shared/models/profile-achievement';
 import { ProfileMaterialArt } from '@shared/models/profile-material-art';
 import { Realm } from '@shared/models/realm';
 import { Sect } from '@shared/models/sect';
+import { ProfileSocial } from 'shared/models/src/profile-social.model';
+import { Social } from 'shared/models/src/social.model';
 
 export const DatabaseModels = [
   Account,
@@ -16,4 +18,6 @@ export const DatabaseModels = [
   Sect,
   ProfileAchievement,
   ProfileMaterialArt,
+  ProfileSocial,
+  Social,
 ];

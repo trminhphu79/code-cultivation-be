@@ -1,4 +1,4 @@
-import { MicroServiceName } from '..';
+import { MicroServiceName } from '../';
 
 export const CoreModule = Object.freeze({
   Sect: `${MicroServiceName.Core}/Sect`,

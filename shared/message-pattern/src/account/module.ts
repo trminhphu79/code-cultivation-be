@@ -1,4 +1,4 @@
-import { MicroServiceName } from '..';
+import { MicroServiceName } from '../';
 
 export const AccountModule = Object.freeze({
   Auth: `${MicroServiceName.Account}/Auth`,

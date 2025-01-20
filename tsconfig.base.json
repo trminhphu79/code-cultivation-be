@@ -30,10 +30,13 @@
       "@shared/jwt": ["shared/jwt/src/index.ts"],
       "@shared/mailer": ["shared/mailer/src/index.ts"],
       "@shared/message-pattern/account": [
-        "shared/message-pattern/src/lib/account/index.ts"
+        "shared/message-pattern/src/account/index.ts"
       ],
       "@shared/message-pattern/metadata": [
-        "shared/message-pattern/src/lib/metadata/index.ts"
+        "shared/message-pattern/src/metadata/index.ts"
+      ],
+      "@shared/message-pattern/activity": [
+        "shared/message-pattern/src/activity/index.ts"
       ],
       "@shared/models/account": ["shared/models/src/account.model.ts"],
       "@shared/models/achievement": ["shared/models/src/achievement.model.ts"],

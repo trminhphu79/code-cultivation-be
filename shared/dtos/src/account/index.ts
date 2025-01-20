@@ -10,4 +10,5 @@ export * from './create-account.dto';
 export * from './create-profile.dto';
 export * from './change-password.dto';
 export * from './account-paging.dto';
-export * from './profile.dto'
+export * from './profile.dto';
+export * from './profile-activity.dto';

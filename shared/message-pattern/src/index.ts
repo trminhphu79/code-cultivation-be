@@ -3,4 +3,5 @@ export const MicroServiceName = Object.freeze({
   Guild: 'GuildService',
   Scripture: 'ScriptureService',
   Core: 'CoreService',
+  Activity: 'ActivityService',
 });

@@ -1,6 +1,10 @@
 export enum CacheMessageAction {
-  Create = 'Create',
-  Update = 'Update',
-  PartialUpdate = 'PartialUpdate',
-  Delete = 'Delete',
+  Create = 'cache.create',
+  Update = 'cache.update',
+  Delete = 'cache.delete',
+  PartialUpdate = 'cache.partial-update',
+  // New array-specific actions
+  ArrayAdd = 'cache.array.add',
+  ArrayRemove = 'cache.array.remove',
+  ArrayUpdate = 'cache.array.update'
 }

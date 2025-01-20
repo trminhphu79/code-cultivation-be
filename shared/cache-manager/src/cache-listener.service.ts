@@ -65,4 +65,81 @@ export class CacheListener {
     }
     this.logger.log(`Handled update cache for key: ${input.key}`);
   }
+
+  @OnEvent(CacheMessageAction.ArrayAdd)
+  async handleArrayAdd(data: { key: string; item: any; ttl?: number }) {
+    try {
+      const currentValue = await this.redis.get(data.key);
+      const currentArray = currentValue ? JSON.parse(currentValue) : [];
+      
+      currentArray.push(data.item);
+      await this.redis.set(data.key, JSON.stringify(currentArray));
+      
+      if (data.ttl) {
+        await this.redis.expire(data.key, data.ttl);
+      }
+
+      this.logger.log(`Successfully added item to array: ${data.key}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to add item to array for key: ${data.key}`,
+        error?.stack
+      );
+      throw error;
+    }
+  }
+
+  @OnEvent(CacheMessageAction.ArrayRemove)
+  async handleArrayRemove(data: { key: string; predicate: string }) {
+    try {
+      const currentValue = await this.redis.get(data.key);
+      if (!currentValue) return;
+
+      const currentArray = JSON.parse(currentValue);
+      // Convert predicate string to function
+      const predicateFn = new Function('item', `return ${data.predicate}`);
+      
+      const filteredArray = currentArray.filter((item: any) => !predicateFn(item));
+      await this.redis.set(data.key, JSON.stringify(filteredArray));
+
+      this.logger.log(`Successfully removed items from array: ${data.key}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to remove items from array for key: ${data.key}`,
+        error?.stack
+      );
+      throw error;
+    }
+  }
+
+  @OnEvent(CacheMessageAction.ArrayUpdate)
+  async handleArrayUpdate(data: { 
+    key: string; 
+    predicate: string;
+    updateFn: string;
+  }) {
+    try {
+      const currentValue = await this.redis.get(data.key);
+      if (!currentValue) return;
+
+      const currentArray = JSON.parse(currentValue);
+      // Convert predicate and update function strings to functions
+      const predicateFn = new Function('item', `return ${data.predicate}`);
+      const updateFn = new Function('item', `return ${data.updateFn}`);
+
+      const updatedArray = currentArray.map((item: any) => 
+        predicateFn(item) ? updateFn(item) : item
+      );
+      
+      await this.redis.set(data.key, JSON.stringify(updatedArray));
+
+      this.logger.log(`Successfully updated items in array: ${data.key}`);
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to update items in array for key: ${data.key}`,
+        error?.stack
+      );
+      throw error;
+    }
+  }
 }
