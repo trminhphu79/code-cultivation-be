@@ -56,4 +56,16 @@ export const AccountAlert = Object.freeze({
   RoleUpdated: 'Cập nhật quyền người dùng thành công',
   RoleUpdateError: 'Có lỗi xảy ra khi cập nhật quyền người dùng',
   RoleInvalid: 'Quyền người dùng không hợp lệ',
+
+  // Profile Alert
+  DontHavePermissionToModifyProfile:
+    'Bạn không có quyền để thực hiện hành động này',
+
+  SocialProfileCreateSuccess: 'Thêm liên kết mạng xã hội thành công',
+  SocialProfileUpdateSuccess: 'Cập nhật liên kết mạng xã hội thành công',
+  SocialProfileDeleteSuccess: 'Xoá liên kết mạng xã hội thành công',
+  SocialProfileFailExisting:
+    'Thêm liên kết mạng xã hội thất bại, đã tồn tại',
+  SocialProfileError:
+    'Có lỗi xãy ra khi thực hiện hành động này',
 });

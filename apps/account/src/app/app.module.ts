@@ -7,12 +7,14 @@ import { BcryptModule } from '@shared/bcrypt';
 import { GlobalEventEmitterModule } from '@shared/event-emitter';
 import { CacheManagerModule } from '@shared/cache-manager';
 import { AuthModule } from './auth/auth.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
     AuthModule,
     BcryptModule,
     AccountModule,
+    ProfileModule,
     ConfigModule.forRoot({
       load: [Configurations],
       isGlobal: true,

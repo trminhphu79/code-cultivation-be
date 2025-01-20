@@ -351,20 +351,7 @@ export class AccountService {
               {
                 association: 'profile',
                 required: false, // Set to true if the profile must exist
-                include: [
-                  {
-                    association: 'profileSocials',
-                    required: false,
-                  },
-                  {
-                    association: 'profileAchievements',
-                    required: false,
-                  },
-                  {
-                    association: 'profileMaterialArts',
-                    required: false,
-                  },
-                ],
+              
               },
             ],
           })

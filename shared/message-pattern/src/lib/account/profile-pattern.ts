@@ -4,6 +4,7 @@ export const ProfileMsgPattern = Object.freeze({
   UpdateExp: `${AccountModule.Profile}/UpdateExp`,
   UpdateStreak: `${AccountModule.Profile}/UpdateStreak`,
   UpdateRealm: `${AccountModule.Profile}/UpdateRealm`,
+
   UpdatePersonal: `${AccountModule.Profile}/UpdatePersonal`,
   Deactivate: `${AccountModule.Profile}/Deactivate`,
   Delete: `${AccountModule.Profile}/Delete`,
@@ -15,4 +16,12 @@ export const ProfileMsgPattern = Object.freeze({
 
   AddMaterialArt: `${AccountModule.Profile}/AddMaterialArt`,
   RemoveMaterialArt: `${AccountModule.Profile}/RemoveMaterialArt`,
+
+  GetAllRelatedInfoProfile: `${AccountModule.Profile}/GetAllRelatedInfoProfile`,
+
+
+  GetSocialProfile: `${AccountModule.Profile}/GetSocialProfile`,
+  AddSocialProfile: `${AccountModule.Profile}/AddSocialProfile`,
+  UpdateSocialProfile: `${AccountModule.Profile}/UpdateSocialProfile`,
+  DeleteSocialProfile: `${AccountModule.Profile}/DeleteSocialProfile`,
 });
