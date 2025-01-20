@@ -12,6 +12,17 @@ import {
 export class ProfileController {
   constructor(private profileService: ProfileService) {}
 
+  @MessagePattern(ProfileMsgPattern.UpdateStreak)
+  handleUpdateStreak(@Payload() id: string) {
+    return this.profileService.handleGetDetailProfile(id);
+  }
+
+  @MessagePattern(ProfileMsgPattern.UpdateExp)
+  handleUpdateExp(@Payload() id: string) {
+    return this.profileService.handleGetDetailProfile(id);
+  }
+
+
   @MessagePattern(ProfileMsgPattern.GetAllRelatedInfoProfile)
   handleGetDetailProfile(@Payload() id: string) {
     return this.profileService.handleGetDetailProfile(id);

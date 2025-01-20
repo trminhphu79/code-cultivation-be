@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { ActionExpType } from '@shared/types';
 
 export class CreateSocialProfileDto {
   @ApiProperty()
@@ -36,4 +37,15 @@ export class DeleteSocialProfileDto {
   @ApiProperty()
   @IsNotEmpty()
   id!: string;
+}
+
+export class UpdateExpProfileDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  id!: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  actionType!: ActionExpType;
 }

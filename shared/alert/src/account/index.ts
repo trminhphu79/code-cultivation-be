@@ -66,6 +66,6 @@ export const AccountAlert = Object.freeze({
   SocialProfileDeleteSuccess: 'Xoá liên kết mạng xã hội thành công',
   SocialProfileFailExisting:
     'Thêm liên kết mạng xã hội thất bại, đã tồn tại',
-  SocialProfileError:
+  ProfilePerformError:
     'Có lỗi xãy ra khi thực hiện hành động này',
 });
