@@ -2436,6 +2436,7 @@ exports.MetadataModule = MetadataModule = tslib_1.__decorate([
                 provide: core_1.APP_GUARD,
                 useClass: guard_1.RoleGuard,
             },
+            guard_1.AccessControlService
         ],
     })
 ], MetadataModule);

@@ -14,7 +14,6 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import {
   CreateAchievementDto,
@@ -27,7 +26,6 @@ import {
   UpdateSectDto,
   UpdateMaterialArtDto,
 } from '@shared/dtos/metadata';
-import { Roles, RoleGuard, Role } from '@shared/guard';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiBody } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';

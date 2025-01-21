@@ -158,6 +158,8 @@ services:
       - redis
 
   activity:
+    ports:
+      - ${WS_PORT}:${WS_PORT}
     container_name: activity
     build:
       context: .

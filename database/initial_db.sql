@@ -12,7 +12,8 @@ CREATE TABLE "realm" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "name" VARCHAR(255) UNIQUE,
     "description" TEXT,
-    "level" INTEGER,
+    "requiredExp" INTEGER NOT NULL,
+    "level" INTEGER UNIQUE NOT NULL,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -54,7 +55,7 @@ CREATE TABLE "profile" (
     "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE "social" (
+CREATE TABLE "socials" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "name" VARCHAR(255) UNIQUE NOT NULL,
     "logo" VARCHAR(255) NOT NULL,
@@ -63,7 +64,7 @@ CREATE TABLE "social" (
 );
 
 -- Create Social Profile junction table to link profiles with their social accounts
-CREATE TABLE "profileSocial" (
+CREATE TABLE "profileSocials" (
     "id" UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "profileId" UUID NOT NULL REFERENCES "profile"("id"),
     "socialId" UUID NOT NULL REFERENCES "social"("id"),

@@ -71,10 +71,10 @@ export class CacheListener {
     try {
       const currentValue = await this.redis.get(data.key);
       const currentArray = currentValue ? JSON.parse(currentValue) : [];
-      
+
       currentArray.push(data.item);
       await this.redis.set(data.key, JSON.stringify(currentArray));
-      
+
       if (data.ttl) {
         await this.redis.expire(data.key, data.ttl);
       }
@@ -98,8 +98,10 @@ export class CacheListener {
       const currentArray = JSON.parse(currentValue);
       // Convert predicate string to function
       const predicateFn = new Function('item', `return ${data.predicate}`);
-      
-      const filteredArray = currentArray.filter((item: any) => !predicateFn(item));
+
+      const filteredArray = currentArray.filter(
+        (item: any) => !predicateFn(item)
+      );
       await this.redis.set(data.key, JSON.stringify(filteredArray));
 
       this.logger.log(`Successfully removed items from array: ${data.key}`);
@@ -113,8 +115,8 @@ export class CacheListener {
   }
 
   @OnEvent(CacheMessageAction.ArrayUpdate)
-  async handleArrayUpdate(data: { 
-    key: string; 
+  async handleArrayUpdate(data: {
+    key: string;
     predicate: string;
     updateFn: string;
   }) {
@@ -127,10 +129,10 @@ export class CacheListener {
       const predicateFn = new Function('item', `return ${data.predicate}`);
       const updateFn = new Function('item', `return ${data.updateFn}`);
 
-      const updatedArray = currentArray.map((item: any) => 
+      const updatedArray = currentArray.map((item: any) =>
         predicateFn(item) ? updateFn(item) : item
       );
-      
+
       await this.redis.set(data.key, JSON.stringify(updatedArray));
 
       this.logger.log(`Successfully updated items in array: ${data.key}`);

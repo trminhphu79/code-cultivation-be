@@ -16,7 +16,9 @@ export class ProfileListener implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.natsClient.connect();
+    this.natsClient.connect().then(() => {
+      this.logger.log('Activity Service Connected to NATS');
+    });
   }
 
   @MessagePattern(ActivityPattern.UpdateExperience)

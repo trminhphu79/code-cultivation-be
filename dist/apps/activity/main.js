@@ -58,11 +58,13 @@ const tslib_1 = __webpack_require__(4);
 const common_1 = __webpack_require__(1);
 const profile_gateway_1 = __webpack_require__(6);
 const profile_listener_1 = __webpack_require__(22);
+const nats_client_1 = __webpack_require__(24);
 let ProfileModule = class ProfileModule {
 };
 exports.ProfileModule = ProfileModule;
 exports.ProfileModule = ProfileModule = tslib_1.__decorate([
     (0, common_1.Module)({
+        imports: [nats_client_1.NatsClientModule],
         providers: [profile_listener_1.ProfileListener, profile_gateway_1.ProfileGateway],
     })
 ], ProfileModule);
@@ -74,7 +76,7 @@ exports.ProfileModule = ProfileModule = tslib_1.__decorate([
 
 
 var ProfileGateway_1;
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProfileGateway = void 0;
 const tslib_1 = __webpack_require__(4);
@@ -91,27 +93,48 @@ let ProfileGateway = ProfileGateway_1 = class ProfileGateway {
         this.CACHE_CONNECTED_CLIENTS = 'profile.connected.clients';
         this.userSocketMap = new Map();
     }
+    afterInit(server) {
+        this.logger.log('Initialized');
+        this.io = server;
+        // console.log('Config: ', this.io.of('/profile_channel'));
+    }
     handleUserPingOnline(client, payload) {
+        if (!payload || !payload.profileId) {
+            this.logger.error('Invalid payload');
+            this.io.emit(activity_1.ActivitySocket.UserPingOnlineFailed, {
+                message: 'Ping User Failed, Invalid payload',
+            });
+            return;
+        }
+        console.log('online with payload: ', payload);
         if (this.userSocketMap.has(payload.profileId)) {
             this.logger.log(`Client already online ${payload.profileId}`);
             return;
         }
         // Store the mapping of id to socket client
-        this.userSocketMap.set(payload.profileId, client);
+        this.userSocketMap.set(payload.profileId, {
+            socket: client,
+            profileId: payload.profileId,
+        });
         this.eventEmitter.emit(cache_manager_1.CacheMessageAction.ArrayAdd, {
             key: this.CACHE_CONNECTED_CLIENTS,
-            value: { ...payload, socketId: client.id },
+            item: { ...payload, socketId: client.id },
+            ttl: 60 * 60 * 24,
         });
         this.logger.log(`Client online ${payload.profileId}`);
+        this.io.emit(activity_1.ActivitySocket.ProfileAddExperience, {
+            exp: 100,
+            profileId: payload.profileId,
+        });
     }
     handleConnection(client) {
-        this.logger.log('Client connected');
+        this.logger.log(`Client id: ${client.id} connected`);
     }
     handleDisconnect(client) {
         this.logger.log(`Client disconnected ${client.id}`);
         // Remove from userSocketMap
         for (const [id, socket] of this.userSocketMap.entries()) {
-            if (socket === client) {
+            if (socket.socket === client) {
                 this.userSocketMap.delete(id);
                 this.eventEmitter.emit(cache_manager_1.CacheMessageAction.ArrayRemove, {
                     key: this.CACHE_CONNECTED_CLIENTS,
@@ -126,30 +149,25 @@ let ProfileGateway = ProfileGateway_1 = class ProfileGateway {
     emitToProfile(profileId, event, data) {
         const userSocket = this.userSocketMap.get(profileId);
         if (userSocket) {
-            userSocket.emit(event, data);
+            userSocket.socket.emit(event, data);
             this.logger.log(`Emit to profile ${profileId} event ${event}`);
             return;
         }
         this.logger.log(`No user socket found for profile ${profileId}`);
     }
+    getCacheKey(profileId) {
+        return `${this.CACHE_CONNECTED_CLIENTS}#${profileId}`;
+    }
 };
 exports.ProfileGateway = ProfileGateway;
 tslib_1.__decorate([
-    (0, websockets_1.WebSocketServer)(),
-    tslib_1.__metadata("design:type", typeof (_b = typeof socket_io_1.Server !== "undefined" && socket_io_1.Server) === "function" ? _b : Object)
-], ProfileGateway.prototype, "server", void 0);
-tslib_1.__decorate([
-    (0, websockets_1.SubscribeMessage)(activity_1.ActivitySocket.UserPingOnline),
     (0, websockets_1.SubscribeMessage)(activity_1.ActivitySocket.UserPingOnline),
     tslib_1.__metadata("design:type", Function),
-    tslib_1.__metadata("design:paramtypes", [typeof (_c = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _c : Object, Object]),
+    tslib_1.__metadata("design:paramtypes", [typeof (_b = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _b : Object, Object]),
     tslib_1.__metadata("design:returntype", void 0)
 ], ProfileGateway.prototype, "handleUserPingOnline", null);
 exports.ProfileGateway = ProfileGateway = ProfileGateway_1 = tslib_1.__decorate([
-    (0, websockets_1.WebSocketGateway)({
-        path: '/profile_channel',
-        namespace: 'profile',
-    }),
+    (0, websockets_1.WebSocketGateway)({ namespace: 'profile' }),
     tslib_1.__metadata("design:paramtypes", [typeof (_a = typeof event_emitter_1.EventEmitter2 !== "undefined" && event_emitter_1.EventEmitter2) === "function" ? _a : Object])
 ], ProfileGateway);
 
@@ -494,6 +512,7 @@ exports.ActivitySocket = Object.freeze({
     ProfileAddExperience: 'PROFILE_ADD_EXPERIENCE',
     ProfileUpgradeLevel: 'PROFILE_UPGRADE_LEVEL',
     UserPingOnline: 'USER_PING_ONLINE',
+    UserPingOnlineFailed: 'USER_PING_ONLINE_FAILED',
 });
 
 
@@ -534,7 +553,9 @@ let ProfileListener = ProfileListener_1 = class ProfileListener {
         this.logger = new common_1.Logger(ProfileListener_1.name);
     }
     async onModuleInit() {
-        await this.natsClient.connect();
+        this.natsClient.connect().then(() => {
+            this.logger.log('Activity Service Connected to NATS');
+        });
     }
     handleProfileEvent(data) {
         this.logger.log(`handleProfileEvent ${data.profileId}`);
@@ -680,12 +701,6 @@ exports.EventEmitterService = EventEmitterService = EventEmitterService_1 = tsli
 ], EventEmitterService);
 
 
-/***/ }),
-/* 29 */
-/***/ ((module) => {
-
-module.exports = require("@nestjs/platform-socket.io");
-
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -728,22 +743,18 @@ const common_1 = __webpack_require__(1);
 const core_1 = __webpack_require__(2);
 const app_module_1 = __webpack_require__(3);
 const microservices_1 = __webpack_require__(23);
-const platform_socket_io_1 = __webpack_require__(29);
 async function bootstrap() {
-    // Create hybrid application to support both NATS and WebSockets
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    // Enable WebSocket adapter
-    app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
-    // Configure NATS microservice
+    const globalPrefix = '';
     app.connectMicroservice({
         transport: microservices_1.Transport.NATS,
         options: {
-            servers: [process.env.NATS_URL || 'nats://localhost:4222'],
-            queue: 'activity_queue',
+            servers: [process.env.NATS_URL],
         },
     });
+    app.setGlobalPrefix(globalPrefix);
     const wsPort = process.env.WS_PORT || 8888; // Different port for WebSocket server
-    // Start both NATS and WebSocket server
+    app.enableCors();
     await app.startAllMicroservices();
     await app.listen(wsPort);
     common_1.Logger.log(`🚀 Activity Service is running:

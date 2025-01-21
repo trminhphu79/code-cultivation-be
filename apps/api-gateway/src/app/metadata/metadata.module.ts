@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MetadataController } from './metadata.controller';
-import { RoleGuard } from '@shared/guard';
+import { AccessControlService, RoleGuard } from '@shared/guard';
 import { APP_GUARD } from '@nestjs/core';
 
 @Module({
@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: RoleGuard,
     },
+    AccessControlService
   ],
 })
 export class MetadataModule {}
